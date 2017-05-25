@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#FF7373</color>
+    <color name="colorPrimaryDark">#FF7373</color>
+    <color name="colorHeader">#FF7373</color>
+    <color name="colorWhite">#FFFFFF</color>
+    <color name="colorAnnotation">#006fff</color>
+    <color name="colorText">#414141</color>
+    <color name="colorBackground">#f9f9f9</color>
+    <color name="colorLayoutSplitLineGray">#d6d6d6</color>
+    <color name="colorViewBackground">#F6F6F6</color>
+
+    <color name="colorHint">#d1d1d6</color>
+    <color name="cpb_grey">#ffdedede</color>
+</resources>

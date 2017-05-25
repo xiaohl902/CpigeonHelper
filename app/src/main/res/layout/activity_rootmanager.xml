@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:background="@color/colorViewBackground"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <include layout="@layout/layout_toolbar"/>
+
+    <LinearLayout
+        android:padding="16dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/iv_rootlist_usericon"
+            android:layout_width="64dp"
+            app:civ_border_color="@color/colorPrimary"
+            app:civ_border_width="2dp"
+            android:layout_height="64dp" />
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+            <TextView
+                android:id="@+id/tv_rootlist_username"
+                android:textSize="@dimen/sp_18"
+                android:gravity="center_vertical"
+                android:text="你的爹爹"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp" />
+            <TextView
+                android:id="@+id/tv_rootlist_usertel"
+                android:textSize="@dimen/sp_16"
+                android:gravity="center_vertical"
+                android:text="你的爹爹"
+                android:layout_weight="1"
+                android:layout_width="match_parent"
+                android:layout_height="0dp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <Switch
+        android:padding="16dp"
+        android:textSize="@dimen/sp_18"
+        android:id="@+id/sw_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="启动" />
+    <TextView
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        android:paddingLeft="16dp"
+        android:paddingRight="16dp"
+        android:textSize="@dimen/sp_16"
+        android:text="权限管理"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerview_privilegelist"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </android.support.v7.widget.RecyclerView>
+    <Button
+        android:id="@+id/btn_delete_root"
+        android:textSize="@dimen/sp_18"
+        android:textColor="@color/colorWhite"
+        android:text="删除"
+        android:background="@color/colorPrimary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    android:background="@color/colorPrimary"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <ImageView
+        android:layout_marginTop="88dp"
+        android:src="@mipmap/launch_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true" />
+    <TextView
+        android:textSize="14sp"
+        android:layout_margin="8dp"
+        android:gravity="center"
+        android:layout_alignParentBottom="true"
+        android:textColor="@color/colorWhite"
+        android:text="中国信鸽网版权所有 ©2004-2017"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+</RelativeLayout>

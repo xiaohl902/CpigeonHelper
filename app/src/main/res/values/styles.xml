@@ -1,0 +1,83 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppBaseTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:textAllCaps">false</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="AppTheme" parent="AppBaseTheme">
+
+    </style>
+
+    <!--自定义EditText下划线样式-->
+    <style name="customLineColor" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/colorPrimary</item>
+    </style>
+
+    <!--权限主题-->
+    <style name="PermissionBlueStyle">
+        <item name="PermissionTitleColor">@color/colorPrimaryDark</item>
+        <item name="PermissionMsgColor">@color/colorPrimary</item>
+        <item name="PermissionItemTextColor">@color/colorPrimary</item>
+        <item name="PermissionButtonBackground">@color/colorPrimary</item>
+        <!-- -->
+        <item name="PermissionButtonTextColor">@android:color/white</item>
+
+    </style>
+    <!--公告主题-->
+    <style name="Marquee" parent="SingleLine">
+        <item name="android:ellipsize">marquee</item>
+        <item name="android:focusable">false</item>
+        <item name="android:marqueeRepeatLimit">marquee_forever</item>
+        <item name="android:focusableInTouchMode">true</item>
+        <item name="android:scrollHorizontally">true</item>
+    </style>
+
+    <style name="SingleLine">
+        <item name="android:singleLine">true</item>
+    </style>
+    <!--登录按钮主题-->
+    <declare-styleable name="CircularProgressButton">
+        <attr name="cpb_selectorIdle" format="reference"/>
+        <attr name="cpb_selectorComplete" format="reference"/>
+        <attr name="cpb_selectorError" format="reference"/>
+        <attr name="cpb_textComplete" format="string"/>
+        <attr name="cpb_textIdle" format="string"/>
+        <attr name="cpb_textError" format="string"/>
+        <attr name="cpb_textProgress" format="string"/>
+        <attr name="cpb_colorProgress" format="color"/>
+        <attr name="cpb_colorIndicator" format="color"/>
+        <attr name="cpb_colorIndicatorBackground" format="color"/>
+        <attr name="cpb_iconError" format="reference"/>
+        <attr name="cpb_iconComplete" format="reference"/>
+        <attr name="cpb_cornerRadius" format="dimension"/>
+        <attr name="cpb_paddingProgress" format="dimension"/>
+    </declare-styleable>
+    <!--搜索框的主题-->
+    <style name="SearchView">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@drawable/bg_search_edit</item>
+        <item name="android:imeOptions">actionSearch</item>
+        <item name="android:inputType">text</item>
+        <item name="android:drawableLeft">@mipmap/ic_search</item>
+        <item name="android:paddingLeft">8dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textColorHint">@color/text_color</item>
+        <item name="android:textColor">@color/colorText</item>
+        <item name="android:hint">搜索</item>
+    </style>
+</resources>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="dp_1">1dp</dimen>
+
+    <dimen name="dp_8">8dp</dimen>
+
+    <dimen name="dp_16">16dp</dimen>
+
+    <dimen name="dp_24">24dp</dimen>
+
+    <dimen name="dp_32">32dp</dimen>
+
+    <dimen name="dp_40">40dp</dimen>
+
+    <dimen name="dp_72">72dp</dimen>
+    <!--小字提示-->
+    <dimen name="sp_12">12sp</dimen>
+    <!--正文，按钮文字-->
+    <dimen name="sp_14">14sp</dimen>
+    <!--小标题-->
+    <dimen name="sp_16">16sp</dimen>
+
+    <dimen name="sp_18">18sp</dimen>
+    <!--Appbar文字-->
+    <dimen name="sp_20">20sp</dimen>
+    <!--大标题-->
+    <dimen name="sp_24">24sp</dimen>
+    <!--输入框的高度-->
+    <dimen name="activity_login_input_layout_height">52dp</dimen>
+    <dimen name="dp_4">4dp</dimen>
+
+
+</resources>
