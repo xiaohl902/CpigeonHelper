@@ -37,6 +37,7 @@ public class CommonUitls {
     private static final String KEY_API_SIGN = "iy087234ho78fuqy49TR23jk4h";    //只有url参数的签名算法
     private static String DeviceID;
     private static Toast toast;
+
     public static String getApiSign(Map<String, Object> urlParams) {
         Map<String, String> map = new TreeMap<>();
 
@@ -62,13 +63,14 @@ public class CommonUitls {
         result = EncryptionTool.MD5(result);
         return result;
     }
+
     //只有timestamp为url参数的签名算法
-    public static String getApiSign(long timestamp,Map<String, Object> postParams) {
+    public static String getApiSign(long timestamp, Map<String, Object> postParams) {
         Map<String, Object> map = new TreeMap<>();
-        map.put("get_timestamp",timestamp);
+        map.put("get_timestamp", timestamp);
         if (postParams != null && postParams.size() > 0) {
             for (String key : postParams.keySet()) {
-                if (!map.containsKey("post_" + key) && postParams.get(key) != null  && !TextUtils.isEmpty(postParams.get(key).toString())) {
+                if (!map.containsKey("post_" + key) && postParams.get(key) != null && !TextUtils.isEmpty(postParams.get(key).toString())) {
                     map.put("post_" + key, postParams.get(key).toString());
                 }
 
@@ -84,6 +86,7 @@ public class CommonUitls {
         result = EncryptionTool.MD5(result);
         return result;
     }
+
     //包含urlParams和postParams
     public static String getApiSign(Map<String, Object> urlParams, Map<String, Object> postParams) {
         Map<String, String> map = new TreeMap<>();
@@ -101,7 +104,7 @@ public class CommonUitls {
 
         if (postParams != null && postParams.size() > 0) {
             for (String key : postParams.keySet()) {
-                if (!map.containsKey("post_" + key) && postParams.get(key) != null  && !TextUtils.isEmpty(postParams.get(key).toString())) {
+                if (!map.containsKey("post_" + key) && postParams.get(key) != null && !TextUtils.isEmpty(postParams.get(key).toString())) {
                     map.put("post_" + key, postParams.get(key).toString());
                 }
 
@@ -372,4 +375,23 @@ public class CommonUitls {
         });
         widthAnimation.start();
     }
+
+    public static double GPS2AjLocation(double gpsLocationValue) {
+        int du = (int) gpsLocationValue;
+        double temp = (gpsLocationValue - du) * 60;//需要转换的部分（分）
+        int fen = (int) temp;
+        temp = (temp - fen) * 60;//秒
+        return du + (double) fen / 100 + temp / 10000;
+    }
+    public static double Aj2GPSLocation(double ajLocationValue)
+    {
+        int du = (int)ajLocationValue;
+        double temp = (ajLocationValue - du) * 100;//需要转换的部分（分）
+        int fen = (int)temp;
+        temp = (temp - fen) * 100;//秒
+        return du + (double)fen / 60 + temp / 3600;
+    }
 }
+
+
+
