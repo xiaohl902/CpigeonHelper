@@ -29,6 +29,9 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <meta-data
+            android:name="com.amap.api.v2.apikey"
+            android:value="986f6c2abed5bfb255d43c1ec8e70837"/>
         <activity android:name=".modular.welcome.activity.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,8 +42,12 @@
         <activity android:name=".modular.usercenter.activity.LoginActivity"/>
         <activity android:name=".MainActivity"/>
         <activity android:name=".modular.usercenter.activity.ForgetPwdActivity"/>
-
-
+        <activity android:name=".modular.geyuntong.activity.OpeningGeyuntongActivity"/>
+        <activity android:name=".modular.root.activity.RootListActivity"/>
+        <activity android:name=".modular.root.activity.RootManagerActivity"/>
+        <activity android:name=".modular.root.activity.SearchUserActivity"/>
+        <activity android:name=".modular.xiehui.activity.XieHuiInfoActivity"/>
+        <activity android:name=".modular.geyuntong.activity.ACarServiceActivity"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.cpigeon.cpigeonhelper.fileprovider"
@@ -50,6 +57,7 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths" />
         </provider>
+        <service android:name="com.amap.api.location.APSService"></service>
     </application>
 
 </manifest>

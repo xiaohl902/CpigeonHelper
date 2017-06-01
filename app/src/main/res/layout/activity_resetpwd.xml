@@ -6,8 +6,6 @@
     android:background="@color/colorWhite"
     android:orientation="vertical">
 
-    <include layout="@layout/layout_toolbar" />
-
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/activity_login_input_layout_height"

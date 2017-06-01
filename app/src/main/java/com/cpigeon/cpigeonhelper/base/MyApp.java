@@ -1,12 +1,15 @@
 package com.cpigeon.cpigeonhelper.base;
 
 import android.app.Application;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 
 import com.cpigeon.cpigeonhelper.BuildConfig;
+import com.cpigeon.cpigeonhelper.MainActivity;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
+import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.facebook.stetho.Stetho;
 import com.tencent.bugly.crashreport.CrashReport;
 
@@ -28,6 +31,10 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+        if (!BuildConfig.DEBUG)
+        {
+            Thread.setDefaultUncaughtExceptionHandler(new MyUnCaughtExceptionHandler());
+        }
         //初始化Bugly
         initBugly();
         //初始化Steho调试工具
@@ -56,7 +63,7 @@ public class MyApp extends Application {
     }
 
     private void initBugly() {
-//        CrashReport.initCrashReport(getApplicationContext(), "d27405999a", BuildConfig.DEBUG);
+        CrashReport.initCrashReport(getApplicationContext(), "d27405999a", BuildConfig.DEBUG);
     }
 
     @Override
@@ -89,5 +96,17 @@ public class MyApp extends Application {
             }
         }
         return res;
+    }
+
+    class MyUnCaughtExceptionHandler implements Thread.UncaughtExceptionHandler{
+
+        @Override
+        public void uncaughtException(Thread thread, Throwable ex) {
+            ex.printStackTrace();
+            Intent intent = new Intent(MyApp.this, MainActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+            AppManager.getAppManager().AppExit();
+        }
     }
 }

@@ -1,49 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:orientation="horizontal"
-    android:padding="8dp"
-    android:id="@+id/ll_root_list"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+
     <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/iv_rootlist_usericon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
         app:civ_border_color="@color/colorLayoutSplitLineGray"
         app:civ_border_width="2dp"
-        android:layout_width="64dp"
-        android:layout_height="64dp" />
-    <LinearLayout
-        android:layout_marginLeft="16dp"
-        android:orientation="vertical"
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent">
-        <TextView
-            android:gravity="center_vertical"
-            android:id="@+id/tv_rootlist_username"
-            android:textSize="@dimen/sp_16"
-            android:text="用户名"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp" />
-        <TextView
-            android:gravity="center_vertical"
-            android:id="@+id/tv_rootlist_usertel"
-            android:layout_weight="1"
-            android:height="0dp"
-            android:textSize="@dimen/sp_14"
-            android:text="18782050317"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
-    <TextView
-        android:visibility="gone"
-        android:id="@+id/tv_rootlist_status"
-        android:drawableRight="@drawable/ic_enter"
-        android:layout_marginRight="8dp"
-        android:gravity="center_vertical|right"
-        android:textSize="@dimen/sp_16"
-        android:text="已启动"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent" />
 
-</LinearLayout>
+    <TextView
+        android:id="@+id/tv_rootlist_username"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:gravity="center_vertical"
+        android:text="用户名"
+        android:textSize="@dimen/sp_16"
+        app:layout_constraintLeft_toRightOf="@+id/iv_rootlist_usericon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/tv_rootlist_usertel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginStart="8dp"
+        android:text="18782050317"
+        android:textSize="@dimen/sp_14"
+        app:layout_constraintLeft_toRightOf="@+id/iv_rootlist_usericon"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <TextView
+        android:id="@+id/tv_rootlist_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="已启动"
+        android:textSize="@dimen/sp_16"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent" />
+
+</android.support.constraint.ConstraintLayout>

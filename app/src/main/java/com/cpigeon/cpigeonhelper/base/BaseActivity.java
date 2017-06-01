@@ -18,8 +18,6 @@ import android.widget.EditText;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
-import com.orhanobut.logger.Logger;
-import com.r0adkll.slidr.Slidr;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import java.lang.ref.WeakReference;

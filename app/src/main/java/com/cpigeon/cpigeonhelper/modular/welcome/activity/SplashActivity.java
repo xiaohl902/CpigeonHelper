@@ -43,6 +43,7 @@ import static com.cpigeon.cpigeonhelper.common.db.AssociationData.DEV_ID;
 
 public class SplashActivity extends BaseActivity {
     private long timestamp;
+    private boolean isOwnDev = true;
 
     @Override
     protected void swipeBack() {
@@ -56,7 +57,7 @@ public class SplashActivity extends BaseActivity {
 
     @Override
     protected void setStatusBar() {
-
+        StatusBarUtil.setTransparent(this);
     }
 
     @Override
@@ -66,8 +67,12 @@ public class SplashActivity extends BaseActivity {
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-        Observable.timer(1, TimeUnit.SECONDS)
-                .subscribe(aLong -> isPermission());
+        Observable.timer(2000, TimeUnit.MILLISECONDS)
+                .compose(bindToLifecycle())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(aLong -> {
+                    isPermission();
+                });
 
     }
 
@@ -85,47 +90,33 @@ public class SplashActivity extends BaseActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(deviceBeanApiResponse -> {
+                    Logger.e("当前系统的Dev_Id" + DEV_ID);
                     if (deviceBeanApiResponse.isStatus()) {
-                        Logger.e("当前系统的Dev_Id" + DEV_ID);
-                        if (deviceBeanApiResponse.getErrorCode() == 0) {
-                            Logger.e("您的设备没有在其他地方登录过");
-                            goHome();
-                        } else if (deviceBeanApiResponse.getErrorCode() == 90102){
-                            Logger.e("您的设备有在其他地方登录过");
-                            showDialog();
-                        }
-
+                        Logger.e("您的设备没有在其他地方登录过");
+                        isOwnDev = true;
                     } else {
-                        Logger.e("请求失败了");
+                        Logger.e("您的设备有在其他地方登录过");
+                        isOwnDev = false;
                     }
-
+                    this.finishTask();
                 }, throwable -> {
                     Logger.e("发生了异常" + throwable.getMessage());
-                    if (AssociationData.checkIsLogin())
-                    {
-                        goHome();
-                    }else {
-                        showDialog();
-                    }
+                    this.finishTask();
                 });
 
     }
 
-    public void showDialog(){
-        AppManager.getAppManager().AppExit();
+
+    public void finishTask() {
+
+        if (AssociationData.checkIsLogin() && isOwnDev) {
+            startActivity(new Intent(SplashActivity.this, MainActivity.class));
+        } else {
+            startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+        }
+
+        SplashActivity.this.finish();
     }
-
-    public void goHome(){
-        startActivity(new Intent(SplashActivity.this, MainActivity.class));
-        AppManager.getAppManager().killActivity(SplashActivity.class);
-    }
-
-
-    public void goLogin(){
-        startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-        AppManager.getAppManager().killActivity(SplashActivity.class);
-    }
-
 
 
     public void isPermission() {
@@ -148,21 +139,17 @@ public class SplashActivity extends BaseActivity {
 
                     @Override
                     public void onFinish() {
-                        if (AssociationData.checkIsLogin()) {
-                            checkDevice();
-                        } else {
-                            goLogin();
-                        }
+                        checkDevice();
                     }
 
                     @Override
                     public void onDeny(String s, int i) {
-                        Logger.e("onDeny"+s+"第"+i+"个");
+                        Logger.e("onDeny" + s + "第" + i + "个");
                     }
 
                     @Override
                     public void onGuarantee(String s, int i) {
-                        Logger.e("onGuarantee"+s+"第"+i+"个");
+                        Logger.e("onGuarantee" + s + "第" + i + "个");
                     }
                 });
     }

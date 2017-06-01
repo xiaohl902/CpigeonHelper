@@ -23,7 +23,6 @@ import com.cpigeon.cpigeonhelper.MainActivity;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
-import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
 import com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton;
@@ -31,13 +30,10 @@ import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
-import com.google.gson.stream.MalformedJsonException;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 import com.squareup.picasso.Picasso;
 
-
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -48,12 +44,7 @@ import butterknife.OnEditorAction;
 import butterknife.OnTextChanged;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.Observable;
-import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.disposables.Disposable;
-
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 import static com.cpigeon.cpigeonhelper.common.db.AssociationData.DEV;
@@ -69,6 +60,7 @@ import static com.cpigeon.cpigeonhelper.utils.CommonUitls.simulateSuccessProgres
  */
 
 public class LoginActivity extends BaseActivity {
+
     @BindView(R.id.civ_user_head_img)
     CircleImageView civUserHeadImg;
     @BindView(R.id.et_username)
@@ -303,7 +295,9 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void setStatusBar() {
+        StatusBarUtil.setTransparent(this);
     }
+
 
     @Override
     public void onBackPressed() {

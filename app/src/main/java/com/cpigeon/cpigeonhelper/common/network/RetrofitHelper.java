@@ -35,8 +35,6 @@ public class RetrofitHelper {
     }
 
 
-
-
     private static void initOkHttpClient() {
 
         HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
@@ -54,9 +52,9 @@ public class RetrofitHelper {
                             .addNetworkInterceptor(new CacheInterceptor())
                             .addNetworkInterceptor(new StethoInterceptor())
                             .retryOnConnectionFailure(true)
-                            .connectTimeout(30, TimeUnit.SECONDS)
-                            .writeTimeout(20, TimeUnit.SECONDS)
-                            .readTimeout(20, TimeUnit.SECONDS)
+                            .connectTimeout(10, TimeUnit.SECONDS)
+                            .writeTimeout(10, TimeUnit.SECONDS)
+                            .readTimeout(10, TimeUnit.SECONDS)
                             .build();
                 }
             }
@@ -90,7 +88,7 @@ public class RetrofitHelper {
         public Response intercept(Chain chain) throws IOException {
 
             // 有网络时 设置缓存超时时间1个小时
-            int maxAge = 60 * 3;
+            int maxAge = 60;
             // 无网络时，设置超时为1天
             int maxStale = 60 * 60;
             Request request = chain.request();

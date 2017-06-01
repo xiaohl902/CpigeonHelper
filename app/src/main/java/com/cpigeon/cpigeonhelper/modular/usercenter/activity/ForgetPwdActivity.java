@@ -18,6 +18,7 @@ import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.CheckCode;
 import com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
+import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 import com.tbruyelle.rxpermissions2.RxPermissions;
@@ -87,8 +88,7 @@ public class ForgetPwdActivity extends BaseActivity {
 
     @Override
     protected void setStatusBar() {
-
-
+        StatusBarUtil.setColor(this, mColor);
     }
 
 

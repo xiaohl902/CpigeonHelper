@@ -23,11 +23,14 @@ import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.ACarServiceActivity;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.OpeningGeyuntongActivity;
 import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
 import com.cpigeon.cpigeonhelper.modular.home.bean.HomeAd;
 import com.cpigeon.cpigeonhelper.modular.root.activity.RootListActivity;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.AnnouncementList;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
+import com.cpigeon.cpigeonhelper.modular.xiehui.activity.XieHuiInfoActivity;
 import com.cpigeon.cpigeonhelper.ui.textview.MarqueeTextView;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.cpigeon.cpigeonhelper.utils.PicassoImageLoader;
@@ -71,7 +74,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     LinearLayout layoutGg;
     @BindView(R.id.ll_xiehui_introduce)
     LinearLayout llXiehuiIntroduce;
-    private int mStatusBarColor;
+    @BindView(R.id.ll_xiehui_geyuntong)
+    LinearLayout llXiehuiGeyuntong;
+
     private int count = 1;
 
 
@@ -189,12 +194,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             count = 2;
             Observable.timer(2, TimeUnit.SECONDS)
                     .compose(bindToLifecycle())
-                    .subscribe(new Consumer<Long>() {
-                        @Override
-                        public void accept(Long aLong) throws Exception {
-                            count = 1;
-                        }
-                    });
+                    .subscribe(aLong -> count = 1);
         }
 
     }
@@ -204,8 +204,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     @Override
     protected void setStatusBar() {
-        mStatusBarColor = getResources().getColor(R.color.colorAccent);
-        StatusBarUtil.setColorForDrawerLayout(this, drawerLayout, mStatusBarColor, 0);
+
+        StatusBarUtil.setColorForDrawerLayout(this, drawerLayout, mColor, 0);
 
     }
 
@@ -215,16 +215,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         int id = menuItem.getItemId();
         switch (id) {
             case R.id.levelup_vip://升级会员
-
+                startActivity(new Intent(MainActivity.this, OpeningGeyuntongActivity.class));
                 break;
             case R.id.xiehui_zone://协会空间
-
+                startActivity(new Intent(MainActivity.this, XieHuiInfoActivity.class));
                 break;
             case R.id.money://钱包
 
                 break;
             case R.id.my_geyuntong://我的鸽运通
-
+                startActivity(new Intent(MainActivity.this, ACarServiceActivity.class));
                 break;
             case R.id.sifangdi://常用司放地
 
@@ -247,13 +247,18 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         return true;
     }
 
-    @OnClick({R.id.layout_gg, R.id.ll_xiehui_introduce})
+    @OnClick({R.id.layout_gg, R.id.ll_xiehui_introduce,R.id.ll_xiehui_geyuntong})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.layout_gg:
                 break;
             case R.id.ll_xiehui_introduce:
                 break;
+            case R.id.ll_xiehui_geyuntong:
+                startActivity(new Intent(MainActivity.this, OpeningGeyuntongActivity.class));
+                break;
         }
     }
+
+
 }

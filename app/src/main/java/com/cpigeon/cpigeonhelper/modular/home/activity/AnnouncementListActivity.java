@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.cpigeon.cpigeonhelper.base.BaseActivity;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 
@@ -27,7 +28,7 @@ public class AnnouncementListActivity extends BaseActivity {
 
     @Override
     protected void setStatusBar() {
-
+        StatusBarUtil.setColor(this, mColor);
     }
 
     @Override

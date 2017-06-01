@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:padding="16dp"
+    android:text="普通用户"
+    android:background="@drawable/bg_button_blue"
+    android:textColor="@color/blue_btn_bg_pressed_color"
+    android:id="@+id/tv_service_item"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+</TextView>
