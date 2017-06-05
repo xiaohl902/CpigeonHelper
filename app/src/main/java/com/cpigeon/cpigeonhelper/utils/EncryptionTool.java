@@ -127,7 +127,7 @@ public class EncryptionTool {
      * @param key
      * @return
      */
-    private static String encryptAES(String input, String key) {
+    public static String encryptAES(String input, String key) {
         byte[] crypted;
         try {
             SecretKeySpec skey = new SecretKeySpec(key.getBytes(), "AES");
@@ -148,7 +148,7 @@ public class EncryptionTool {
      * @param key
      * @return
      */
-    private static String decryptAES(String input, String key) {
+    public static String decryptAES(String input, String key) {
         byte[] output;
         try {
             SecretKeySpec skey = new SecretKeySpec(key.getBytes(), "AES");
