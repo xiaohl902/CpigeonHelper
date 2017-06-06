@@ -1,8 +1,11 @@
 package com.cpigeon.cpigeonhelper.mina;
 
 import android.content.Context;
+import android.os.Handler;
 import android.util.Log;
 
+import com.cpigeon.cpigeonhelper.common.db.AssociationData;
+import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
 import com.orhanobut.logger.Logger;
 
 import org.apache.mina.core.buffer.IoBuffer;
@@ -16,6 +19,9 @@ import org.apache.mina.transport.socket.nio.NioSocketConnector;
 
 import java.lang.ref.WeakReference;
 import java.net.InetSocketAddress;
+
+import static com.cpigeon.cpigeonhelper.utils.CommonUitls.KEY_SERVER_PWD;
+
 public class ConnectionManager {
 
     private ConnectionConfig mConfig;
@@ -23,7 +29,7 @@ public class ConnectionManager {
     public NioSocketConnector mConnection;
     private IoSession mSession;
     private InetSocketAddress mAddress;
-
+    private Handler mHandler = new Handler();
     public ConnectionManager(ConnectionConfig config){
 
         this.mConfig = config;
@@ -119,8 +125,18 @@ public class ConnectionManager {
                     break;
                 }
                 if(ConnectionManager.this.connect()){
+                    mHandler.post(() -> {
+                        String s =  EncryptionTool.encryptAES(AssociationData.getUserToken(), EncryptionTool.MD5(KEY_SERVER_PWD).toLowerCase());
+                        IoBuffer buffer = IoBuffer.allocate(100000);
+                        buffer.put(
+                                ("[len="+s.length()+"]"+s)
+                                        .getBytes());
+                        SessionManager.getInstance().writeToServer(buffer);
+                    });
+
                     Logger.e("断线重连[" + mConnection.getDefaultRemoteAddress().getHostName() + ":" +
                             mConnection.getDefaultRemoteAddress().getPort() + "]成功");
+
                     break;
                 }
                 Thread.sleep(5000);

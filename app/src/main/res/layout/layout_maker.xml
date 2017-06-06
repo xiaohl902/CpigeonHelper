@@ -4,9 +4,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="240dp"
-    android:layout_height="80dp">
+    android:padding="8dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
     <LinearLayout
+        android:orientation="vertical"
         android:background="@color/colorPrimary"
         android:layout_width="wrap_content"
         android:layout_height="match_parent">
@@ -14,7 +16,13 @@
             app:srcCompat="@drawable/ic_rules"
             android:layout_width="48dp"
             android:layout_height="48dp" />
-
+        <TextView
+            android:id="@+id/tv_area_distance"
+            android:textColor="@color/colorWhite"
+            android:gravity="center"
+            android:text="168KM"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
     </LinearLayout>
     <LinearLayout
         android:gravity="center"
@@ -32,7 +40,7 @@
         <TextView
             android:textSize="14sp"
             android:textColor="@color/colorPrimary"
-            android:id="@+id/tv_location"
+            android:id="@+id/tv_area_location"
             android:text="120.123158/27.124562"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

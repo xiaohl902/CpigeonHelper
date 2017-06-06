@@ -14,4 +14,10 @@
         \n请检查手机号是否输入正确。
         \n如果正确，则此用户没有注册中鸽网，请联系该用户注册成为中鸽网会员。</string>
     <string name="tips_register">如何成为中鸽网用户?快点我!</string>
+
+    <string-array name="sections">
+        <item>鸽运通</item>
+        <item>照片</item>
+        <item>视频</item>
+    </string-array>
 </resources>

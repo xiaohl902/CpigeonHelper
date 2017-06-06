@@ -1,17 +1,13 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
 
 import android.os.Bundle;
-import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentTransaction;
-import android.view.MenuItem;
 import android.widget.FrameLayout;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarServiceFragment;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPageFragment;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
-import com.r0adkll.slidr.Slidr;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -21,14 +17,13 @@ import butterknife.ButterKnife;
  */
 
 public class ACarServiceActivity extends ToolbarBaseActivity {
+    private Fragment[] fragments;
+
+
+    private CarPageFragment carPageFragment;
 
     @BindView(R.id.container)
     FrameLayout container;
-    private Fragment[] fragments;
-
-    private int currentTabIndex;
-
-    private int index;
 
     @Override
     protected void swipeBack() {
@@ -47,47 +42,33 @@ public class ACarServiceActivity extends ToolbarBaseActivity {
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
+        setTitle("成都三道堰虐菜局比赛");
+        setTopLeftButton(R.drawable.ic_back, this::finish);
+        //初始化Fragment
         initFragments();
     }
 
     private void initFragments() {
-        CarServiceFragment mCarServiceFragment = CarServiceFragment.newInstance();
-        fragments = new Fragment[]{
-                mCarServiceFragment
+        carPageFragment = CarPageFragment.newInstance();
+        fragments = new Fragment[] {
+                carPageFragment,
+
         };
+
         // 添加显示第一个fragment
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.container, mCarServiceFragment)
-                .show(mCarServiceFragment).commit();
+                .add(R.id.container, carPageFragment)
+                .show(carPageFragment).commit();
     }
 
+    /**
+     * 解决App重启后导致Fragment重叠的问题
+     */
     @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-
+    protected void onSaveInstanceState(Bundle outState) {
+        //super.onSaveInstanceState(outState);
     }
 
-    /**
-     * Fragment切换
-     */
-    private void switchFragment() {
 
-        FragmentTransaction trx = getSupportFragmentManager().beginTransaction();
-        trx.hide(fragments[currentTabIndex]);
-        if (!fragments[index].isAdded()) {
-            trx.add(R.id.container, fragments[index]);
-        }
-        trx.show(fragments[index]).commit();
-        currentTabIndex = index;
-    }
-
-    /**
-     * 切换Fragment的下标
-     */
-    private void changeFragmentIndex(MenuItem item, int currentIndex) {
-
-        index = currentIndex;
-        switchFragment();
-        item.setChecked(true);
-    }
 }

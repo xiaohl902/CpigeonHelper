@@ -14,4 +14,5 @@
     <color name="colorHint">#d1d1d6</color>
     <color name="cpb_grey">#ffdedede</color>
     <color name="colorBlueButtonBorder">#00cff9</color>
+    <color name="transparent">#00000000</color>
 </resources>

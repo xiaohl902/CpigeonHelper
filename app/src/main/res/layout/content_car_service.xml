@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+        android:layout_margin="8dp"
+        android:textSize="16sp"
+        android:id="@+id/tv_sifang_location"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="司放地坐标:"/>
+
+    <TextView
+        android:layout_margin="8dp"
+        android:textSize="16sp"
+        android:text="司放地天气:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_weather"/>
+    <TextView
+        android:layout_margin="8dp"
+        android:textSize="16sp"
+        android:text="当前坐标:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/tv_now_location"/>
+    <TextView
+        android:layout_margin="8dp"
+        android:textSize="16sp"
+        android:id="@+id/tv_now_weather"
+        android:text="当前天气:"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:layout_margin="8dp"
+        android:textSize="16sp"
+        android:id="@+id/tv_airdistance"
+        android:text="空距"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:layout_margin="8dp"
+        android:textSize="16sp"
+        android:text="里程"
+        android:id="@+id/tv_mileage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+    <TextView
+        android:layout_margin="8dp"
+        android:textSize="16sp"
+        android:text="车速"
+        android:id="@+id/tv_speed"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

@@ -2,6 +2,7 @@ package com.cpigeon.cpigeonhelper.modular.geyuntong.fragment;
 
 import android.os.Bundle;
 
+import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
 
 /**
@@ -9,17 +10,33 @@ import com.cpigeon.cpigeonhelper.base.BaseFragment;
  */
 
 public class CarVideoFragment extends BaseFragment {
-    @Override
-    public int getLayoutResId() {
-        return 0;
-    }
 
-    @Override
-    public void finishCreateView(Bundle state) {
-
-    }
     public static CarVideoFragment newInstance() {
 
         return new CarVideoFragment();
     }
+
+    @Override
+    public int getLayoutResId() {
+        return R.layout.fragment_car_video;
+    }
+
+    @Override
+    public void finishCreateView(Bundle state) {
+        isPrepared = true;
+        lazyLoad();
+    }
+
+    @Override
+    protected void lazyLoad() {
+
+        if (!isPrepared || !isVisible) {
+            return;
+        }
+
+        initRefreshLayout();
+        initRecyclerView();
+        isPrepared = false;
+    }
+
 }

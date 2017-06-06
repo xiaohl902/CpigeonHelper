@@ -12,6 +12,7 @@ import android.widget.Toast;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseActivity;
+import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.network.ApiConstants;
 import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
@@ -44,7 +45,7 @@ import static com.cpigeon.cpigeonhelper.utils.CommonUitls.simulateSuccessProgres
  * Created by Administrator on 2017/5/25.
  */
 
-public class ForgetPwdActivity extends BaseActivity {
+public class ForgetPwdActivity extends ToolbarBaseActivity {
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.et_phonenumber)
@@ -66,29 +67,24 @@ public class ForgetPwdActivity extends BaseActivity {
     }
 
     @Override
-    protected int getLayoutId() {
+    protected int getContentView() {
         return R.layout.activity_resetpwd;
     }
 
+
     @Override
     public void initViews(Bundle savedInstanceState) {
-
+        setTitle("修改密码");
+        setTopLeftButton(R.drawable.ic_back, ForgetPwdActivity.this::finish);
     }
 
-    @Override
-    public void initToolBar() {
-        mColor = getResources().getColor(R.color.colorPrimary);
-        toolbar.setTitle("重置密码");
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(v -> finish());
 
-    }
 
 
     @Override
     protected void setStatusBar() {
-        StatusBarUtil.setColor(this, mColor);
+        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        StatusBarUtil.setColorForSwipeBack(this, mColor,0);//最后一个参数代表了透明度，0位全部透明
     }
 
 

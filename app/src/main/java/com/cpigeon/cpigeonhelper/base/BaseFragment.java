@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.orhanobut.logger.Logger;
 import com.trello.rxlifecycle2.components.support.RxFragment;
 
 import butterknife.ButterKnife;
@@ -36,12 +37,14 @@ public abstract class BaseFragment extends RxFragment{
     @LayoutRes
     int getLayoutResId();
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle state) {
         parentView = inflater.inflate(getLayoutResId(), container, false);
         activity = getSupportActivity();
         return parentView;
     }
+
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {

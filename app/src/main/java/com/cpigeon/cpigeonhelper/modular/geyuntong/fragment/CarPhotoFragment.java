@@ -1,7 +1,9 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.fragment;
 
 import android.os.Bundle;
+import android.view.View;
 
+import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
 
 /**
@@ -9,17 +11,32 @@ import com.cpigeon.cpigeonhelper.base.BaseFragment;
  */
 
 public class CarPhotoFragment extends BaseFragment {
+
+    public static CarPhotoFragment newInstance() {
+
+        return new CarPhotoFragment();
+    }
+
     @Override
     public int getLayoutResId() {
-        return 0;
+        return R.layout.fragment_car_photo;
     }
 
     @Override
     public void finishCreateView(Bundle state) {
-
+        isPrepared = true;
+        lazyLoad();
     }
-    public static CarPhotoFragment newInstance() {
 
-        return new CarPhotoFragment();
+    @Override
+    protected void lazyLoad() {
+
+        if (!isPrepared || !isVisible) {
+            return;
+        }
+
+        initRefreshLayout();
+        initRecyclerView();
+        isPrepared = false;
     }
 }

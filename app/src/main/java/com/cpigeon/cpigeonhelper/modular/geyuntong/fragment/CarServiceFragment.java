@@ -5,15 +5,14 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.SystemClock;
 import android.support.design.widget.FloatingActionButton;
 import android.view.View;
-import android.view.animation.CycleInterpolator;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -22,7 +21,6 @@ import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
-import com.amap.api.maps.MapView;
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
@@ -38,26 +36,13 @@ import com.amap.api.services.weather.WeatherSearch;
 import com.amap.api.services.weather.WeatherSearchQuery;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
-import com.cpigeon.cpigeonhelper.common.db.AssociationData;
-import com.cpigeon.cpigeonhelper.mina.Event;
 import com.cpigeon.cpigeonhelper.mina.SessionManager;
-import com.cpigeon.cpigeonhelper.mina.domain.MinaMsgHead;
-import com.cpigeon.cpigeonhelper.utils.CommonUitls;
-import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.InfoWinAdapter;
 import com.cpigeon.cpigeonhelper.utils.SensorEventHelper;
 import com.orhanobut.logger.Logger;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.net.Socket;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -66,13 +51,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import butterknife.BindView;
 import butterknife.OnClick;
 
-import static com.cpigeon.cpigeonhelper.utils.CommonUitls.KEY_SERVER_PWD;
-
 /**
  * Created by Administrator on 2017/5/31.
  */
 
-public class CarServiceFragment extends BaseFragment implements LocationSource, AMapLocationListener, AMap.OnMapLoadedListener, AMap.OnMapClickListener, WeatherSearch.OnWeatherSearchListener {
+public class CarServiceFragment extends BaseFragment implements LocationSource, AMapLocationListener, AMap.OnMapLoadedListener, AMap.OnMapClickListener, WeatherSearch.OnWeatherSearchListener, AMap.OnMarkerClickListener {
 
 
     @BindView(R.id.mapView)
@@ -97,10 +80,9 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     TextView tvSpeed;
     @BindView(R.id.fab_take_photo)
     FloatingActionButton fabTakePhoto;
-    @BindView(R.id.button)
-    Button button;
+    @BindView(R.id.btn_stop)
+    ToggleButton mToggleButton;
     private AMap aMap;
-    private boolean first = true;
     private OnLocationChangedListener mListener;
     private AMapLocationClient mlocationClient;
     private AMapLocationClientOption mLocationOption;
@@ -123,6 +105,14 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     private StringBuilder stringBuilder;
     private Queue<AMapLocation> locationQueue;
     private long startTimeStamp;
+    private long usingTime;
+    private InfoWinAdapter adapter;
+    public static CarServiceFragment newInstance() {
+
+        return new CarServiceFragment();
+    }
+
+
     @Override
     public int getLayoutResId() {
         return R.layout.fragment_car_service;
@@ -130,6 +120,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
 
     @Override
     public void finishCreateView(Bundle state) {
+
         mapView.onCreate(state);
         if (aMap == null) {
             aMap = mapView.getMap();
@@ -149,42 +140,33 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         aMap.setMyLocationEnabled(true);// 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
         // 设置定位的类型为定位模式 ，可以由定位、跟随或地图根据面向方向旋转几种
         aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);
+
+        aMap.setOnMarkerClickListener(this);
+        adapter = new InfoWinAdapter();
+        aMap.setInfoWindowAdapter(adapter);
     }
 
-    @OnClick({R.id.fab_take_photo, R.id.button})
+    @OnClick({R.id.fab_take_photo, R.id.btn_stop})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.fab_take_photo:
-                getActivity().stopService(new Intent(getActivity(), CoreService.class));
+
                 break;
-            case R.id.button:
-                startTimeStamp = System.currentTimeMillis() / 1000;
-                getActivity().startService(new Intent(getActivity(), CoreService.class));
+            case R.id.btn_stop:
+                if (mToggleButton.isChecked())
+                {
+                    startTimeStamp = System.currentTimeMillis() / 1000;
+                    getActivity().startService(new Intent(getActivity(), CoreService.class));
+                }else {
+                    getActivity().stopService(new Intent(getActivity(), CoreService.class));
+                    usingTime = System.currentTimeMillis()/1000 - startTimeStamp;
+                    Logger.e("总共花费了"+usingTime);
+                }
+
+
                 break;
         }
     }
-
-    private Handler mHandler = new Handler() {
-        public void handleMessage(android.os.Message msg) {
-            switch (msg.what) {
-                case TcpManager.STATE_FROM_SERVER_OK:
-                    String result = (String) msg.obj;
-                    Logger.e("result" + result);
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        ;
-    };
-
-    public static CarServiceFragment newInstance() {
-
-        return new CarServiceFragment();
-    }
-
     @Override
     public void activate(OnLocationChangedListener onLocationChangedListener) {
         mListener = onLocationChangedListener;
@@ -203,6 +185,8 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
             // 在定位结束后，在合适的生命周期调用onDestroy()方法
             // 在单次定位情况下，定位无论成功与否，都无需调用stopLocation()方法移除请求，定位sdk内部会移除
             mlocationClient.startLocation();
+        }else {
+            mlocationClient.startLocation();
         }
     }
 
@@ -215,7 +199,6 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         }
         mlocationClient = null;
     }
-
 
     private void addCircle(LatLng latlng, double radius) {
         CircleOptions options = new CircleOptions();
@@ -234,19 +217,6 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         Marker marker = aMap.addMarker(new MarkerOptions().position(point).icon(des)
                 .anchor(0.5f, 0.5f));
         return marker;
-    }
-
-    private void addMarkerNoReturn(LatLng latlng) {
-        if (mLocMarker != null) {
-            return;
-        }
-        MarkerOptions options = new MarkerOptions();
-        options.icon(BitmapDescriptorFactory.fromBitmap(BitmapFactory.decodeResource(this.getResources(),
-                R.mipmap.car)));
-        options.anchor(0.5f, 0.5f);
-        options.position(latlng);
-        mLocMarker = aMap.addMarker(options);
-        mLocMarker.setTitle("Andy");
     }
 
     private void addLocationMarker(AMapLocation aMapLocation) {
@@ -321,32 +291,6 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         }
     }
 
-    /**
-     * 方法必须重写
-     */
-    @Override
-    public void onResume() {
-        super.onResume();
-        mapView.onResume();
-    }
-
-    /**
-     * 方法必须重写
-     */
-    @Override
-    public void onPause() {
-        super.onPause();
-        mapView.onPause();
-    }
-
-    /**
-     * 方法必须重写
-     */
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        mapView.onSaveInstanceState(outState);
-    }
 
     public void Scalecircle(final Circle circle) {
         start = SystemClock.uptimeMillis();
@@ -354,18 +298,15 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         mTimer.schedule(mTimerTask, 0, 30);
     }
 
+
     @Override
     public void onMapLoaded() {
 
     }
 
-    @Override
-    public void onMapClick(LatLng latLng) {
-
-    }
 
     @Override
-    public synchronized void onWeatherLiveSearched(LocalWeatherLiveResult weatherLiveResult, int rCode) {
+    public void onWeatherLiveSearched(LocalWeatherLiveResult weatherLiveResult, int rCode) {
         AMapLocation location = locationQueue.poll();
         if (rCode == 1000) {
             if (weatherLiveResult != null && weatherLiveResult.getLiveResult() != null) {
@@ -444,7 +385,6 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
 
     }
 
-
     private class circleTask extends TimerTask {
         private double r;
         private Circle circle;
@@ -479,5 +419,34 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         }
     }
 
+    //地图的点击事件
+    @Override
+    public void onMapClick(LatLng latLng) {
+        //点击地图上没marker 的地方，隐藏inforwindow
+        if (mLocMarker != null) {
+            mLocMarker.hideInfoWindow();
+            mLocMarker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
+        }
+    }
+
+    //maker的点击事件
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        if (mLocMarker != null) {
+            mLocMarker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
+        }
+        mLocMarker = marker;
+        marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
+        return false; //返回 “false”，除定义的操作之外，默认操作也将会被执行
+    }
+
+    private void addMarkerToMap(LatLng latLng, String title, String snippet) {
+        aMap.addMarker(new MarkerOptions().anchor(0.5f, 0.5f)
+                .position(latLng)
+                .title(title)
+                .snippet(snippet)
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+        );
+    }
 
 }
