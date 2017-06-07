@@ -24,6 +24,7 @@ import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.ACarServiceActivity;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.GeYunTongListActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.OpeningGeyuntongActivity;
 import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
 import com.cpigeon.cpigeonhelper.modular.home.bean.HomeAd;
@@ -224,7 +225,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
                 break;
             case R.id.my_geyuntong://我的鸽运通
-                startActivity(new Intent(MainActivity.this, ACarServiceActivity.class));
+                startActivity(new Intent(MainActivity.this, GeYunTongListActivity.class));
                 break;
             case R.id.sifangdi://常用司放地
 

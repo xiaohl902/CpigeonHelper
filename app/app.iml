@@ -103,19 +103,18 @@
     </content>
     <orderEntry type="jdk" jdkName="Android API 25 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" exported="" name="nativecrashreport-3.2.0" level="project" />
     <orderEntry type="library" exported="" name="stetho-okhttp3-1.5.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="runner-0.5" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="espresso-idling-resource-2.2.2" level="project" />
+    <orderEntry type="library" exported="" name="navi-3dmap-5.1.0_3dmap5.2.0" level="project" />
     <orderEntry type="library" exported="" name="core-1.8.0-2.x" level="project" />
     <orderEntry type="library" exported="" name="mina-core-2.0.16" level="project" />
-    <orderEntry type="library" exported="" name="crashreport-2.6.0" level="project" />
     <orderEntry type="library" exported="" scope="TEST" name="hamcrest-library-1.3" level="project" />
     <orderEntry type="library" exported="" name="relinker-1.2.2" level="project" />
     <orderEntry type="library" exported="" name="slf4j-android-1.6.1-RC1" level="project" />
     <orderEntry type="library" exported="" name="transition-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="common-0.0.3" level="project" />
-    <orderEntry type="library" exported="" name="navi-3dmap-5.1.0" level="project" />
+    <orderEntry type="library" exported="" name="crashreport-2.6.5" level="project" />
     <orderEntry type="library" exported="" name="commons-cli-1.2" level="project" />
     <orderEntry type="library" exported="" name="rxandroid-2.0.1" level="project" />
     <orderEntry type="library" exported="" name="rxjava-2.1.0" level="project" />
@@ -144,6 +143,7 @@
     <orderEntry type="library" exported="" name="support-vector-drawable-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="support-compat-25.3.1" level="project" />
     <orderEntry type="library" exported="" name="authcode-1.0.0" level="project" />
+    <orderEntry type="library" exported="" name="nativecrashreport-3.3.0" level="project" />
     <orderEntry type="library" exported="" name="map2d-3.0.0" level="project" />
     <orderEntry type="library" exported="" name="picasso-2.5.2" level="project" />
     <orderEntry type="library" exported="" name="runtime-1.8.0-2.x" level="project" />

@@ -5,9 +5,9 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.TextView;
 
-import com.amap.api.maps2d.AMap;
-import com.amap.api.maps2d.model.LatLng;
-import com.amap.api.maps2d.model.Marker;
+import com.amap.api.maps.AMap;
+import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.MyApp;
 
@@ -15,7 +15,7 @@ import com.cpigeon.cpigeonhelper.base.MyApp;
  * Created by Administrator on 2017/6/6.
  */
 
-public class InfoWinAdapter implements AMap.InfoWindowAdapter, com.amap.api.maps.AMap.InfoWindowAdapter {
+public class InfoWinAdapter implements AMap.InfoWindowAdapter {
     private Context mContext = MyApp.getInstance();
     private LatLng latLng;
     private String snippet;
@@ -48,16 +48,6 @@ public class InfoWinAdapter implements AMap.InfoWindowAdapter, com.amap.api.maps
 
     @Override
     public View getInfoContents(Marker marker) {
-        return null;
-    }
-
-    @Override
-    public View getInfoWindow(com.amap.api.maps.model.Marker marker) {
-        return null;
-    }
-
-    @Override
-    public View getInfoContents(com.amap.api.maps.model.Marker marker) {
         return null;
     }
 }

@@ -48,6 +48,8 @@
         <activity android:name=".modular.root.activity.SearchUserActivity"/>
         <activity android:name=".modular.xiehui.activity.XieHuiInfoActivity"/>
         <activity android:name=".modular.geyuntong.activity.ACarServiceActivity"/>
+        <activity android:name=".modular.geyuntong.activity.AddGeyuntongActivity"/>
+        <activity android:name=".modular.geyuntong.activity.GeYunTongListActivity"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="com.cpigeon.cpigeonhelper.fileprovider"

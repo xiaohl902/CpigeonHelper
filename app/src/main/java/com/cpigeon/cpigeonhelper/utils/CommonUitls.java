@@ -16,6 +16,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
+import com.amap.api.maps.model.LatLng;
 import com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton;
 import com.orhanobut.logger.Logger;
 
@@ -36,6 +37,7 @@ import java.util.regex.Pattern;
 public class CommonUitls {
     private static final String KEY_API_SIGN = "iy087234ho78fuqy49TR23jk4h";    //只有url参数的签名算法
     public static final String KEY_SERVER_PWD = "9834h5ok2j32hKgjvmn34JHG89";
+    public static final LatLng CHENGDU = new LatLng(30.668544, 104.03224);
     private static String DeviceID;
     private static Toast toast;
     public  static  final  String HOST = "192.168.0.5";

@@ -38,6 +38,7 @@ import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
 import com.cpigeon.cpigeonhelper.mina.SessionManager;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.InfoWinAdapter;
+import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.SensorEventHelper;
 import com.orhanobut.logger.Logger;
 
@@ -87,17 +88,14 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     private AMapLocationClient mlocationClient;
     private AMapLocationClientOption mLocationOption;
     private Marker mLocMarker;
+    private Marker oldMarker;
     private Circle mCircle;
     private boolean mFirstFix = false;
     private SensorEventHelper mSensorHelper;
     private static final int STROKE_COLOR = Color.argb(180, 3, 145, 255);
     private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
-    private Circle ac;
-    private Circle c;
-    private long start;
-    private final Interpolator interpolator1 = new LinearInterpolator();
+    private LatLng location;
     private TimerTask mTimerTask;
-    private Timer mTimer = new Timer();
     private WeatherSearchQuery mQuery;
     private WeatherSearch mWeatherSearch;
     private LocalWeatherLive oldlocalWeatherLive;
@@ -107,6 +105,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     private long startTimeStamp;
     private long usingTime;
     private InfoWinAdapter adapter;
+
     public static CarServiceFragment newInstance() {
 
         return new CarServiceFragment();
@@ -140,10 +139,11 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         aMap.setMyLocationEnabled(true);// 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
         // 设置定位的类型为定位模式 ，可以由定位、跟随或地图根据面向方向旋转几种
         aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);
-
         aMap.setOnMarkerClickListener(this);
         adapter = new InfoWinAdapter();
         aMap.setInfoWindowAdapter(adapter);
+        addMarkerToMap(CommonUitls.CHENGDU,"成都","成都市");
+
     }
 
     @OnClick({R.id.fab_take_photo, R.id.btn_stop})
@@ -153,20 +153,20 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
 
                 break;
             case R.id.btn_stop:
-                if (mToggleButton.isChecked())
-                {
+                if (mToggleButton.isChecked()) {
                     startTimeStamp = System.currentTimeMillis() / 1000;
                     getActivity().startService(new Intent(getActivity(), CoreService.class));
-                }else {
+                } else {
                     getActivity().stopService(new Intent(getActivity(), CoreService.class));
-                    usingTime = System.currentTimeMillis()/1000 - startTimeStamp;
-                    Logger.e("总共花费了"+usingTime);
+                    usingTime = System.currentTimeMillis() / 1000 - startTimeStamp;
+                    Logger.e("总共花费了" + usingTime);
                 }
 
 
                 break;
         }
     }
+
     @Override
     public void activate(OnLocationChangedListener onLocationChangedListener) {
         mListener = onLocationChangedListener;
@@ -180,12 +180,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
             mLocationOption.setInterval(10000);
             //设置定位参数
             mlocationClient.setLocationOption(mLocationOption);
-            // 此方法为每隔固定时间会发起一次定位请求，为了减少电量消耗或网络流量消耗，
-            // 注意设置合适的定位时间的间隔（最小间隔支持为2000ms），并且在合适时间调用stopLocation()方法来取消定位请求
-            // 在定位结束后，在合适的生命周期调用onDestroy()方法
-            // 在单次定位情况下，定位无论成功与否，都无需调用stopLocation()方法移除请求，定位sdk内部会移除
-            mlocationClient.startLocation();
-        }else {
+
             mlocationClient.startLocation();
         }
     }
@@ -214,32 +209,13 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         Bitmap bMap = BitmapFactory.decodeResource(this.getResources(),
                 R.mipmap.car);
         BitmapDescriptor des = BitmapDescriptorFactory.fromBitmap(bMap);
-        Marker marker = aMap.addMarker(new MarkerOptions().position(point).icon(des)
+        Marker marker = aMap.addMarker(new MarkerOptions()
+                .position(point)
+                .icon(des)
                 .anchor(0.5f, 0.5f));
         return marker;
     }
 
-    private void addLocationMarker(AMapLocation aMapLocation) {
-        LatLng mylocation = new LatLng(aMapLocation.getLatitude(), aMapLocation.getLongitude());
-        float accuracy = aMapLocation.getAccuracy();
-        if (mLocMarker == null) {
-            mLocMarker = addMarker(mylocation);
-            ac = aMap.addCircle(new CircleOptions().center(mylocation)
-                    .fillColor(Color.argb(100, 255, 218, 185)).radius(accuracy)
-                    .strokeColor(Color.argb(255, 255, 228, 185)).strokeWidth(5));
-            c = aMap.addCircle(new CircleOptions().center(mylocation)
-                    .fillColor(Color.argb(70, 255, 218, 185))
-                    .radius(accuracy).strokeColor(Color.argb(255, 255, 228, 185))
-                    .strokeWidth(0));
-        } else {
-            mLocMarker.setPosition(mylocation);
-            ac.setCenter(mylocation);
-            ac.setRadius(accuracy);
-            c.setCenter(mylocation);
-            c.setRadius(accuracy);
-        }
-        Scalecircle(c);
-    }
 
     @Override
     public void onLocationChanged(AMapLocation amapLocation) {
@@ -251,39 +227,29 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
             if (amapLocation != null
                     && amapLocation.getErrorCode() == 0) {
 
-                LatLng location = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
+                location = new LatLng(amapLocation.getLatitude(), amapLocation.getLongitude());
 
                 tvNowLocation.setText("当前坐标 : " + amapLocation.getLatitude() + "/" + amapLocation.getLongitude());
 
-                if (locationQueue ==null) locationQueue = new ConcurrentLinkedQueue<>();
+                if (locationQueue == null) locationQueue = new ConcurrentLinkedQueue<>();
                 locationQueue.offer(amapLocation);
-
-
                 mQuery = new WeatherSearchQuery(amapLocation.getCity(), WeatherSearchQuery.WEATHER_TYPE_LIVE);
                 mWeatherSearch = new WeatherSearch(getActivity());
                 mWeatherSearch.setOnWeatherSearchListener(this);
                 mWeatherSearch.setQuery(mQuery);
                 mWeatherSearch.searchWeatherAsyn(); //异步搜索
-
-
-
                 if (!mFirstFix) {
                     mFirstFix = true;
                     addCircle(location, amapLocation.getAccuracy());//添加定位精度圆
-//                    addMarkerNoReturn(location);//添加定位图标
                     mLocMarker = addMarker(location);
                     mSensorHelper.setCurrentMarker(mLocMarker);//定位图标旋转
                     aMap.moveCamera(CameraUpdateFactory.newLatLngZoom(location, 18));
-                    addLocationMarker(amapLocation);
                 } else {
                     mCircle.setCenter(location);
                     mCircle.setRadius(amapLocation.getAccuracy());
                     mLocMarker.setPosition(location);
                     aMap.moveCamera(CameraUpdateFactory.changeLatLng(location));
-                    addLocationMarker(amapLocation);
                 }
-
-
             } else {
                 String errText = "定位失败," + amapLocation.getErrorCode() + ": " + amapLocation.getErrorInfo();
                 Logger.e(errText);
@@ -291,19 +257,10 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         }
     }
 
-
-    public void Scalecircle(final Circle circle) {
-        start = SystemClock.uptimeMillis();
-        mTimerTask = new circleTask(circle, 1000);
-        mTimer.schedule(mTimerTask, 0, 30);
-    }
-
-
     @Override
     public void onMapLoaded() {
 
     }
-
 
     @Override
     public void onWeatherLiveSearched(LocalWeatherLiveResult weatherLiveResult, int rCode) {
@@ -323,15 +280,13 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         stringBuilder.append("|");
         stringBuilder.append(location.getLongitude());
         stringBuilder.append("|");
-        stringBuilder.append(location.getSpeed()*3.6);
+        stringBuilder.append(location.getSpeed() * 3.6);
         stringBuilder.append("|");
         stringBuilder.append(location.getTime() / 1000);
-        if (oldlocalWeatherLive==null || !oldlocalWeatherLive.getCity().equals(weatherLiveResult.getLiveResult().getCity()) ||
-                !oldlocalWeatherLive.getReportTime().equals(weatherLiveResult.getLiveResult().getReportTime()))
-        {
+        if (oldlocalWeatherLive == null || !oldlocalWeatherLive.getCity().equals(weatherLiveResult.getLiveResult().getCity()) ||
+                !oldlocalWeatherLive.getReportTime().equals(weatherLiveResult.getLiveResult().getReportTime())) {
             stringBuilder.append("|");
-            if (weatherLiveResult!=null)
-            {
+            if (weatherLiveResult != null) {
                 stringBuilder.append(weatherLiveResult.getLiveResult().getWeather());
                 stringBuilder.append("|");
                 stringBuilder.append(weatherLiveResult.getLiveResult().getWindDirection());
@@ -344,7 +299,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
             }
 
             Logger.e("位置发生了改变");
-        }else {
+        } else {
             stringBuilder.append("|");
             stringBuilder.append(oldlocalWeatherLive.getWeather());
             stringBuilder.append("|");
@@ -355,7 +310,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
             stringBuilder.append(oldlocalWeatherLive.getReportTime());
             stringBuilder.append("|");
             stringBuilder.append(oldlocalWeatherLive.getTemperature());
-            Logger.e("位置无任何改变:"+oldlocalWeatherLive.getCity()+"---"+oldlocalWeatherLive.getProvince());
+            Logger.e("位置无任何改变:" + oldlocalWeatherLive.getCity() + "---" + oldlocalWeatherLive.getProvince());
         }
 
         sendMsg(stringBuilder.toString());
@@ -366,7 +321,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     /**
      * 给服务器发送一条消息
      */
-    public void sendMsg(String msg){
+    public void sendMsg(String msg) {
         /**
          * 假定消息格式为：消息头（一个short类型：表示事件号、一个int类型：表示消息体的长度）+消息体
          */
@@ -376,7 +331,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
 
         //创建一个缓冲，缓冲大小为:消息头长度(6位)+消息体长度
         IoBuffer buffer = IoBuffer.allocate(100000);
-        buffer.put(("[len="+msg.length()+"]"+msg).getBytes());
+        buffer.put(("[len=" + msg.length() + "]" + msg).getBytes());
         SessionManager.getInstance().writeToServer(buffer);
     }
 
@@ -385,58 +340,28 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
 
     }
 
-    private class circleTask extends TimerTask {
-        private double r;
-        private Circle circle;
-        private long duration = 1000;
-
-        public circleTask(Circle circle, long rate) {
-            this.circle = circle;
-            this.r = circle.getRadius();
-            if (rate > 0) {
-                this.duration = rate;
-            }
-        }
-
-        @Override
-        public void run() {
-            try {
-                long elapsed = SystemClock.uptimeMillis() - start;
-                float input = (float) elapsed / duration;
-//                外圈循环缩放
-//                float t = interpolator.getInterpolation((float)(input-0.25));//return (float)(Math.sin(2 * mCycles * Math.PI * input))
-//                double r1 = (t + 2) * r;
-//                外圈放大后消失
-                float t = interpolator1.getInterpolation(input);
-                double r1 = (t + 1) * r;
-                circle.setRadius(r1);
-                if (input > 2) {
-                    start = SystemClock.uptimeMillis();
-                }
-            } catch (Throwable e) {
-                e.printStackTrace();
-            }
-        }
-    }
 
     //地图的点击事件
     @Override
     public void onMapClick(LatLng latLng) {
         //点击地图上没marker 的地方，隐藏inforwindow
-        if (mLocMarker != null) {
-            mLocMarker.hideInfoWindow();
-            mLocMarker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
+        if (oldMarker != null) {
+            oldMarker.hideInfoWindow();
         }
     }
 
     //maker的点击事件
     @Override
     public boolean onMarkerClick(Marker marker) {
-        if (mLocMarker != null) {
-            mLocMarker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
+
+        if (!marker.getPosition().equals(location)) { //点击的marker不是自己位置的那个marker
+            if (oldMarker != null) {
+
+            }
+            oldMarker = marker;
+
         }
-        mLocMarker = marker;
-        marker.setIcon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher));
+
         return false; //返回 “false”，除定义的操作之外，默认操作也将会被执行
     }
 
@@ -445,7 +370,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
                 .position(latLng)
                 .title(title)
                 .snippet(snippet)
-                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher))
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.car))
         );
     }
 

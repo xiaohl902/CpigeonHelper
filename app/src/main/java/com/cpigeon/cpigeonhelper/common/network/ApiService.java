@@ -1,5 +1,6 @@
 package com.cpigeon.cpigeonhelper.common.network;
 
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PackageInfo;
 import com.cpigeon.cpigeonhelper.modular.root.bean.OrgInfo;
 import com.cpigeon.cpigeonhelper.modular.root.bean.OrgNameApplyStatus;
@@ -137,4 +138,21 @@ public interface ApiService {
     //获取服务信息
     @GET("GAPI/V1/GetServicePackageInfo")
     Observable<ApiResponse<List<PackageInfo>>> getServicePackageInfo(@Query("key") String key);
+
+    //获取鸽运通比赛列表
+    @GET("CHAPI/V1/GetGTYRaceList")
+    Observable<ApiResponse<List<GeYunTong>>> getGeYunTongRaceList(@Header("auth") String token,
+                                                                  @QueryMap Map<String,Object> urlParams);
+    //添加鸽运通比赛
+    @POST("CHAPI/V1/CreateGTYRace")
+    Observable<ApiResponse<GeYunTong>> createGeYunTongRace(@Header("auth") String token,
+                                                           @Body RequestBody body,
+                                                           @Query("timestamp") long timestamp,
+                                                           @Query("sign") String sign);
+
+    @POST("CHAPI/V1/UpdateGTYRace")
+    Observable<ApiResponse<GeYunTong>> updateGeYunTongRace(@Header("auth") String token,
+                                                           @Body RequestBody body,
+                                                           @Query("timestamp") long timestamp,
+                                                           @Query("sign") String sign);
 }
