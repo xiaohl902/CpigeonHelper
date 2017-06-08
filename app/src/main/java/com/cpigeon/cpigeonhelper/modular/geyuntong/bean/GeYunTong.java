@@ -27,6 +27,15 @@ public class GeYunTong {
     private String flyingTime;
     private int stateCode;
     private String state;
+    private String raceImage;
+
+    public String getRaceImage() {
+        return raceImage;
+    }
+
+    public void setRaceImage(String raceImage) {
+        this.raceImage = raceImage;
+    }
 
     public int getId() {
         return id;

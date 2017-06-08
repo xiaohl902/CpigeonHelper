@@ -20,6 +20,7 @@ import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
+import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import java.util.Map;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -56,7 +58,10 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
     private StringBuilder stringBuilder;
     private int remove = 0;//是否删除，默认值为0,1则代表删除
     private long timestamp;
+    private String imgurl;
+    private String name;
     private PermissionAdapter mAdapter;
+
     @Override
     protected void swipeBack() {
         Slidr.attach(this);
@@ -75,10 +80,12 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
+
+        Intent intent = getIntent();
+
+        auuid = intent.getIntExtra("auuid", 0);
         this.setTitle("修改权限");
-        this.setTopLeftButton(R.drawable.ic_back, () -> RootManagerActivity.this.finish());
-        this.setTopRightButton("保存",
-                R.drawable.ic_addroot, () -> setAuthUserPermission());
+        this.setTopLeftButton(R.drawable.ic_back, this::finish);
         loadData();
         initRecyclerView();
     }
@@ -86,8 +93,7 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
     @Override
     public void loadData() {
         swRoot.setOnCheckedChangeListener(this);
-        Intent intent = getIntent();
-        auuid = intent.getIntExtra("auuid", 0);
+
         stringBuilder = new StringBuilder(",");
         RequestBody rqb = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
@@ -108,14 +114,13 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                         swRoot.setChecked(userPermissionsApiResponse.getData().isEnable());
                         Picasso.with(mContext)
                                 .load(userPermissionsApiResponse.getData().getAuthUserInfo().getHeadimgUrl())
+                                .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)//跳过内存缓存
                                 .into(ivRootlistUsericon);
                         tvRootlistUsername.setText(userPermissionsApiResponse.getData().getAuthUserInfo().getNickname());
                         tvRootlistUsertel.setText(userPermissionsApiResponse.getData().getAuthUserInfo().getPhone());
                         mAdapter.setNewData(userPermissionsApiResponse.getData().getPermissions());
-                        for (UserPermissions.PermissionsBean bean : userPermissionsApiResponse.getData().getPermissions())
-                        {
-                            if (bean.isEnable())
-                            {
+                        for (UserPermissions.PermissionsBean bean : userPermissionsApiResponse.getData().getPermissions()) {
+                            if (bean.isEnable()) {
                                 stringBuilder.append(bean.getId());
                                 stringBuilder.append(",");
 
@@ -129,15 +134,21 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                 });
     }
 
-    @OnClick({R.id.sw_root, R.id.btn_delete_root})
+    @OnClick({R.id.btn_delete_root})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.sw_root:
-                break;
             case R.id.btn_delete_root:
-                if (remove == 0){
-                    remove = 1;
-                }
+                new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText("警告")
+                        .setContentText("确认要删除该授权用户吗？")
+                        .setConfirmText("我确认")
+                        .setConfirmClickListener(sweetAlertDialog -> {
+                            remove = 1;
+                            setAuthUserPermission();
+                        })
+                        .setCancelText("点错了")
+                        .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
+                        .show();
                 break;
         }
     }
@@ -179,8 +190,8 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
         postParams.put("auuid", String.valueOf(auuid));
         postParams.put("enable", String.valueOf(enablestatus));
         postParams.put("per", stringBuilder.toString().substring(1, stringBuilder.length() > 2 ? stringBuilder.length() - 1 : stringBuilder.length()));
-        postParams.put("remove",String.valueOf(remove));
-        postParams.put("type","ZGZS");
+        postParams.put("remove", String.valueOf(remove));
+        postParams.put("type", "ZGZS");
 
         RetrofitHelper.getApi()
                 .setAuthUserPermissions(AssociationData.getUserToken(),
@@ -191,14 +202,31 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(rootManagerListApiResponse -> {
                             if (rootManagerListApiResponse.isStatus()) {
-                                Logger.e("修改成功了");
+                                new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                                        .setTitleText("成功")
+                                        .setContentText("修改成功")
+                                        .setConfirmText("好的")
+                                        .setConfirmClickListener(sweetAlertDialog -> {
+                                            sweetAlertDialog.dismissWithAnimation();
+                                            finish();
+                                        })
+                                        .show();
 
                             } else {
-                                Logger.e("修改失败了");
+                                new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                                        .setTitleText("失败")
+                                        .setContentText("修改失败")
+                                        .setConfirmText("好的")
+                                        .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation)
+                                        .show();
                             }
-                            super.finish();
                         }, throwable -> {
-                            Logger.e("错误代码" + throwable.getMessage());
+                            new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                                    .setTitleText("出错了")
+                                    .setContentText(throwable.getMessage())
+                                    .setConfirmText("好的")
+                                    .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation)
+                                    .show();
                         }
                 );
     }

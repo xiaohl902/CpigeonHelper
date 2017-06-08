@@ -13,7 +13,9 @@ import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GeYunTongListAdapter;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
+import com.cpigeon.cpigeonhelper.ui.MyDecoration;
 import com.cpigeon.cpigeonhelper.ui.searchview.SearchEditText;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.r0adkll.slidr.Slidr;
@@ -71,10 +73,15 @@ public class GeYunTongListActivity extends ToolbarBaseActivity {
     public void initRecyclerView() {
         mAdapter = new GeYunTongListAdapter(null);
         mAdapter.setOnItemClickListener((adapter, view, position) -> {
-            startActivity(new Intent(GeYunTongListActivity.this,ACarServiceActivity.class));
+            GeYunTong geYunTong = (GeYunTong) adapter.getData().get(position);
+            Intent intent = new Intent(GeYunTongListActivity.this,ACarServiceActivity.class);
+            intent.putExtra("longitude",geYunTong.getLongitude());
+            intent.putExtra("latitude",geYunTong.getLatitude());
+            startActivity(intent);
         });
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
         mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new MyDecoration(this,MyDecoration.VERTICAL_LIST));
     }
 
     @Override

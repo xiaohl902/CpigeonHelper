@@ -29,6 +29,8 @@ import com.amap.api.maps.model.CircleOptions;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.Marker;
 import com.amap.api.maps.model.MarkerOptions;
+import com.amap.api.maps.model.Polyline;
+import com.amap.api.maps.model.PolylineOptions;
 import com.amap.api.services.weather.LocalWeatherForecastResult;
 import com.amap.api.services.weather.LocalWeatherLive;
 import com.amap.api.services.weather.LocalWeatherLiveResult;
@@ -44,6 +46,8 @@ import com.orhanobut.logger.Logger;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Queue;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -96,6 +100,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     private static final int FILL_COLOR = Color.argb(10, 0, 0, 180);
     private LatLng location;
     private TimerTask mTimerTask;
+    private Polyline polyline;
     private WeatherSearchQuery mQuery;
     private WeatherSearch mWeatherSearch;
     private LocalWeatherLive oldlocalWeatherLive;
@@ -105,7 +110,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     private long startTimeStamp;
     private long usingTime;
     private InfoWinAdapter adapter;
-
+    private List<LatLng> aimLocation;
     public static CarServiceFragment newInstance() {
 
         return new CarServiceFragment();
@@ -132,6 +137,11 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     }
 
     private void setUpMap() {
+        aimLocation = new ArrayList<>();
+        aimLocation.add(new LatLng(30.668544, 104.03224));
+        aimLocation.add(new LatLng(40.010055,116.334704));
+        polyline =aMap.addPolyline(new PolylineOptions().
+                addAll(aimLocation).width(10).color(Color.argb(255, 1, 1, 1)));
         aMap.setOnMapLoadedListener(this);
         aMap.setOnMapClickListener(this);
         aMap.setLocationSource(this);// 设置定位监听
@@ -142,7 +152,8 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         aMap.setOnMarkerClickListener(this);
         adapter = new InfoWinAdapter();
         aMap.setInfoWindowAdapter(adapter);
-        addMarkerToMap(CommonUitls.CHENGDU,"成都","成都市");
+//        addMarkerToMap(CommonUitls.CHENGDU,"成都","成都市");
+
 
     }
 

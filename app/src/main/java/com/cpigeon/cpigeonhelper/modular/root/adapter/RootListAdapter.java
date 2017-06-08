@@ -1,5 +1,7 @@
 package com.cpigeon.cpigeonhelper.modular.root.adapter;
 
+import android.text.TextUtils;
+
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.cpigeon.cpigeonhelper.R;
@@ -23,13 +25,13 @@ public class RootListAdapter extends BaseQuickAdapter<RootList, BaseViewHolder> 
 
     @Override
     protected void convert(BaseViewHolder baseViewHolder, RootList rootList) {
-        baseViewHolder.setText(R.id.tv_rootlist_username,rootList.getAuthUserInfo().getName());
+        baseViewHolder.setText(R.id.tv_rootlist_username, TextUtils.isEmpty(rootList.getAuthUserInfo().getNickname())?rootList.getAuthUserInfo().getName():rootList.getAuthUserInfo().getNickname());
         baseViewHolder.setText(R.id.tv_rootlist_usertel,rootList.getAuthUserInfo().getPhone());
         baseViewHolder.setVisible(R.id.tv_rootlist_status,true);
         if (rootList.isEnable())
         {
             baseViewHolder.setText(R.id.tv_rootlist_status,"已启动");
-            baseViewHolder.setTextColor(R.id.tv_rootlist_status,mContext.getResources().getColor(R.color.colorPrimary));
+            baseViewHolder.setTextColor(R.id.tv_rootlist_status,mContext.getResources().getColor(R.color.colorGreen));
         }else {
             baseViewHolder.setText(R.id.tv_rootlist_status,"已停用");
             baseViewHolder.setTextColor(R.id.tv_rootlist_status,mContext.getResources().getColor(R.color.colorLayoutSplitLineGray));

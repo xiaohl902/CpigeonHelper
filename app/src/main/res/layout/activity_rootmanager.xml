@@ -1,75 +1,109 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="@color/colorViewBackground"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-    <LinearLayout
-        android:padding="16dp"
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_rootlist_usericon"
             android:layout_width="64dp"
-            app:civ_border_color="@color/colorPrimary"
+            android:layout_height="64dp"
+            app:civ_border_color="@color/colorLayoutSplitLineGray"
             app:civ_border_width="2dp"
-            android:layout_height="64dp" />
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-            <TextView
-                android:id="@+id/tv_rootlist_username"
-                android:textSize="@dimen/sp_18"
-                android:gravity="center_vertical"
-                android:text="你的爹爹"
-                android:layout_weight="1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp" />
-            <TextView
-                android:id="@+id/tv_rootlist_usertel"
-                android:textSize="@dimen/sp_16"
-                android:gravity="center_vertical"
-                android:text="你的爹爹"
-                android:layout_weight="1"
-                android:layout_width="match_parent"
-                android:layout_height="0dp" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginStart="8dp" />
 
-        </LinearLayout>
+        <TextView
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold"
+            android:id="@+id/tv_rootlist_usertel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="18782050317"
+            android:textSize="@dimen/sp_14"
+            app:layout_constraintLeft_toRightOf="@+id/iv_rootlist_usericon"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintBottom_toBottomOf="@+id/iv_rootlist_usericon"
+            android:layout_marginBottom="16dp"
+            android:layout_marginStart="8dp" />
 
-    </LinearLayout>
+        <TextView
+            android:textColor="@color/colorPrimary"
+            android:textStyle="bold"
+            android:id="@+id/tv_rootlist_username"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:text="用户名"
+            android:textSize="@dimen/sp_16"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_rootlist_usertel"
+            app:layout_constraintLeft_toRightOf="@+id/iv_rootlist_usericon"
+            android:layout_marginLeft="8dp"
+            android:layout_marginStart="8dp" />
 
-    <Switch
-        android:padding="16dp"
-        android:textSize="@dimen/sp_18"
-        android:id="@+id/sw_root"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="启动" />
-    <TextView
-        android:paddingBottom="8dp"
-        android:paddingTop="8dp"
-        android:paddingLeft="16dp"
-        android:paddingRight="16dp"
-        android:textSize="@dimen/sp_16"
-        android:text="权限管理"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recyclerview_privilegelist"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        <Switch
+            android:textSize="@dimen/sp_16"
+            android:id="@+id/sw_root"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="启动"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            app:layout_constraintBottom_toBottomOf="@id/iv_rootlist_usericon" />
+        <TextView
 
-    </android.support.v7.widget.RecyclerView>
-    <Button
-        android:id="@+id/btn_delete_root"
-        android:textSize="@dimen/sp_18"
-        android:textColor="@color/colorWhite"
-        android:text="删除"
-        android:background="@color/colorPrimary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
-</LinearLayout>
+            android:textSize="@dimen/sp_16"
+            android:text="权限管理"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/iv_rootlist_usericon"
+            android:id="@+id/textView"
+            android:layout_marginStart="8dp" />
+
+
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerview_privilegelist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/textView"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+
+
+        <Button
+            android:id="@+id/btn_delete_root"
+            android:textSize="@dimen/sp_18"
+            android:textColor="@color/colorWhite"
+            android:text="删除"
+            android:background="@color/colorPrimary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintTop_toBottomOf="@+id/recyclerview_privilegelist"
+            android:layout_marginRight="8dp"
+            app:layout_constraintRight_toRightOf="parent"
+            android:layout_marginLeft="8dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp" />
+</android.support.constraint.ConstraintLayout>

@@ -1,10 +1,12 @@
 package com.cpigeon.cpigeonhelper.modular.root.adapter;
 
 import android.text.TextUtils;
+import android.view.View;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.cpigeon.cpigeonhelper.R;
+import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.modular.root.bean.UserInfoByTelBean;
 import com.squareup.picasso.Picasso;
 
@@ -30,5 +32,25 @@ public class SearchListAdapter extends BaseQuickAdapter<UserInfoByTelBean,BaseVi
                 .placeholder(R.mipmap.logos)
                 .error(R.mipmap.logos)
                 .into((CircleImageView) baseViewHolder.getView(R.id.iv_rootlist_usericon));
-    }
+
+                if (userInfoByTelBean.getAuthUid() == 0)
+                {
+                    baseViewHolder.setText(R.id.tv_rootlist_status,"未启用");
+                    baseViewHolder.setTextColor(R.id.tv_rootlist_status,mContext.getResources().getColor(R.color.gray_btn_bg_color));
+                }else if (userInfoByTelBean.getAuthUid() == AssociationData.getUserId())
+                {
+                    baseViewHolder.setText(R.id.tv_rootlist_status,"已添加");
+                    baseViewHolder.setTextColor(R.id.tv_rootlist_status,mContext.getResources().getColor(R.color.colorGreen));
+
+                }else if (userInfoByTelBean.getAuthUid() != AssociationData.getUserId()){
+                    baseViewHolder.setText(R.id.tv_rootlist_status,"占用中");
+                    baseViewHolder.setTextColor(R.id.tv_rootlist_status,mContext.getResources().getColor(R.color.colorPrimary));
+
+                }
+
+
+
+
+        }
+
 }

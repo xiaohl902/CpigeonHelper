@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 
 import com.cpigeon.cpigeonhelper.R;
@@ -14,6 +15,7 @@ import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.root.adapter.RootListAdapter;
 import com.cpigeon.cpigeonhelper.modular.root.bean.RootList;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
+import com.cpigeon.cpigeonhelper.ui.MyDecoration;
 import com.cpigeon.cpigeonhelper.ui.SnackbarUtil;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
@@ -118,11 +120,16 @@ public class RootListActivity extends ToolbarBaseActivity {
 
             Intent intent = new Intent(RootListActivity.this, RootManagerActivity.class);
             intent.putExtra("auuid", rootList.getAuthUserInfo().getUid());
-            Logger.e("auuid" + rootList.getAuthUserInfo().getUid());
+            intent.putExtra("imgurl", rootList.getAuthUserInfo().getHeadimgUrl());
+            intent.putExtra("name", TextUtils.isEmpty(rootList.getAuthUserInfo().getName())?
+                    rootList.getAuthUserInfo().getNickname():rootList.getAuthUserInfo().getName());
+
             startActivity(intent);
         });
-        mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addItemDecoration(new MyDecoration(this,MyDecoration.VERTICAL_LIST));
+
     }
 
     public void initEmptyView(String tips) {
@@ -132,7 +139,6 @@ public class RootListActivity extends ToolbarBaseActivity {
         mRecyclerView.setVisibility(View.GONE);
         mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
         mCustomEmptyView.setEmptyText(tips);
-        SnackbarUtil.showMessage(mRecyclerView, "数据加载失败,请重新加载或者检查网络是否链接");
     }
 
 
@@ -141,4 +147,9 @@ public class RootListActivity extends ToolbarBaseActivity {
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        initRefreshLayout();
+    }
 }

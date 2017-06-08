@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
@@ -36,6 +37,7 @@ import java.util.concurrent.TimeUnit;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
 import io.reactivex.functions.Consumer;
@@ -44,7 +46,9 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 /**
+ *
  * Created by Administrator on 2017/5/27.
+ *
  */
 
 public class SearchUserActivity extends ToolbarBaseActivity {
@@ -59,6 +63,7 @@ public class SearchUserActivity extends ToolbarBaseActivity {
     private SearchListAdapter mAdapter;
     private long timestamp;
     private Map<String, Object> postParams;
+    private String s;
     @Override
     protected void swipeBack() {
         Slidr.attach(this);
@@ -78,7 +83,7 @@ public class SearchUserActivity extends ToolbarBaseActivity {
     @Override
     protected void initViews(Bundle savedInstanceState) {
         this.setTitle("添加授权");
-        this.setTopLeftButton(R.drawable.ic_back, () -> SearchUserActivity.this.finish());
+        this.setTopLeftButton(R.drawable.ic_back, this::finish);
         this.initRecyclerView();
 
     }
@@ -132,7 +137,25 @@ public class SearchUserActivity extends ToolbarBaseActivity {
         mAdapter.setOnItemClickListener((baseQuickAdapter, view, i) -> {
             UserInfoByTelBean userInfoByTelBean = (UserInfoByTelBean) baseQuickAdapter.getData().get(i);
             Logger.e("当前用户的uid"+userInfoByTelBean.getUid());
-            setUserPermission(userInfoByTelBean.getUid());
+            s = TextUtils.isEmpty(userInfoByTelBean.getNickname()) ? userInfoByTelBean.getNickname() : userInfoByTelBean.getNickname();
+            Logger.e("当前用户的昵称"+s);
+            if (userInfoByTelBean.getAuthUid() == AssociationData.getUserId())
+            {
+                Toast.makeText(mContext, "该账户已经是授权账户", Toast.LENGTH_SHORT).show();
+            }else if (userInfoByTelBean.getAuthUid()!=0 && userInfoByTelBean.getAuthUid()!= AssociationData.getUserId()){
+                Toast.makeText(mContext, "当前账户已被其他协会或公棚授权", Toast.LENGTH_SHORT).show();
+            }else {
+                new SweetAlertDialog(this,SweetAlertDialog.NORMAL_TYPE)
+                        .setTitleText("添加用户")
+                        .setContentText("是否添加"+s+"为授权用户?")
+                        .setConfirmText("我确定")
+                        .setConfirmClickListener(sweetAlertDialog -> {
+                            sweetAlertDialog.dismissWithAnimation();
+                            setUserPermission(userInfoByTelBean.getUid());
+                        })
+                        .setCancelText("点错了")
+                        .setCancelClickListener(SweetAlertDialog::dismissWithAnimation).show();
+            }
         });
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -155,11 +178,25 @@ public class SearchUserActivity extends ToolbarBaseActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(rootManagerListApiResponse -> {
+                    new SweetAlertDialog(this,SweetAlertDialog.SUCCESS_TYPE)
+                            .setTitleText("添加成功")
+                            .setContentText("成功添加"+s+"为授权用户")
+                            .setConfirmText("确定")
+                            .setConfirmClickListener(sweetAlertDialog -> {
+                                sweetAlertDialog.dismissWithAnimation();
+                                finish();
+                            }
 
-                        Logger.e("授权成功了");
-
+                            ).show();
                 },throwable -> {
-                    Logger.e("授权出了问题"+throwable.getMessage());
+                    new SweetAlertDialog(this,SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("添加错误")
+                            .setContentText(throwable.getMessage())
+                            .setConfirmText("确定")
+                            .setConfirmClickListener(sweetAlertDialog -> {
+                                sweetAlertDialog.dismissWithAnimation();
+                                finish();
+                            }).show();
                 });
     }
 
@@ -168,7 +205,6 @@ public class SearchUserActivity extends ToolbarBaseActivity {
         mRecyclerView.setVisibility(View.GONE);
         mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
         mCustomEmptyView.setEmptyText(tips);
-        SnackbarUtil.showMessage(mRecyclerView, "数据加载失败,请重新加载或者检查网络是否链接");
     }
 
 

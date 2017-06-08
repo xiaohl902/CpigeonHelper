@@ -23,6 +23,9 @@ public class EditDialogFragment extends DialogFragment {
     public static final int DIALOG_TYPE_SHORTNAME = 1;
     public static final int DIALOG_TYPE_ADDRESS = 2;
     public static final int DIALOG_TYPE_EMAIL = 3;
+    public static final int DIALOG_TYPE_GYP_NAME = 4;
+    public static final int DIALOG_TYPE_GYP_PLACE = 5;
+    public static final int DIALOG_TYPE_GYP_LATLNG = 6;
 
 
     public static EditDialogFragment getInstance(int type,String title) {
@@ -65,6 +68,19 @@ public class EditDialogFragment extends DialogFragment {
 
                             TextView mShotName = (TextView) getActivity().findViewById(R.id.tv_xiehui_shotname);
                             mShotName.setText(editText.getText().toString().trim());
+                            break;
+                        case DIALOG_TYPE_GYP_NAME:
+
+                            TextView mGeYunTongName = (TextView) getActivity().findViewById(R.id.tv_geyuntong_name);
+                            mGeYunTongName.setText(editText.getText().toString().trim());
+                            break;
+                        case DIALOG_TYPE_GYP_PLACE:
+
+                            TextView mGeYunTongPlace = (TextView) getActivity().findViewById(R.id.tv_geyuntong_place);
+                            mGeYunTongPlace.setText(editText.getText().toString().trim());
+                            break;
+                        case DIALOG_TYPE_GYP_LATLNG:
+
                             break;
                     }
                 })

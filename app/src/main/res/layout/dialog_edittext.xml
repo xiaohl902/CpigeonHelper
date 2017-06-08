@@ -8,7 +8,7 @@
 
     <EditText
         android:id="@+id/et_info"
-        android:layout_width="368dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
