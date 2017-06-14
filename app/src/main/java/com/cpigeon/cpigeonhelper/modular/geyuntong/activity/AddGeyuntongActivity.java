@@ -113,13 +113,13 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
                                     .show();
                         }else {
                             new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                                    .setTitleText("添加失败了")
+                                    .setTitleText(geYunTongApiResponse.getMsg())
                                     .setConfirmText("知道了")
                                     .show();
                         }
                 }, throwable -> {
                     new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                            .setTitleText("添加失败了")
+                            .setTitleText(throwable.getMessage())
                             .setConfirmText("知道了")
                             .show();
                 });

@@ -87,10 +87,6 @@ dependencies {
     compile 'com.facebook.stetho:stetho:1.5.0'
     //圆角头像
     compile 'de.hdodenhof:circleimageview:2.1.0'
-    compile 'com.amap.api:location:latest.integration'
-    compile 'com.amap.api:map2d:latest.integration'
-    compile 'com.amap.api:search:latest.integration'
-    compile 'com.amap.api:navi-3dmap:latest.integration'
     compile files('libs/commons-codec-1.10.jar')
     //图片加载
     compile 'com.squareup.picasso:picasso:2.5.2'
@@ -111,4 +107,9 @@ dependencies {
     compile files('libs/mina-core-2.0.16.jar')
     compile files('libs/slf4j-android-1.6.1-RC1.jar')
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+    //高德地图相关
+    compile 'com.amap.api:map3d-native:latest.integration'
+    compile 'com.amap.api:map3d:latest.integration'
+    compile 'com.amap.api:location:latest.integration'
+
 }

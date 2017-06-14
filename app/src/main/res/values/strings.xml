@@ -20,4 +20,9 @@
         <item>照片</item>
         <item>视频</item>
     </string-array>
+
+    <string-array name="flyingarea_sections">
+        <item>我的司放地</item>
+        <item>参考司放地</item>
+    </string-array>
 </resources>

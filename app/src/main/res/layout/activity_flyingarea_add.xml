@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:padding="16dp"
+        android:background="@color/colorWhite"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textSize="16sp"
+            android:text="地点"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+        <EditText
+            android:id="@+id/et_flyingarea_place"
+            android:background="@null"
+            android:textSize="14sp"
+            android:layout_marginLeft="16dp"
+            android:hint="请填写地点"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_marginTop="2dp"
+        android:padding="16dp"
+        android:background="@color/colorWhite"
+
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:textSize="16sp"
+            android:text="坐标"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+        <EditText
+            android:id="@+id/et_flyingarea_la"
+            android:background="@null"
+            android:layout_marginLeft="16dp"
+            android:textSize="14sp"
+            android:hint="纬度，如40.00346"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+        <View
+            android:layout_marginLeft="8dp"
+            android:background="@color/colorDarkGrey"
+            android:layout_width="1dp"
+            android:layout_height="match_parent"/>
+        <EditText
+            android:id="@+id/et_flyingarea_lo"
+            android:background="@null"
+            android:textSize="14sp"
+            android:layout_marginLeft="8dp"
+            android:hint="经度，如116.195"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_marginTop="2dp"
+        android:background="@color/colorWhite"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="备注"
+            android:textSize="16sp" />
+
+        <EditText
+            android:id="@+id/et_flyingarea_alias"
+            android:background="@null"
+            android:layout_marginLeft="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="这里填写备注"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+
+</LinearLayout>

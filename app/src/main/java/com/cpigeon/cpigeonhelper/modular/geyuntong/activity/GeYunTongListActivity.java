@@ -79,7 +79,7 @@ public class GeYunTongListActivity extends ToolbarBaseActivity {
             intent.putExtra("latitude",geYunTong.getLatitude());
             startActivity(intent);
         });
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(mContext));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.addItemDecoration(new MyDecoration(this,MyDecoration.VERTICAL_LIST));
     }

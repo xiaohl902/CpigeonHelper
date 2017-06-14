@@ -7,8 +7,11 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPhotoFragment;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPlaybackFragment;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarServiceFragment;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarVideoFragment;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.MyFlyingAreaFragment;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.SystemFlyingAreaFragment;
 
 /**
  * Created by hcc on 16/8/4 14:12

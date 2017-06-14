@@ -396,6 +396,23 @@ public class CommonUitls {
         temp = (temp - fen) * 100;//秒
         return du + (double)fen / 60 + temp / 3600;
     }
+
+    public static boolean isAjLocation(double ajLocationValue)
+    {
+        String value = String.valueOf(ajLocationValue);
+        if (value.length() - value.indexOf(".") - 1 > 6) return false;
+        int temp = ((int)(ajLocationValue * 100)) % 100;
+        if (temp >= 0 && temp < 60)
+        {
+            temp = ((int)(ajLocationValue * 10000)) % 100;
+            if (temp >= 0 && temp < 60)
+            {
+                return true;
+            }
+        }
+        return false;
+
+    }
 }
 
 

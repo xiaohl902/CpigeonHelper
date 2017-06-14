@@ -1,6 +1,7 @@
 package com.cpigeon.cpigeonhelper.common.db;
 
 
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PathRecord;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
 
 import io.realm.Realm;
@@ -54,8 +55,8 @@ public class RealmUtils {
      * @return
      */
     public RealmResults<UserBean> queryUserInfo(){
-        RealmResults<UserBean> results = getRealm().where(UserBean.class).findAll();
-        return results;
+
+        return  getRealm().where(UserBean.class).findAll();
     }
 
     /**
@@ -82,6 +83,12 @@ public class RealmUtils {
         });
     }
 
+//    public void insertLocation(PathRecord mRecord)
+//    {
+//        getRealm().beginTransaction();//开启事务
+//        getRealm().copyToRealmOrUpdate(mRecord);
+//        getRealm().commitTransaction();
+//    }
 
 
 

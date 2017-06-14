@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <com.amap.api.maps.TextureMapView
+        android:id="@+id/mapView"
+        android:layout_weight="1"
+        android:layout_width="match_parent"
+        android:layout_height="0dp">
+
+    </com.amap.api.maps.TextureMapView>
+    <ToggleButton
+        android:textOn="回放比赛"
+        android:textOff="停止回放"
+        android:id="@+id/btn_playback"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

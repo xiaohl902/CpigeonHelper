@@ -16,4 +16,6 @@
     <color name="colorBlueButtonBorder">#00cff9</color>
     <color name="transparent">#00000000</color>
     <color name="colorGreen">#32CD32</color>
+    <color name="colorGrey">#ACACAC</color>
+    <color name="colorDarkGrey">#9C9C9C</color>
 </resources>

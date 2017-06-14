@@ -1,26 +1,27 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.widget.FrameLayout;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPageFragment;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.FlyingAreaHomeFragment;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
+import com.r0adkll.slidr.Slidr;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 
 /**
- * Created by Administrator on 2017/5/31.
+ * Created by Administrator on 2017/6/14.
  */
 
-public class ACarServiceActivity extends ToolbarBaseActivity {
+public class FlyingAreaActivity extends ToolbarBaseActivity {
     private Fragment[] fragments;
 
 
-    private CarPageFragment carPageFragment;
+    private FlyingAreaHomeFragment homeFragment;
 
     @BindView(R.id.container)
     FrameLayout container;
@@ -42,24 +43,24 @@ public class ACarServiceActivity extends ToolbarBaseActivity {
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-        setTitle("成都三道堰虐菜局比赛");
+        setTitle("常用司放地");
         setTopLeftButton(R.drawable.ic_back, this::finish);
-        //初始化Fragment
+        setTopRightButton("添加", R.drawable.ic_add, () -> startActivity(new Intent(FlyingAreaActivity.this,AddFlyingAreaActivity.class)));
         initFragments();
     }
 
     private void initFragments() {
-        carPageFragment = CarPageFragment.newInstance();
+        homeFragment = FlyingAreaHomeFragment.newInstance();
         fragments = new Fragment[] {
-                carPageFragment,
+                homeFragment,
 
         };
 
         // 添加显示第一个fragment
         getSupportFragmentManager()
                 .beginTransaction()
-                .add(R.id.container, carPageFragment)
-                .show(carPageFragment).commit();
+                .add(R.id.container, homeFragment)
+                .show(homeFragment).commit();
     }
 
     /**
@@ -67,10 +68,6 @@ public class ACarServiceActivity extends ToolbarBaseActivity {
      */
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        //super.onSaveInstanceState(outState);
     }
-
-
-
 
 }

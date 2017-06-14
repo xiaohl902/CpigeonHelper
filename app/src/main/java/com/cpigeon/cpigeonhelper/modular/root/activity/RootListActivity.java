@@ -16,13 +16,10 @@ import com.cpigeon.cpigeonhelper.modular.root.adapter.RootListAdapter;
 import com.cpigeon.cpigeonhelper.modular.root.bean.RootList;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
 import com.cpigeon.cpigeonhelper.ui.MyDecoration;
-import com.cpigeon.cpigeonhelper.ui.SnackbarUtil;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
-import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
@@ -48,7 +45,7 @@ public class RootListActivity extends ToolbarBaseActivity {
 
     @Override
     protected int getContentView() {
-        return R.layout.activity_root;
+        return R.layout.layout_swipwithrecycler;
     }
 
     @Override

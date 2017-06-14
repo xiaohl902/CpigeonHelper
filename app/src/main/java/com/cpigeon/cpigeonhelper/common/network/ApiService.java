@@ -1,6 +1,8 @@
 package com.cpigeon.cpigeonhelper.common.network;
 
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.LocationInfoReports;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PackageInfo;
 import com.cpigeon.cpigeonhelper.modular.root.bean.OrgInfo;
 import com.cpigeon.cpigeonhelper.modular.root.bean.OrgNameApplyStatus;
@@ -40,12 +42,12 @@ public interface ApiService {
     ///////////////////////////////////////////////////////////////////////////
     @FormUrlEncoded
     @POST("GAPI/V1/Login")
-    Observable<ApiResponse<UserBean>> login(@FieldMap Map<String,Object> params, @Query("timestamp") long timestamp, @Query("sign") String sign );
+    Observable<ApiResponse<UserBean>> login(@FieldMap Map<String, Object> params, @Query("timestamp") long timestamp, @Query("sign") String sign);
 
     //获取登录的设备信息
     @FormUrlEncoded
     @POST("GAPI/V1/GetLoginInfo")
-    Observable<ApiResponse<DeviceBean>> getDeviceInfo(@Header("auth") String token, @FieldMap Map<String,Object> params, @Query("timestamp") long timestamp, @Query("sign") String sign);
+    Observable<ApiResponse<DeviceBean>> getDeviceInfo(@Header("auth") String token, @FieldMap Map<String, Object> params, @Query("timestamp") long timestamp, @Query("sign") String sign);
 
     //获取头像
     @GET("GAPI/V1/GetUserHeadImg")
@@ -62,17 +64,17 @@ public interface ApiService {
     //修改密码（通过验证码）
     @FormUrlEncoded
     @POST("/GAPI/V1/FindPwd")
-    Observable<ApiResponse<Object>> getLoginPassword(@FieldMap Map<String,Object> params,@Query("timestamp") long timestamp,@Query("sign") String sign);
+    Observable<ApiResponse<Object>> getLoginPassword(@FieldMap Map<String, Object> params, @Query("timestamp") long timestamp, @Query("sign") String sign);
 
     //修改密码
     @FormUrlEncoded
     @POST("/GAPI/V1/SetUserPwd")
-    Observable<ApiResponse<Object>> changePassword(@FieldMap Map<String,Object> params,@Query("timestamp") long timestamp,@Query("sign") String sign);
+    Observable<ApiResponse<Object>> changePassword(@FieldMap Map<String, Object> params, @Query("timestamp") long timestamp, @Query("sign") String sign);
 
     //发送验证码
     @FormUrlEncoded
     @POST("GAPI/V1/SendVerifyCode")
-    Observable<ApiResponse<CheckCode>> sendVerifyCode(@FieldMap Map<String,Object> params, @Query("timestamp") long timestamp, @Query("sign") String sign);
+    Observable<ApiResponse<CheckCode>> sendVerifyCode(@FieldMap Map<String, Object> params, @Query("timestamp") long timestamp, @Query("sign") String sign);
 
     ///////////////////////////////////////////////////////////////////////////
     // 主页数据
@@ -105,24 +107,28 @@ public interface ApiService {
     @FormUrlEncoded
     @POST("CHAPI/V1/SetOrgInfo")
     Observable<ApiResponse<OrgInfo>> setOrgInfo(@Header("auth") String token,
-                                                @FieldMap Map<String,Object> params,
+                                                @FieldMap Map<String, Object> params,
                                                 @Query("timestamp") long timestamp,
                                                 @Query("sign") String sign);
+
     //提交修改组织申请
     @POST("CHAPI/V1/SubmitOrgNameApply")
     Observable<ApiResponse<Object>> submitOrgNameApply(@Header("auth") String token,
                                                        @Body RequestBody body,
                                                        @Query("timestamp") long timestamp,
                                                        @Query("sign") String sign);
+
     //获取组织名称修改申请状态
     @GET("CHAPI/V1/GetOrgNameApplyStatus")
     Observable<ApiResponse<OrgNameApplyStatus>> getOrgNameApplyStatus(@Header("auth") String token,
-                                                                      @QueryMap Map<String,Object> urlParams,
+                                                                      @QueryMap Map<String, Object> urlParams,
                                                                       @Query("sign") String sign);
+
     //获取被授权的用户列表
     @GET("GAPI/V1/GetAuthUsers")
     Observable<ApiResponse<List<RootList>>> getAuthUsers(@Header("auth") String token,
                                                          @Query("uid") String uid);
+
     //设置用户 的权限，仅管理员操作
     @POST("GAPI/V1/SetAuthUserPermissions")
     Observable<ApiResponse<RootManagerList>> setAuthUserPermissions(@Header("auth") String token,
@@ -140,19 +146,92 @@ public interface ApiService {
     Observable<ApiResponse<List<PackageInfo>>> getServicePackageInfo(@Query("key") String key);
 
     //获取鸽运通比赛列表
-    @GET("CHAPI/V1/GetGTYRaceList")
+    @GET("CHAPI/V1/GetGYTRaceList")
     Observable<ApiResponse<List<GeYunTong>>> getGeYunTongRaceList(@Header("auth") String token,
-                                                                  @QueryMap Map<String,Object> urlParams);
+                                                                  @QueryMap Map<String, Object> urlParams);
+
     //添加鸽运通比赛
-    @POST("CHAPI/V1/CreateGTYRace")
+    @POST("CHAPI/V1/CreateGYTRace")
     Observable<ApiResponse<GeYunTong>> createGeYunTongRace(@Header("auth") String token,
                                                            @Body RequestBody body,
                                                            @Query("timestamp") long timestamp,
                                                            @Query("sign") String sign);
 
-    @POST("CHAPI/V1/UpdateGTYRace")
+    //修改鸽运通比赛
+    @POST("CHAPI/V1/UpdateGYTRace")
     Observable<ApiResponse<GeYunTong>> updateGeYunTongRace(@Header("auth") String token,
                                                            @Body RequestBody body,
                                                            @Query("timestamp") long timestamp,
                                                            @Query("sign") String sign);
+
+    //删除鸽运通比赛
+    @POST("CHAPI/V1/DeleteGYTRace")
+    Observable<ApiResponse<Object>> deleteGeYunTongRace(@Header("auth") String token,
+                                                        @Body RequestBody body,
+                                                        @Query("timestamp") long timestamp,
+                                                        @Query("sign") String sign);
+
+    //批量删除鸽运通比赛
+    @POST("CHAPI/V1/DeleteGYTRaces")
+    Observable<ApiResponse<Integer>> deleteGeYunTongRaces(@Header("auth") String token,
+                                                          @Body RequestBody body,
+                                                          @Query("timestamp") long timestamp,
+                                                          @Query("sign") String sign);
+
+    //创建司放地
+    @POST("CHAPI/V1/CreateFlyingArea")
+    Observable<ApiResponse<FlyingArea>> createFlyingArea(@Header("auth") String token,
+                                                         @Body RequestBody body,
+                                                         @Query("timestamp") long timestamp,
+                                                         @Query("sign") String sign);
+
+    //修改司放地
+    @POST("/CHAPI/V1/ModifyFlyingArea")
+    Observable<ApiResponse<FlyingArea>> modifyflyingarea(@Header("auth") String token,
+                                                         @Body RequestBody body,
+                                                         @Query("timestamp") long timestamp,
+                                                         @Query("sign") String sign);
+
+
+    //获取司放地
+    @GET("CHAPI/V1/GetFlyingAreas")
+    Observable<ApiResponse<List<FlyingArea>>> getFlyingAreas(@Query("uid") int uid,
+                                                             @QueryMap Map<String, Object> map);
+
+
+    //删除司放地
+    @POST("CHAPI/V1/DeleteFlyingArea")
+    Observable<ApiResponse<Object>> deleteFlyingArea(@Header("auth") String token,
+                                                     @Body RequestBody body,
+                                                     @Query("timestamp") long timestamp,
+                                                     @Query("sign") String sign);
+
+    //开始鸽运通监控
+    @POST("CHAPI/V1/StartRaceMonitor")
+    Observable<ApiResponse<Object>> startRaceMonitor(@Header("auth") String token,
+                                                     @Body RequestBody body,
+                                                     @Query("timestamp") long timestamp,
+                                                     @Query("sign") String sign);
+
+    //结束鸽运通监控
+    @POST("CHAPI/V1/StopRaceMonitor")
+    Observable<ApiResponse<Object>> stopRaceMonitor(@Header("auth") String token,
+                                                    @Body RequestBody body,
+                                                    @Query("timestamp") long timestamp,
+                                                    @Query("sign") String sign);
+
+    //获取监控定位数据
+    @POST("CHAPI/V1/GetGYTLocationInfoReports")
+    Observable<ApiResponse<List<LocationInfoReports>>> getGeYunTongLocationInfoReports(@Header("auth") String token,
+                                                                                       @Body RequestBody body,
+                                                                                       @Query("timestamp") long timestamp,
+                                                                                       @Query("sign") String sign);
+
+
+    //图片视频的上传
+    @POST("CHAPI/V1/UploadGYTRaceImageOrVideo")
+    Observable<ApiResponse<Object>> raceImageOrVideo(@Header("auth") String token,
+                                                     @Body RequestBody body,
+                                                     @Query("timestamp") long timestamp,
+                                                     @Query("sign") String sign);
 }
