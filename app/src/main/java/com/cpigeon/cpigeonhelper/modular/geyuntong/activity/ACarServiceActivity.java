@@ -1,11 +1,13 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.widget.FrameLayout;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPageFragment;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 
@@ -18,7 +20,7 @@ import butterknife.ButterKnife;
 
 public class ACarServiceActivity extends ToolbarBaseActivity {
     private Fragment[] fragments;
-
+    private GeYunTong geYunTong;
 
     private CarPageFragment carPageFragment;
 
@@ -42,10 +44,22 @@ public class ACarServiceActivity extends ToolbarBaseActivity {
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-        setTitle("成都三道堰虐菜局比赛");
+        Intent intent = getIntent();
+        Bundle bundle = intent.getExtras();
+        geYunTong = bundle.getParcelable("geyuntong");
+        setGeYunTong(geYunTong);
+        setTitle(geYunTong.getRaceName());
         setTopLeftButton(R.drawable.ic_back, this::finish);
-        //初始化Fragment
+
         initFragments();
+    }
+
+    public GeYunTong getGeYunTong() {
+        return geYunTong;
+    }
+
+    public void setGeYunTong(GeYunTong geYunTong) {
+        this.geYunTong = geYunTong;
     }
 
     private void initFragments() {

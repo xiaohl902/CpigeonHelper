@@ -46,7 +46,6 @@ public class GeYunTongListActivity extends ToolbarBaseActivity {
     private GeYunTongListAdapter mAdapter;
     @Override
     protected void swipeBack() {
-        Slidr.attach(this);
     }
 
     @Override
@@ -74,9 +73,10 @@ public class GeYunTongListActivity extends ToolbarBaseActivity {
         mAdapter = new GeYunTongListAdapter(null);
         mAdapter.setOnItemClickListener((adapter, view, position) -> {
             GeYunTong geYunTong = (GeYunTong) adapter.getData().get(position);
+            Bundle bundle = new Bundle();
+            bundle.putParcelable("geyuntong",geYunTong);
             Intent intent = new Intent(GeYunTongListActivity.this,ACarServiceActivity.class);
-            intent.putExtra("longitude",geYunTong.getLongitude());
-            intent.putExtra("latitude",geYunTong.getLatitude());
+            intent.putExtras(bundle);
             startActivity(intent);
         });
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -147,7 +147,6 @@ public class GeYunTongListActivity extends ToolbarBaseActivity {
     }
 
     public void hideEmptyView() {
-
         mCustomEmptyView.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
     }

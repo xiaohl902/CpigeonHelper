@@ -1,9 +1,11 @@
 package com.cpigeon.cpigeonhelper.common.network;
 
-import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.FlyingArea;
+import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.ImgTag;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.LocationInfoReports;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PackageInfo;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.RaceImageOrVideo;
 import com.cpigeon.cpigeonhelper.modular.root.bean.OrgInfo;
 import com.cpigeon.cpigeonhelper.modular.root.bean.OrgNameApplyStatus;
 import com.cpigeon.cpigeonhelper.modular.root.bean.RootList;
@@ -14,7 +16,6 @@ import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.AnnouncementList;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.CheckCode;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.DeviceBean;
-import com.cpigeon.cpigeonhelper.modular.root.bean.RootUserBean;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
 
 import java.util.List;
@@ -234,4 +235,12 @@ public interface ApiService {
                                                      @Body RequestBody body,
                                                      @Query("timestamp") long timestamp,
                                                      @Query("sign") String sign);
+
+    @GET("GAPI/V1/GetTAG")
+    Observable<ApiResponse<List<ImgTag>>> getTag(@Query("type") String type);
+
+
+    @GET("CHAPI/V1/GetGYTRaceImageOrVideo")
+    Observable<ApiResponse<List<RaceImageOrVideo>>> getGYTRaceImageOrVideo(@Header("auth") String token,
+                                                                           @QueryMap Map<String,Object> urlParams );
 }

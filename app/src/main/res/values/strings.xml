@@ -25,4 +25,7 @@
         <item>我的司放地</item>
         <item>参考司放地</item>
     </string-array>
+
+    <drawable name="clr_normal">#FF7373</drawable>
+    <drawable name="clr_pressed">#FF4081</drawable>
 </resources>

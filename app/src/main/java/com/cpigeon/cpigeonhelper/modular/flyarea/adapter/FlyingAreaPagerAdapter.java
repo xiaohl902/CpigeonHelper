@@ -1,4 +1,4 @@
-package com.cpigeon.cpigeonhelper.modular.geyuntong.adapter;
+package com.cpigeon.cpigeonhelper.modular.flyarea.adapter;
 
 import android.content.Context;
 import android.support.v4.app.Fragment;
@@ -6,10 +6,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
 import com.cpigeon.cpigeonhelper.R;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPhotoFragment;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarServiceFragment;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.MyFlyingAreaFragment;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.SystemFlyingAreaFragment;
+import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.MyFlyingAreaFragment;
+import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.SystemFlyingAreaFragment;
 
 /**
  * 司放地的适配器，用于显示两个fragment

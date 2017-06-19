@@ -2,6 +2,7 @@ package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -28,7 +29,6 @@ import okhttp3.RequestBody;
 
 /**
  * Created by Administrator on 2017/6/7.
- *
  */
 
 public class AddGeyuntongActivity extends ToolbarBaseActivity {
@@ -44,9 +44,13 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
     LinearLayout llGeyuntongName;
     @BindView(R.id.ll_geyuntong_place)
     LinearLayout llGeyuntongPlace;
-    @BindView(R.id.ll_geyuntong_latlng)
-    LinearLayout llGeyuntongLatlng;
+    @BindView(R.id.ll_geyuntong_latitude)
+    LinearLayout llGeyuntongLatitude;
+    @BindView(R.id.ll_geyuntong_longitude)
+    LinearLayout llGeyuntongLongitude;
     private long timestamp;
+    private int faid = 0;
+
     @Override
     protected void swipeBack() {
         Slidr.attach(this);
@@ -60,7 +64,7 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
     @Override
     protected void setStatusBar() {
         mColor = mContext.getResources().getColor(R.color.colorPrimary);
-        StatusBarUtil.setColorForSwipeBack(this,mColor,0);
+        StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
     @Override
@@ -70,59 +74,82 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
         setTopRightButton("完成", this::add);
     }
 
-    @OnClick({R.id.ll_geyuntong_name, R.id.ll_geyuntong_place, R.id.ll_geyuntong_latlng})
+    @OnClick({R.id.ll_geyuntong_name, R.id.ll_geyuntong_place, R.id.ll_geyuntong_longitude, R.id.ll_geyuntong_latitude})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll_geyuntong_name:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_GYP_NAME,"比赛名称").show(getSupportFragmentManager(),"提示");
+                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_GYP_NAME, "比赛名称", tvGeyuntongName.getText().toString()).show(getSupportFragmentManager(), "提示");
                 break;
             case R.id.ll_geyuntong_place:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_GYP_PLACE,"司放地点").show(getSupportFragmentManager(),"提示");
+                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_GYP_PLACE, "司放地点", tvGeyuntongPlace.getText().toString()).show(getSupportFragmentManager(), "提示");
                 break;
-            case R.id.ll_geyuntong_latlng:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_GYP_LATLNG,"司放地坐标").show(getSupportFragmentManager(),"提示");
+            case R.id.ll_geyuntong_latitude:
+                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_GYP_LA, "司放地经度", tvLatitude.getText().toString()).show(getSupportFragmentManager(), "提示");
+                break;
+            case R.id.ll_geyuntong_longitude:
+                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_GYP_LO, "司放地纬度", tvLongitude.getText().toString()).show(getSupportFragmentManager(), "提示");
                 break;
         }
     }
-    private void add(){
-        timestamp = System.currentTimeMillis() / 1000;
-        RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
-                .addFormDataPart("type","xiehui")
-                .addFormDataPart("rname",tvGeyuntongName.getText().toString())
-                .build();
 
-        Map<String,Object> postParams = new HashMap<>();
-        postParams.put("uid",String.valueOf(AssociationData.getUserId()));
-        postParams.put("type","xiehui");
-        postParams.put("rname",tvGeyuntongName.getText().toString());
+    private void add() {
+        if (!CommonUitls.isAjLocation(Double.parseDouble(tvLatitude.getText().toString())) ||
+                !CommonUitls.isAjLocation(Double.parseDouble(tvLongitude.getText().toString())))
+        {
+            new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                    .setTitleText("坐标输入错误")
+                    .setConfirmText("知道了")
+                    .show();
+        }else {
+            timestamp = System.currentTimeMillis() / 1000;
+            RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                    .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
+                    .addFormDataPart("type", "xiehui")
+                    .addFormDataPart("rname", tvGeyuntongName.getText().toString())
+                    .addFormDataPart("farea", tvGeyuntongPlace.getText().toString())
+                    .addFormDataPart("lo", tvLatitude.getText().toString())
+                    .addFormDataPart("la", tvLongitude.getText().toString())
+                    .addFormDataPart("faid", String.valueOf(faid))
+                    .build();
 
+            Map<String, Object> postParams = new HashMap<>();
+            postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+            postParams.put("type", "xiehui");
+            postParams.put("rname", tvGeyuntongName.getText().toString());
+            postParams.put("farea", tvGeyuntongPlace.getText().toString());
+            postParams.put("lo", tvLatitude.getText().toString());
+            postParams.put("la", tvLongitude.getText().toString());
+            postParams.put("faid", String.valueOf(faid));
 
-        RetrofitHelper.getApi().createGeYunTongRace(AssociationData.getUserToken()
-                , mRequestBody
-                , timestamp, CommonUitls.getApiSign(timestamp,postParams))
-                .compose(bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(geYunTongApiResponse -> {
-                        if (geYunTongApiResponse.isStatus())
-                        {
+            RetrofitHelper.getApi().createGeYunTongRace(AssociationData.getUserToken()
+                    , mRequestBody
+                    , timestamp, CommonUitls.getApiSign(timestamp, postParams))
+                    .compose(bindToLifecycle())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(geYunTongApiResponse -> {
+                        if (geYunTongApiResponse.isStatus()) {
                             new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
                                     .setTitleText("添加成功")
                                     .setConfirmText("知道了")
+                                    .setConfirmClickListener(sweetAlertDialog -> {
+                                        sweetAlertDialog.dismissWithAnimation();
+                                        AddGeyuntongActivity.this.finish();
+                                    })
                                     .show();
-                        }else {
+                        } else {
                             new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
                                     .setTitleText(geYunTongApiResponse.getMsg())
                                     .setConfirmText("知道了")
                                     .show();
                         }
-                }, throwable -> {
-                    new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                    }, throwable -> new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
                             .setTitleText(throwable.getMessage())
                             .setConfirmText("知道了")
-                            .show();
-                });
+                            .show());
+
+        }
+
 
     }
 }

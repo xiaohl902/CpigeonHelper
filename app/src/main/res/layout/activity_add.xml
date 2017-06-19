@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:background="@color/colorViewBackground"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
+        android:background="@color/colorWhite"
         android:id="@+id/ll_geyuntong_name"
-        android:padding="8dp"
+        android:padding="16dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -17,8 +19,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
         <TextView
+            android:layout_marginLeft="2dp"
             android:textSize="@dimen/sp_16"
-            android:text="比赛名称"
+            android:text="比赛名称："
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
@@ -26,21 +29,26 @@
             android:id="@+id/tv_geyuntong_name"
             android:gravity="right"
             android:textSize="@dimen/sp_16"
-            android:text="四川省成都市赛鸽协会"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
     </LinearLayout>
+    <View
+        android:background="@color/colorLayoutSplitLineGray"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
     <LinearLayout
+        android:background="@color/colorWhite"
         android:id="@+id/ll_geyuntong_place"
-        android:padding="8dp"
+        android:padding="16dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <TextView
-            android:layout_marginLeft="7dp"
+            android:layout_marginLeft="9dp"
             android:textSize="@dimen/sp_16"
-            android:text="司放地点"
+            android:text="司放地点："
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
@@ -50,7 +58,6 @@
             android:gravity="right"
             android:layout_weight="1"
             android:textSize="@dimen/sp_16"
-            android:text="青羊区"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             />
@@ -60,49 +67,66 @@
             android:layout_height="20dp" />
 
     </LinearLayout>
-   <LinearLayout
-       android:id="@+id/ll_geyuntong_latlng"
-       android:padding="8dp"
+    <View
+        android:background="@color/colorLayoutSplitLineGray"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+    <LinearLayout
+       android:background="@color/colorWhite"
+       android:id="@+id/ll_geyuntong_latitude"
+       android:padding="16dp"
        android:layout_width="match_parent"
        android:layout_height="wrap_content">
+
        <TextView
-           android:layout_marginLeft="7dp"
-           android:textSize="@dimen/sp_16"
-           android:text="司放坐标"
+           android:layout_marginLeft="9dp"
            android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
-       <TextView
            android:textSize="@dimen/sp_16"
-           android:text="纬度"
-           android:layout_width="wrap_content"
+           android:text="司放地纬度："
            android:layout_height="wrap_content"
-           android:layout_marginLeft="24dp" />
+            />
        <TextView
            android:id="@+id/tv_latitude"
            android:textSize="@dimen/sp_16"
            android:textColor="@color/colorPrimary"
-           android:layout_marginLeft="8dp"
-           android:text="16.12465546"
            android:layout_width="wrap_content"
            android:layout_height="wrap_content" />
-       <TextView
-           android:layout_marginLeft="24dp"
-           android:textSize="@dimen/sp_16"
-           android:text="经度"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content"/>
-       <TextView
-           android:id="@+id/tv_longitude"
-           android:textSize="@dimen/sp_16"
-           android:textColor="@color/colorPrimary"
-           android:layout_marginLeft="8dp"
-           android:text="16.12465546"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
+
    </LinearLayout>
+    <View
+        android:background="@color/colorLayoutSplitLineGray"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+    <LinearLayout
+        android:id="@+id/ll_geyuntong_longitude"
+        android:background="@color/colorWhite"
+        android:padding="16dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_marginLeft="9dp"
+            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:textSize="@dimen/sp_16"
+            android:text="司放地经度："
+            android:layout_height="wrap_content"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:id="@+id/tv_longitude"
+            android:textSize="@dimen/sp_16"
+            android:textColor="@color/colorPrimary"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+    <View
+        android:background="@color/colorLayoutSplitLineGray"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
 
     <TextView
-        android:padding="8dp"
+        android:padding="16dp"
         android:textColor="@color/colorPrimary"
         android:textSize="14sp"
         android:gravity="right"

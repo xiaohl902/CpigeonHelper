@@ -1,4 +1,4 @@
-package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
+package com.cpigeon.cpigeonhelper.modular.flyarea.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -7,9 +7,8 @@ import android.widget.FrameLayout;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.FlyingAreaHomeFragment;
+import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.FlyingAreaHomeFragment;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
-import com.r0adkll.slidr.Slidr;
 
 import butterknife.BindView;
 

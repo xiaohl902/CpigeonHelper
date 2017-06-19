@@ -1,6 +1,7 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.fragment;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -35,25 +36,43 @@ import com.amap.api.trace.TraceLocation;
 import com.amap.api.trace.TraceOverlay;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
+import com.cpigeon.cpigeonhelper.common.db.AssociationData;
+import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
+import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.mina.SessionManager;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.ACarServiceActivity;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PathRecord;
 import com.cpigeon.cpigeonhelper.ui.Util;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.SensorEventHelper;
+import com.orhanobut.logger.Logger;
 
 import org.apache.mina.core.buffer.IoBuffer;
+import org.greenrobot.eventbus.EventBus;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Queue;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
+import cn.pedant.SweetAlert.SweetAlertDialog;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 
 /**
  * Created by Administrator on 2017/5/31.
@@ -107,6 +126,8 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     private LatLng mLocation;
     private int mDistance = 0;
     private int tracesize = 30;
+    private GeYunTong geYunTong;
+    private int ift;
 
     public static CarServiceFragment newInstance() {
 
@@ -126,16 +147,28 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
 
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        geYunTong = ((ACarServiceActivity) activity).getGeYunTong();
+    }
+
     private void init() {
-        if (mAMap == null) {
-            mAMap = mMapView.getMap();
-            setUpMap();
+        Logger.e("当前状态为:" + geYunTong.getStateCode());
+        switch (geYunTong.getStateCode()) {
+            case 0:
+                mToggleButton.setChecked(false);
+                break;
+            case 1:
+                mToggleButton.setChecked(true);
+                runMap();
+                break;
+            case 2:
+                Logger.e("比赛已经结束了的");
+                break;
         }
-        mSensorHelper = new SensorEventHelper(getActivity());
-        if (mSensorHelper != null) {
-            mSensorHelper.registerSensorListener();
-        }
-        mTraceoverlay = new TraceOverlay(mAMap);
+
+
     }
 
     private void setUpMap() {
@@ -189,6 +222,11 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         mLocationClient = null;
     }
 
+    /**
+     * 当定位发送改变会调用该方法
+     *
+     * @param aMapLocation
+     */
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
         if (mListener != null && aMapLocation != null) {
@@ -217,14 +255,17 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
                     mLocMarker.setPosition(mLocation);
                     mAMap.moveCamera(CameraUpdateFactory.changeLatLng(mLocation));
                 }
-                tvSpeed.setText(aMapLocation.getSpeed()*3.6+"KM");
-                tvSpeed.setText(aMapLocation.getSpeed()*3.6+"KM");
+                tvSpeed.setText(aMapLocation.getSpeed() * 3.6 + "KM");
+                tvSpeed.setText(aMapLocation.getSpeed() * 3.6 + "KM");
             } else {
                 CommonUitls.showToast(getActivity(), "定位失败");
             }
         }
     }
 
+    /**
+     * 画线
+     */
     private void redrawline() {
         if (mPolyoptions.getPoints().size() > 1) {
             if (mpolyline != null) {
@@ -235,6 +276,12 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         }
     }
 
+    /**
+     * 添加圆形
+     *
+     * @param latlng
+     * @param radius
+     */
     private void addCircle(LatLng latlng, double radius) {
         CircleOptions options = new CircleOptions();
         options.strokeWidth(1f);
@@ -245,6 +292,11 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         mCircle = mAMap.addCircle(options);
     }
 
+    /**
+     * 添加汽车图标
+     *
+     * @param latlng
+     */
     private void addMarker(LatLng latlng) {
         if (mLocMarker != null) {
             return;
@@ -323,28 +375,205 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     @OnClick(R.id.btn_stop)
     public void onViewClicked() {
         if (mToggleButton.isChecked()) {
-            if (mPathRecord != null) {
-                mPathRecord = null;
-            }
+            new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("温馨提示")
+                    .setContentText("确认立即开启鸽车监控？")
+                    .setConfirmText("确认")
+                    .setConfirmClickListener(sweetAlertDialog -> {
+                        sweetAlertDialog.dismissWithAnimation();
+                        mStartTime = System.currentTimeMillis();
+                        startRaceMonitor();
+                    })
+                    .setCancelText("取消")
+                    .setCancelClickListener(sweetAlertDialog -> {
+                        sweetAlertDialog.dismissWithAnimation();
+                        mToggleButton.setChecked(false);
+                    })
+                    .show();
 
-            mPathRecord = new PathRecord();
-            mStartTime = System.currentTimeMillis();
-            mPathRecord.setDate(getcueDate(mStartTime));
-            getActivity().startService(new Intent(getActivity(), CoreService.class));
-            showUsingTime();
 
         } else {
-            mEndTime = System.currentTimeMillis();
-            mOverlayList.add(mTraceoverlay);
-            DecimalFormat decimalFormat = new DecimalFormat("0.0");
-            LBSTraceClient mTraceClient = new LBSTraceClient(getApplicationContext());
-            mTraceClient.queryProcessedTrace(2, Util.parseTraceLocationList(mPathRecord.getPathline()) , LBSTraceClient.TYPE_AMAP,this);
-            getActivity().stopService(new Intent(getActivity(), CoreService.class));
+            new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
+                    .setTitleText("警告")
+                    .setContentText("是否退出鸽车监控，退出之后无法再开启")
+                    .setConfirmText("确认")
+                    .setConfirmClickListener(sweetAlertDialog -> {
+                        sweetAlertDialog.dismissWithAnimation();
+                        mEndTime = System.currentTimeMillis();
+                        stopRaceMonitor();
+                    })
+                    .setCancelText("取消")
+                    .setCancelClickListener(sweetAlertDialog -> {
+                        mToggleButton.setChecked(true);
+                        sweetAlertDialog.dismissWithAnimation();
+                    })
+                    .show();
         }
 
     }
 
-    private void showUsingTime() {
+
+    private void runMap() {
+        if (mAMap == null) {
+            mAMap = mMapView.getMap();
+            setUpMap();
+        }
+        mSensorHelper = new SensorEventHelper(getActivity());
+        if (mSensorHelper != null) {
+            mSensorHelper.registerSensorListener();
+        }
+        mTraceoverlay = new TraceOverlay(mAMap);
+        if (mPathRecord != null) {
+            mPathRecord = null;
+        }
+        mPathRecord = new PathRecord();
+        mPathRecord.setDate(getcueDate(mStartTime));
+        getActivity().startService(new Intent(getActivity(), CoreService.class));
+
+    }
+
+    private void startRaceMonitor() {
+        RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
+                .addFormDataPart("type", "xiehui")
+                .addFormDataPart("rid", String.valueOf(geYunTong.getId()))
+                .build();
+
+        Map<String, Object> postParams = new HashMap<String, Object>();
+        postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+        postParams.put("type", "xiehui");
+        postParams.put("rid", String.valueOf(geYunTong.getId()));
+
+        RetrofitHelper
+                .getApi()
+                .startRaceMonitor(AssociationData.getUserToken()
+                        , mRequestBody, mStartTime, CommonUitls.getApiSign(mStartTime, postParams))
+                .compose(bindToLifecycle())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(objectApiResponse -> {
+                    if (objectApiResponse.getErrorCode() == 0) {
+                        runMap();
+                    } else {
+                        new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
+                                .setTitleText("错误提示")
+                                .setContentText(objectApiResponse.getMsg())
+                                .setConfirmText("好的")
+                                .show();
+                        mToggleButton.setChecked(false);
+                    }
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(getActivity(), "请求超时");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(getActivity(), "无法连接");
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(getActivity(), "运行时异常");
+                    }
+                });
+    }
+
+    private void stopCarService() {
+        mOverlayList.add(mTraceoverlay);
+        DecimalFormat decimalFormat = new DecimalFormat("0.0");
+        LBSTraceClient mTraceClient = new LBSTraceClient(getApplicationContext());
+        mTraceClient.queryProcessedTrace(2, Util.parseTraceLocationList(mPathRecord.getPathline()), LBSTraceClient.TYPE_AMAP, this);
+        getActivity().stopService(new Intent(getActivity(), CoreService.class));
+    }
+
+    private void stopRaceMonitor() {
+
+        new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("温馨提示")
+                .setContentText("是否将当前时间设为司放时间？")
+                .setConfirmText("确认")
+                .setConfirmClickListener(sweetAlertDialog -> {
+                    sweetAlertDialog.dismissWithAnimation();
+                    ift = 1;
+                    RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                            .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
+                            .addFormDataPart("type", "xiehui")
+                            .addFormDataPart("rid", String.valueOf(geYunTong.getId()))
+                            .addFormDataPart("ift", String.valueOf(ift))
+                            .build();
+
+                    Map<String, Object> postParams = new HashMap<String, Object>();
+                    postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+                    postParams.put("type", "xiehui");
+                    postParams.put("rid", String.valueOf(geYunTong.getId()));
+                    postParams.put("ift", String.valueOf(ift));
+
+                    RetrofitHelper.getApi()
+                            .stopRaceMonitor(AssociationData.getUserToken(),
+                                    mRequestBody, mEndTime, CommonUitls.getApiSign(mEndTime, postParams))
+                            .compose(bindToLifecycle())
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(objectApiResponse -> {
+                                if (objectApiResponse.getErrorCode() == 0) {
+                                    stopCarService();
+                                } else {
+                                    new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
+                                            .setTitleText("温馨提示")
+                                            .setContentText(objectApiResponse.getMsg())
+                                            .setConfirmText("确认")
+                                            .show();
+                                }
+                            }, throwable -> {
+                                if (throwable instanceof SocketTimeoutException) {
+                                    CommonUitls.showToast(getActivity(), "请求超时");
+                                } else if (throwable instanceof ConnectException) {
+                                    CommonUitls.showToast(getActivity(), "无法连接");
+                                } else if (throwable instanceof RuntimeException) {
+                                    CommonUitls.showToast(getActivity(), "运行时异常");
+                                }
+                            });
+                })
+                .setCancelText("取消")
+                .setCancelClickListener(sweetAlertDialog -> {
+                    sweetAlertDialog.dismissWithAnimation();
+                    ift = 0;
+                    RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                            .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
+                            .addFormDataPart("type", "xiehui")
+                            .addFormDataPart("rid", String.valueOf(geYunTong.getId()))
+                            .addFormDataPart("ift", String.valueOf(ift))
+                            .build();
+
+                    Map<String, Object> postParams = new HashMap<String, Object>();
+                    postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+                    postParams.put("type", "xiehui");
+                    postParams.put("rid", String.valueOf(geYunTong.getId()));
+                    postParams.put("ift", String.valueOf(ift));
+
+                    RetrofitHelper.getApi()
+                            .stopRaceMonitor(AssociationData.getUserToken(),
+                                    mRequestBody, mEndTime, CommonUitls.getApiSign(mEndTime, postParams))
+                            .compose(bindToLifecycle())
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(objectApiResponse -> {
+                                if (objectApiResponse.getErrorCode() == 0) {
+                                    stopCarService();
+                                } else {
+                                    new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
+                                            .setTitleText("温馨提示")
+                                            .setContentText(objectApiResponse.getMsg())
+                                            .setConfirmText("确认")
+                                            .show();
+                                }
+                            }, throwable -> {
+                                if (throwable instanceof SocketTimeoutException) {
+                                    CommonUitls.showToast(getActivity(), "请求超时");
+                                } else if (throwable instanceof ConnectException) {
+                                    CommonUitls.showToast(getActivity(), "无法连接");
+                                } else if (throwable instanceof RuntimeException) {
+                                    CommonUitls.showToast(getActivity(), "运行时异常");
+                                }
+                            });
+                })
+                .show();
+
 
     }
 
@@ -362,24 +591,24 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     @Override
     public void onFinished(int lineID, List<LatLng> linepoints, int distance, int i2) {
         if (lineID == 1) {
-            if (linepoints != null && linepoints.size()>0) {
+            if (linepoints != null && linepoints.size() > 0) {
                 mTraceoverlay.add(linepoints);
                 mDistance += distance;
-                mTraceoverlay.setDistance(mTraceoverlay.getDistance()+distance);
+                mTraceoverlay.setDistance(mTraceoverlay.getDistance() + distance);
                 if (mLocMarker == null) {
                     mLocMarker = mAMap.addMarker(new MarkerOptions().position(linepoints.get(linepoints.size() - 1))
                             .icon(BitmapDescriptorFactory
                                     .fromResource(R.drawable.point))
-                            .title("距离：" + mDistance+"米"));
+                            .title("距离：" + mDistance + "米"));
                     mLocMarker.showInfoWindow();
                 } else {
-                    mLocMarker.setTitle("距离：" + mDistance+"米");
+                    mLocMarker.setTitle("距离：" + mDistance + "米");
                     mLocMarker.setPosition(linepoints.get(linepoints.size() - 1));
                     mLocMarker.showInfoWindow();
                 }
             }
         } else if (lineID == 2) {
-            if (linepoints != null && linepoints.size()>0) {
+            if (linepoints != null && linepoints.size() > 0) {
                 mAMap.addPolyline(new PolylineOptions()
                         .color(Color.RED)
                         .width(40).addAll(linepoints));
@@ -391,8 +620,21 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         List<TraceLocation> locationList = new ArrayList<>(mTracelocationlist);
         LBSTraceClient mTraceClient = new LBSTraceClient(getApplicationContext());
         mTraceClient.queryProcessedTrace(1, locationList, LBSTraceClient.TYPE_AMAP, this);
-        TraceLocation lastlocation = mTracelocationlist.get(mTracelocationlist.size()-1);
+        TraceLocation lastlocation = mTracelocationlist.get(mTracelocationlist.size() - 1);
         mTracelocationlist.clear();
         mTracelocationlist.add(lastlocation);
+    }
+
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Logger.e("onPause");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Logger.e("onPause");
     }
 }

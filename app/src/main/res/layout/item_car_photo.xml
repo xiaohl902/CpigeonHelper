@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_margin="8dp"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <ImageView
+        android:id="@+id/iv_car_photo_img"
+        android:layout_width="180dp"
+        android:layout_height="240dp" />
+    <TextView
+        android:id="@+id/tv_car_photo_status"
+        android:layout_gravity="center"
+        android:text="上笼"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

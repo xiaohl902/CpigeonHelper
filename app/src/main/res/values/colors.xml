@@ -18,4 +18,15 @@
     <color name="colorGreen">#32CD32</color>
     <color name="colorGrey">#ACACAC</color>
     <color name="colorDarkGrey">#9C9C9C</color>
+
+    <color name="actionsheet_blue">#FF4081</color>
+
+    <color name="bgColor_divier">#d7d7db</color>
+
+    <color name="bgColor_alert_button_press">#EAEAEA</color>
+
+    <color name="actionsheet_gray">#8F8F8F</color>
+
+    <!--actionsheet模式的取消按钮背景颜色-->
+    <color name="bgColor_actionsheet_cancel_nor">#ffffff</color>
 </resources>

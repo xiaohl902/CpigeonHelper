@@ -1,16 +1,20 @@
-package com.cpigeon.cpigeonhelper.modular.geyuntong.fragment;
+package com.cpigeon.cpigeonhelper.modular.flyarea.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
+import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.FlyingAreaAdapter;
+import com.cpigeon.cpigeonhelper.modular.flyarea.activity.FlyingAreaEditActivity;
+import com.cpigeon.cpigeonhelper.modular.flyarea.adapter.FlyingAreaAdapter;
+import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
 
 import java.util.HashMap;
@@ -75,6 +79,16 @@ public class MyFlyingAreaFragment extends BaseFragment {
     @Override
     protected void initRecyclerView() {
         mAdapter = new FlyingAreaAdapter(null);
+        mAdapter.setOnItemClickListener((adapter, view, position) -> {
+            FlyingArea flyingArea = (FlyingArea) adapter.getData().get(position);
+            Intent i = new Intent(getActivity(), FlyingAreaEditActivity.class);
+            i.putExtra("faid",flyingArea.getFaid());
+            i.putExtra("place",flyingArea.getArea());
+            i.putExtra("lo",flyingArea.getLongitude());
+            i.putExtra("la",flyingArea.getLatitude());
+            i.putExtra("alias",flyingArea.getAlias());
+            startActivity(i);
+        });
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setAdapter(mAdapter);
         setRecycleNoScroll();
@@ -92,10 +106,15 @@ public class MyFlyingAreaFragment extends BaseFragment {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(listApiResponse -> {
-                    mAdapter.setNewData(listApiResponse.getData());
-                    finishTask();
+                    if (listApiResponse.getData() != null && listApiResponse.getData().size()>0)
+                    {
+                        mAdapter.setNewData(listApiResponse.getData());
+                        finishTask();
+                    }else {
+                        initEmptyView();
+                    }
                 }, throwable -> {
-                    initEmptyView();
+                    initErrorView();
                 });
     }
 
@@ -139,11 +158,19 @@ public class MyFlyingAreaFragment extends BaseFragment {
         mRecyclerView.setOnTouchListener((v, event) -> mIsRefreshing);
     }
 
-    public void initEmptyView() {
+    public void initErrorView() {
         mSwipeRefreshLayout.setRefreshing(false);
         mCustomEmptyView.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.GONE);
         mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
         mCustomEmptyView.setEmptyText("加载失败~(≧▽≦)~啦啦啦.");
+    }
+
+    public void initEmptyView() {
+        mSwipeRefreshLayout.setRefreshing(false);
+        mCustomEmptyView.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
+        mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
+        mCustomEmptyView.setEmptyText("暂无数据，快去添加吧");
     }
 }

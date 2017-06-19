@@ -6,7 +6,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
@@ -20,18 +19,15 @@ import android.widget.Toast;
 import com.cpigeon.cpigeonhelper.base.BaseActivity;
 import com.cpigeon.cpigeonhelper.base.MyApp;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
-import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
-import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.ACarServiceActivity;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.FlyingAreaActivity;
+import com.cpigeon.cpigeonhelper.modular.flyarea.activity.FlyingAreaActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.GeYunTongListActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.OpeningGeyuntongActivity;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.UploadVideoActivity;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.UploadImgActivity;
 import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
 import com.cpigeon.cpigeonhelper.modular.home.bean.HomeAd;
 import com.cpigeon.cpigeonhelper.modular.root.activity.RootListActivity;
-import com.cpigeon.cpigeonhelper.modular.usercenter.bean.AnnouncementList;
-import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
 import com.cpigeon.cpigeonhelper.modular.xiehui.activity.XieHuiInfoActivity;
 import com.cpigeon.cpigeonhelper.ui.textview.MarqueeTextView;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
@@ -45,9 +41,7 @@ import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
@@ -55,9 +49,7 @@ import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.RealmResults;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
 
@@ -235,10 +227,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 startActivity(new Intent(MainActivity.this, RootListActivity.class));
                 break;
             case R.id.my_zone://我的空间
-
+                startActivity(new Intent(MainActivity.this, UploadImgActivity.class));
                 break;
             case R.id.my_order://我的订单
-
+                startActivity(new Intent(MainActivity.this, UploadVideoActivity.class));
                 break;
             case R.id.setting://设置
 

@@ -21,7 +21,9 @@ import com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton;
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
+import java.math.RoundingMode;
 import java.net.NetworkInterface;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -381,12 +383,12 @@ public class CommonUitls {
         widthAnimation.start();
     }
 
-    public static double GPS2AjLocation(double gpsLocationValue) {
+    public static String GPS2AjLocation(double gpsLocationValue) {
         int du = (int) gpsLocationValue;
         double temp = (gpsLocationValue - du) * 60;//需要转换的部分（分）
         int fen = (int) temp;
         temp = (temp - fen) * 60;//秒
-        return du + (double) fen / 100 + temp / 10000;
+        return doubleformat(du + (double) fen / 100 + temp / 10000);
     }
     public static double Aj2GPSLocation(double ajLocationValue)
     {
@@ -413,6 +415,22 @@ public class CommonUitls {
         return false;
 
     }
+
+    public static String doubleformat(double d) {
+        NumberFormat nf = NumberFormat.getNumberInstance();
+
+
+        // 保留两位小数
+        nf.setMaximumFractionDigits(6);
+
+
+        // 如果不需要四舍五入，可以使用RoundingMode.DOWN
+        nf.setRoundingMode(RoundingMode.UP);
+
+
+        return nf.format(d);
+    }
+
 }
 
 

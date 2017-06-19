@@ -22,7 +22,11 @@ android {
         vectorDrawables.useSupportLibrary = true
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         signingConfig signingConfigs.release //默认签名配置
+        multiDexEnabled true
 
+    }
+    packagingOptions {
+        exclude 'META-INF/rxjava.properties'
     }
 
     buildTypes {
@@ -111,5 +115,17 @@ dependencies {
     compile 'com.amap.api:map3d-native:latest.integration'
     compile 'com.amap.api:map3d:latest.integration'
     compile 'com.amap.api:location:latest.integration'
+
+    compile 'com.zhy:autolayout:1.4.5'
+
+    compile 'com.android.support:multidex:'
+
+    compile 'com.github.LuckSiege.PictureSelector:picture_library:v2.0.4'
+
+    compile 'me.shaohui:bottomdialog:1.1.9'
+
+    compile 'org.greenrobot:eventbus:3.0.0'
+
+    compile 'fm.jiecao:jiecaovideoplayer:5.5.4'
 
 }

@@ -1,4 +1,4 @@
-package com.cpigeon.cpigeonhelper.modular.geyuntong.bean;
+package com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean;
 
 /**
  * Created by Administrator on 2017/6/14.

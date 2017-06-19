@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:focusable="true"
+    android:background="@color/colorViewBackground"
     android:focusableInTouchMode="true"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -16,6 +17,7 @@
         android:hint="搜索"
         app:drawableDel="@mipmap/ic_delete"/>
     <FrameLayout
+        android:background="@color/colorWhite"
         android:layout_weight="1"
         android:layout_width="match_parent"
         android:layout_height="0dp">

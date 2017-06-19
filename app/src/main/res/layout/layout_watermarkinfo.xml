@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/tv_geyuntong_status"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:text="上笼"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_geyuntong_time"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:text="2017.05.03 12:23:23"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_geyuntong_weather"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:text="多云 25C 西北风 微风"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_geyuntong_location"
+        android:padding="8dp"
+        android:textSize="14sp"
+        android:gravity="center"
+        android:drawableLeft="@drawable/ic_place_location"
+        android:text="坐标：108.030108/32.030401"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+</LinearLayout>

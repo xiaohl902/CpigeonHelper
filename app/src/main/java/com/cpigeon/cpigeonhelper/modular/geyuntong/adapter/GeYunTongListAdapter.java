@@ -23,10 +23,9 @@ public class GeYunTongListAdapter extends BaseQuickAdapter<GeYunTong,BaseViewHol
     @Override
     protected void convert(BaseViewHolder helper, GeYunTong item) {
         helper.setText(R.id.tv_geyuntong_name,item.getRaceName());
-        helper.setText(R.id.tv_geyuntong_place,"司放地点："+item.getFlyingArea());
-        helper.setText(R.id.tv_geyuntong_time,"司放时间："+item.getCreateTime());
+        helper.setText(R.id.tv_geyuntong_place,item.getFlyingArea());
+        helper.setText(R.id.tv_geyuntong_time,item.getCreateTime());
         helper.setText(R.id.tv_geyuntong_status,item.getState());
-        helper.setText(R.id.tv_geyuntong_lati,"经度："+item.getLongitude()+" 纬度："+item.getLatitude());
         Picasso.with(mContext)
                 .load(TextUtils.isEmpty(item.getRaceImage())?"1":item.getRaceImage())
                 .placeholder(R.drawable.default_geyuntong)
@@ -35,10 +34,10 @@ public class GeYunTongListAdapter extends BaseQuickAdapter<GeYunTong,BaseViewHol
         switch (item.getState())
         {
             case "监控中":
-                helper.setTextColor(R.id.tv_geyuntong_status,mContext.getResources().getColor(R.color.colorPrimary));
+                helper.setTextColor(R.id.tv_geyuntong_status,mContext.getResources().getColor(R.color.colorAnnotation));
                 break;
             case "未开始监控":
-                helper.setTextColor(R.id.tv_geyuntong_status,mContext.getResources().getColor(R.color.colorGreen));
+                helper.setTextColor(R.id.tv_geyuntong_status,mContext.getResources().getColor(R.color.colorPrimary));
                 break;
         }
     }

@@ -90,7 +90,7 @@ public class XieHuiInfoActivity extends ToolbarBaseActivity {
     @Override
     protected void initViews(Bundle savedInstanceState) {
         this.setTitle("支付");
-        this.setTopLeftButton(R.drawable.ic_back, () -> XieHuiInfoActivity.this.finish());
+        this.setTopLeftButton(R.drawable.ic_back, this::finish);
         this.setTopRightButton("完成", () -> Toast.makeText(this, "点击了右上角按钮！", Toast.LENGTH_LONG).show());
         loadData();
     }
@@ -127,7 +127,7 @@ public class XieHuiInfoActivity extends ToolbarBaseActivity {
             case R.id.ll_xiehui_name:
                 break;
             case R.id.ll_xiehui_shotname:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_SHORTNAME,"修改简称").show(getSupportFragmentManager(),"提示");
+                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_SHORTNAME,"修改简称",tvXiehuiShotname.getText().toString()).show(getSupportFragmentManager(),"提示");
                 break;
             case R.id.ll_xiehui_yuming:
                 break;
@@ -136,10 +136,10 @@ public class XieHuiInfoActivity extends ToolbarBaseActivity {
             case R.id.ll_xiehui_tel:
                 break;
             case R.id.ll_xiehui_mail:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_EMAIL,"修改邮箱").show(getSupportFragmentManager(),"提示");
+                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_EMAIL,"修改邮箱",tvXiehuiMail.getText().toString()).show(getSupportFragmentManager(),"提示");
                 break;
             case R.id.ll_xiehui_address:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_ADDRESS,"修改地址").show(getSupportFragmentManager(),"提示");
+                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_ADDRESS,"修改地址",tvXiehuiAddress.getText().toString()).show(getSupportFragmentManager(),"提示");
                 break;
             case R.id.ll_xiehui_registertime:
                 break;

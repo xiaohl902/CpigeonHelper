@@ -25,14 +25,16 @@ public class EditDialogFragment extends DialogFragment {
     public static final int DIALOG_TYPE_EMAIL = 3;
     public static final int DIALOG_TYPE_GYP_NAME = 4;
     public static final int DIALOG_TYPE_GYP_PLACE = 5;
-    public static final int DIALOG_TYPE_GYP_LATLNG = 6;
+    public static final int DIALOG_TYPE_GYP_LA = 6;
+    public static final int DIALOG_TYPE_GYP_LO = 7;
 
 
-    public static EditDialogFragment getInstance(int type,String title) {
+    public static EditDialogFragment getInstance(int type, String title, String hint) {
         EditDialogFragment dialogFragment = new EditDialogFragment();
         Bundle bundle = new Bundle();
         bundle.putInt("Dialog_Type", type);
-        bundle.putString("Dialog_Title",title);
+        bundle.putString("Dialog_Title", title);
+        bundle.putString("Hint", hint);
         dialogFragment.setArguments(bundle);
         return dialogFragment;
     }
@@ -49,44 +51,49 @@ public class EditDialogFragment extends DialogFragment {
         EditText editText = (EditText) view.findViewById(R.id.et_info);
 
         int dialog_type = getArguments().getInt("Dialog_Type");
+
+        if (dialog_type == 6 || dialog_type == 7)
+        {
+            String hinit = getArguments().getString("Hint");
+            editText.setText(hinit);
+            editText.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        }
         String dialog_title = getArguments().getString("Dialog_Title");
         builder.setView(view)
                 .setTitle(dialog_title)
                 .setPositiveButton("确认", (dialog, which) -> {
                     switch (dialog_type) {
                         case DIALOG_TYPE_SHORTNAME:
-
                             TextView mName = (TextView) getActivity().findViewById(R.id.tv_xiehui_shotname);
                             mName.setText(editText.getText().toString().trim());
                             break;
                         case DIALOG_TYPE_ADDRESS:
-
                             TextView mAddress = (TextView) getActivity().findViewById(R.id.tv_xiehui_address);
                             mAddress.setText(editText.getText().toString().trim());
                             break;
                         case DIALOG_TYPE_EMAIL:
-
                             TextView mShotName = (TextView) getActivity().findViewById(R.id.tv_xiehui_shotname);
                             mShotName.setText(editText.getText().toString().trim());
                             break;
                         case DIALOG_TYPE_GYP_NAME:
-
                             TextView mGeYunTongName = (TextView) getActivity().findViewById(R.id.tv_geyuntong_name);
                             mGeYunTongName.setText(editText.getText().toString().trim());
                             break;
                         case DIALOG_TYPE_GYP_PLACE:
-
                             TextView mGeYunTongPlace = (TextView) getActivity().findViewById(R.id.tv_geyuntong_place);
                             mGeYunTongPlace.setText(editText.getText().toString().trim());
                             break;
-                        case DIALOG_TYPE_GYP_LATLNG:
-
+                        case DIALOG_TYPE_GYP_LA:
+                            TextView mGeYunTongLa = (TextView) getActivity().findViewById(R.id.tv_latitude);
+                            mGeYunTongLa.setText(editText.getText().toString().trim());
+                            break;
+                        case DIALOG_TYPE_GYP_LO:
+                            TextView mGeYunTongLong = (TextView) getActivity().findViewById(R.id.tv_longitude);
+                            mGeYunTongLong.setText(editText.getText().toString().trim());
                             break;
                     }
                 })
-                .setNegativeButton("取消", (dialog, which) -> {
-                    dialog.dismiss();
-                });
+                .setNegativeButton("取消", (dialog, which) -> dialog.dismiss());
         builder.setCancelable(true);
         return builder.create();
     }

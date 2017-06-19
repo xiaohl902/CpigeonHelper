@@ -1,10 +1,15 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.bean;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2017/6/7.
  */
 
-public class GeYunTong {
+public class GeYunTong implements Parcelable{
 
     /**
      * id : 11
@@ -108,5 +113,52 @@ public class GeYunTong {
     public void setState(String state) {
         this.state = state;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
+        dest.writeString(raceName);
+        dest.writeDouble(latitude);
+        dest.writeDouble(longitude);
+        dest.writeString(flyingArea);
+        dest.writeString(createTime);
+        dest.writeString(flyingTime);
+        dest.writeInt(stateCode);
+        dest.writeString(state);
+        dest.writeString(raceImage);
+    }
+
+    public static final Parcelable.Creator<GeYunTong> CREATOR = new Creator<GeYunTong>() {
+        @Override
+        public GeYunTong createFromParcel(Parcel source) {
+            return new GeYunTong(source);
+        }
+
+        @Override
+        public GeYunTong[] newArray(int size) {
+            return new GeYunTong[size];
+        }
+    };
+
+    public GeYunTong(Parcel in)
+    {
+        id = in.readInt();
+        raceName = in.readString();
+        latitude = in.readDouble();
+        longitude = in.readDouble();
+        flyingArea = in.readString();
+        createTime = in.readString();
+        flyingTime = in.readString();
+        stateCode = in.readInt();
+        state = in.readString();
+        raceImage = in.readString();
+
+    }
+
 
 }

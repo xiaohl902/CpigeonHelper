@@ -1,12 +1,10 @@
-package com.cpigeon.cpigeonhelper.modular.geyuntong.fragment;
+package com.cpigeon.cpigeonhelper.modular.flyarea.fragment;
 
 import android.os.Bundle;
-import android.support.v4.app.FragmentPagerAdapter;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.FlyingAreaPagerAdapter;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.HomePagerAdapter;
+import com.cpigeon.cpigeonhelper.modular.flyarea.adapter.FlyingAreaPagerAdapter;
 import com.cpigeon.cpigeonhelper.ui.NoScrollViewPager;
 import com.flyco.tablayout.SlidingTabLayout;
 

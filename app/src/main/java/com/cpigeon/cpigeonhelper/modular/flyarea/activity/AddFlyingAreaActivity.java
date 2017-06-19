@@ -1,4 +1,4 @@
-package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
+package com.cpigeon.cpigeonhelper.modular.flyarea.activity;
 
 import android.os.Bundle;
 import android.widget.EditText;
@@ -111,7 +111,12 @@ public class AddFlyingAreaActivity extends ToolbarBaseActivity {
                                     .setTitleText("成功")
                                     .setContentText("添加司放地成功")
                                     .setConfirmText("好的")
+                                    .setConfirmClickListener(sweetAlertDialog -> {
+                                        sweetAlertDialog.dismissWithAnimation();
+                                        AddFlyingAreaActivity.this.finish();
+                                    })
                                     .show();
+
                         } else {
                             new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
                                     .setTitleText("错误")

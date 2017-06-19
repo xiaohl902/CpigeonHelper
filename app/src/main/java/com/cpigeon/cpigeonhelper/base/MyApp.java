@@ -1,10 +1,12 @@
 package com.cpigeon.cpigeonhelper.base;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
+import android.support.multidex.MultiDex;
 
 import com.cpigeon.cpigeonhelper.BuildConfig;
 import com.cpigeon.cpigeonhelper.MainActivity;
@@ -12,6 +14,7 @@ import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.facebook.stetho.Stetho;
 import com.tencent.bugly.crashreport.CrashReport;
+import com.zhy.autolayout.config.AutoLayoutConifg;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -28,9 +31,16 @@ public class MyApp extends Application {
     }
 
     @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        MultiDex.install(this);
+    }
+
+    @Override
     public void onCreate() {
         super.onCreate();
         mInstance = this;
+        AutoLayoutConifg.getInstance().useDeviceSize();
         if (!BuildConfig.DEBUG)
         {
             Thread.setDefaultUncaughtExceptionHandler(new MyUnCaughtExceptionHandler());
