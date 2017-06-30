@@ -113,4 +113,27 @@
         <item name="android:windowEnterAnimation">@anim/actionsheet_dialog_in</item>
         <item name="android:windowExitAnimation">@anim/actionsheet_dialog_out</item>
     </style>
+
+    <!--订单支付界面-订单详情标题-->
+    <style name="order_info_item_title" parent="SingleLine">
+        <item name="android:gravity">left</item>
+        <item name="android:paddingRight">5dp</item>
+        <item name="android:textColor">@color/colorText</item>
+        <item name="android:minWidth">80dp</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+    <!--订单支付界面-订单详情内容-->
+    <style name="order_info_item_content">
+        <item name="android:textColor">@color/colorDarkGrey</item>
+        <item name="android:paddingLeft">5dp</item>
+        <item name="android:textSize">@dimen/sp_16</item>
+    </style>
+    <!--订单支付界面-订单详情项-->
+    <style name="order_info_item_layout" parent="SingleLine">
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:paddingLeft">24dp</item>
+        <item name="android:paddingRight">24dp</item>
+        <item name="android:background">@color/colorWhite</item>
+    </style>
 </resources>

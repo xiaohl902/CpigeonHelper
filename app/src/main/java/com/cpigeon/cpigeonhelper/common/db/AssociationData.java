@@ -131,15 +131,28 @@ public class AssociationData {
         return "";
     }
 
-    public static String getUsetType(){
+
+
+    public static String getUserType(){
         for (UserBean userBean : info)
         {
-            if (!TextUtils.isEmpty(userBean.getAccountType()))
+            if (!TextUtils.isEmpty(userBean.getType()))
             {
-                return userBean.getAccountType();
+                return userBean.getType();
             }
         }
-        return "";
+        return "xiehui";
+    }
+
+    public static String getUserAType(){
+        for (UserBean userBean : info)
+        {
+            if (!TextUtils.isEmpty(userBean.getAtype()))
+            {
+                return userBean.getAtype();
+            }
+        }
+        return "admin";
     }
 
 

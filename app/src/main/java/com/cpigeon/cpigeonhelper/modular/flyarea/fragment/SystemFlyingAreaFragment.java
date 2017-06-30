@@ -15,6 +15,8 @@ import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +78,6 @@ public class SystemFlyingAreaFragment extends BaseFragment {
 
     }
 
-
     @Override
     protected void initRecyclerView() {
         mAdapter = new SystemFlyingAreaAdapter(null);
@@ -90,7 +91,7 @@ public class SystemFlyingAreaFragment extends BaseFragment {
                         sweetAlertDialog.dismissWithAnimation();
                         RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                                 .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
-                                .addFormDataPart("type", "xiehui")
+                                .addFormDataPart("type", AssociationData.getUserType())
                                 .addFormDataPart("alias", flyingArea.getAlias())
                                 .addFormDataPart("area", flyingArea.getArea())
                                 .addFormDataPart("lo", String.valueOf(flyingArea.getLongitude()))
@@ -99,7 +100,7 @@ public class SystemFlyingAreaFragment extends BaseFragment {
 
                         Map<String, Object> postParams = new HashMap<>();
                         postParams.put("uid", String.valueOf(AssociationData.getUserId()));
-                        postParams.put("type", "xiehui");
+                        postParams.put("type", AssociationData.getUserType());
                         postParams.put("alias", flyingArea.getAlias());
                         postParams.put("area", flyingArea.getArea());
                         postParams.put("lo", String.valueOf(flyingArea.getLongitude()));
@@ -127,11 +128,16 @@ public class SystemFlyingAreaFragment extends BaseFragment {
                                                 .setConfirmText("好的")
                                                 .show();
                                     }
-                                }, throwable -> new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
-                                        .setTitleText("错误")
-                                        .setContentText(throwable.getMessage())
-                                        .setConfirmText("好的")
-                                        .show());
+                                }, throwable -> {
+                                    if (throwable instanceof SocketTimeoutException)
+                                    {
+                                        CommonUitls.showToast(getActivity(),"啊偶，连接超时了，都啥年代了还塞网络？");
+                                    }else if (throwable instanceof ConnectException){
+                                        CommonUitls.showToast(getActivity(),"啊偶，连接失败了，都啥年代了无网络？");
+                                    }else {
+                                        CommonUitls.showToast(getActivity(),"啊偶，发生了不可预期的错误："+throwable.getMessage());
+                                    }
+                                });
                     })
                     .setCancelText("取消")
                     .setCancelClickListener(sweetAlertDialog -> sweetAlertDialog.dismissWithAnimation())
@@ -159,16 +165,19 @@ public class SystemFlyingAreaFragment extends BaseFragment {
                         mAdapter.setNewData(listApiResponse.getData());
                         finishTask();
                     }else {
-                        initEmptyView();
+                        initEmptyView(listApiResponse.getMsg());
                     }
-
-
                 }, throwable -> {
-                    initErrorView();
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        initEmptyView("啊偶，连接超时了，都啥年代了还塞网络？");
+                    }else if (throwable instanceof ConnectException){
+                        initEmptyView("啊偶，连接失败了，都啥年代了无网络？");
+                    }else {
+                        initEmptyView("啊偶，发生了不可预期的错误："+throwable.getMessage());
+                    }
                 });
     }
-
-    @Override
     protected void initRefreshLayout() {
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefreshLayout.post(() -> {
@@ -208,19 +217,12 @@ public class SystemFlyingAreaFragment extends BaseFragment {
         mRecyclerView.setOnTouchListener((v, event) -> mIsRefreshing);
     }
 
-    public void initErrorView() {
-        mSwipeRefreshLayout.setRefreshing(false);
-        mCustomEmptyView.setVisibility(View.VISIBLE);
-        mRecyclerView.setVisibility(View.GONE);
-        mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
-        mCustomEmptyView.setEmptyText("加载失败~(≧▽≦)~啦啦啦.");
-    }
 
-    public void initEmptyView() {
+    public void initEmptyView(String tips) {
         mSwipeRefreshLayout.setRefreshing(false);
         mCustomEmptyView.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.GONE);
         mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
-        mCustomEmptyView.setEmptyText("暂无数据，快去添加吧");
+        mCustomEmptyView.setEmptyText(tips);
     }
 }

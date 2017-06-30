@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPhotoFragment;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPlaybackFragment;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarServiceFragment;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarVideoFragment;
 
@@ -22,10 +23,11 @@ public class HomePagerAdapter extends FragmentPagerAdapter {
 
   private Fragment[] fragments;
 
+  private int loadtype;
 
-  public HomePagerAdapter(FragmentManager fm, Context context) {
-
+  public HomePagerAdapter(FragmentManager fm, Context context,int loadtype) {
     super(fm);
+    this.loadtype = loadtype;
     TITLES = context.getResources().getStringArray(R.array.sections);
     fragments = new Fragment[TITLES.length];
   }
@@ -37,7 +39,13 @@ public class HomePagerAdapter extends FragmentPagerAdapter {
     if (fragments[position] == null) {
       switch (position) {
         case 0:
-          fragments[position] = CarServiceFragment.newInstance();
+          if (loadtype == 0||loadtype == 1)
+          {
+            fragments[position] = CarServiceFragment.newInstance();
+          }else {
+            fragments[position] = CarPlaybackFragment.newInstance();
+          }
+
           break;
         case 1:
           fragments[position] = CarPhotoFragment.newInstance();

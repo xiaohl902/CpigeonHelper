@@ -3,7 +3,9 @@ package com.cpigeon.cpigeonhelper.modular.usercenter.activity;
 import android.Manifest;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -24,6 +26,8 @@ import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 import com.tbruyelle.rxpermissions2.RxPermissions;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -38,6 +42,8 @@ import io.reactivex.schedulers.Schedulers;
 import tech.michaelx.authcode.AuthCode;
 import tech.michaelx.authcode.CodeConfig;
 
+import static com.cpigeon.cpigeonhelper.utils.CommonUitls.isAccountValid;
+import static com.cpigeon.cpigeonhelper.utils.CommonUitls.showToast;
 import static com.cpigeon.cpigeonhelper.utils.CommonUitls.simulateErrorProgress;
 import static com.cpigeon.cpigeonhelper.utils.CommonUitls.simulateSuccessProgress;
 
@@ -61,6 +67,7 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
     @BindView(R.id.btn_confim)
     CircularProgressButton btnConfim;
     private long timestamp;
+
     @Override
     protected void swipeBack() {
         Slidr.attach(this);
@@ -78,13 +85,10 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
         setTopLeftButton(R.drawable.ic_back, ForgetPwdActivity.this::finish);
     }
 
-
-
-
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
-        StatusBarUtil.setColorForSwipeBack(this, mColor,0);//最后一个参数代表了透明度，0位全部透明
+        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
+        StatusBarUtil.setColorForSwipeBack(this, mColor, 0);//最后一个参数代表了透明度，0位全部透明
     }
 
 
@@ -98,7 +102,7 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
         btnConfim.setProgress(50);
         RetrofitHelper
                 .getApi()
-                .getLoginPassword(postParams, timestamp, CommonUitls.getApiSign(timestamp,postParams))
+                .getLoginPassword(postParams, timestamp, CommonUitls.getApiSign(timestamp, postParams))
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -108,8 +112,16 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
                     } else {
                         simulateErrorProgress(btnConfim);
                     }
-                },throwable -> {
-                    Logger.e("错误的消息"+throwable.getMessage());
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        CommonUitls.showToast(this,"连接超时");
+                    }else if (throwable instanceof ConnectException)
+                    {
+                        CommonUitls.showToast(this,"无法连接到服务器");
+                    }else if (throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this,"发生了不可预知的错误"+throwable.getMessage());
+                    }
                 });
     }
 
@@ -117,15 +129,35 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_sendcheckcode:
-                timer.start();
-                getCheckCode();
+                if (TextUtils.isEmpty(etPhonenumber.getText().toString().trim()) || !isAccountValid(etPhonenumber.getText().toString().trim())) {
+                    CommonUitls.showToast(this, "输入的手机号错误，请重新输入");
+                } else {
+                    getCheckCode();
+                }
                 break;
             case R.id.btn_confim:
                 if (btnConfim.getProgress() == 0) {
-                    changePassWord();
+                    if (!TextUtils.isEmpty(etPhonenumber.getText().toString().trim()) &&
+                            !TextUtils.isEmpty(etCheckcode.getText().toString().trim()) &&
+                            !TextUtils.isEmpty(etNewpwd.getText().toString().trim()) &&
+                            !TextUtils.isEmpty(etChecknewpwd.getText().toString().trim()) &&
+                            etNewpwd.getText().toString().trim().equals(etChecknewpwd.getText().toString().trim())) {
+                        changePassWord();
+                    } else {
+                        showToast(this, "您的输入不正确，请检查重新输入");
+                    }
+
                 } else {
                     btnConfim.setProgress(0);
-                    changePassWord();
+                    if (!TextUtils.isEmpty(etPhonenumber.getText().toString().trim()) &&
+                            !TextUtils.isEmpty(etCheckcode.getText().toString().trim()) &&
+                            !TextUtils.isEmpty(etNewpwd.getText().toString().trim()) &&
+                            !TextUtils.isEmpty(etChecknewpwd.getText().toString().trim()) &&
+                            etNewpwd.getText().toString().trim().equals(etChecknewpwd.getText().toString().trim())) {
+                        changePassWord();
+                    } else {
+                        showToast(this, "您的输入不正确，请检查重新输入");
+                    }
                 }
                 break;
         }
@@ -141,18 +173,21 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
      * 获取验证码
      */
     public void getCheckCode() {
+
         RxPermissions rxPermissions = new RxPermissions(this);
         rxPermissions
                 .request(Manifest.permission.READ_SMS,
                         Manifest.permission.RECEIVE_SMS)
                 .compose(bindToLifecycle())
-                .subscribe(granted  -> {
-                    if (granted){
+                .subscribe(granted -> {
+                    if (granted) {
                         sendCheckCode();
-                    }else {
+                    } else {
                         sendCheckCode();
                     }
                 });
+
+
     }
 
     private void sendCheckCode() {
@@ -161,11 +196,12 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
         postParams.put("p", etPhonenumber.getText().toString().trim());
         postParams.put("t", "2");
         RetrofitHelper.getApi()
-                .sendVerifyCode(postParams, timestamp, CommonUitls.getApiSign(timestamp,postParams))
+                .sendVerifyCode(postParams, timestamp, CommonUitls.getApiSign(timestamp, postParams))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(checkCodeApiResponse -> {
-                    if (checkCodeApiResponse.isStatus()) {
+                    if (checkCodeApiResponse.getErrorCode() == 0) {
+                        timer.start();
                         CodeConfig config = new CodeConfig.Builder()
                                 .codeLength(4) // 设置验证码长度
                                 .smsFromStart(106) // 设置验证码发送号码前几位数字
@@ -173,33 +209,29 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
                                 .smsBodyContains("验证码：") // 设置验证码短信内容包含文字
                                 .build();
                         AuthCode.getInstance().with(ForgetPwdActivity.this).config(config).into((EditText) findViewById(R.id.et_checkcode));
-
                     } else {
-                        switch (checkCodeApiResponse.getErrorCode()) {
-                            case 1005:
-                                Toast.makeText(mContext, "发送失败,同一个手机号每天获取最多两次哦", Toast.LENGTH_SHORT).show();
-                                break;
-                            case 1003:
-                                Toast.makeText(mContext, "发送失败,手机号码已被使用", Toast.LENGTH_SHORT).show();
-                                break;
-                            case 1008:
-                                Toast.makeText(mContext, "发送失败,该手机号码未绑定账号", Toast.LENGTH_SHORT).show();
-                                break;
-
+                                CommonUitls.showToast(mContext, checkCodeApiResponse.getMsg());
                         }
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        CommonUitls.showToast(this,"连接超时");
+                    }else if (throwable instanceof ConnectException)
+                    {
+                        CommonUitls.showToast(this,"无法连接到服务器");
+                    }else if (throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this,"发生了不可预知的错误"+throwable.getMessage());
                     }
-                },throwable -> {
-                    Logger.e("错误消息"+throwable.getMessage());
                 });
     }
 
 
-    private CountDownTimer timer = new CountDownTimer(10000, 1000) {
+    private CountDownTimer timer = new CountDownTimer(50000, 1000) {
 
         @Override
         public void onTick(long millisUntilFinished) {
 
-            btnSendcheckcode.setText("("+millisUntilFinished / 1000 +") 秒后可重新发送");
+            btnSendcheckcode.setText("(" + millisUntilFinished / 1000 + ") 秒后可重新发送");
             btnSendcheckcode.setClickable(false);
         }
 

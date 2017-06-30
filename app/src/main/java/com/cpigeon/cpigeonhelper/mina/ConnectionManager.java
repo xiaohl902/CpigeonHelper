@@ -126,7 +126,7 @@ public class ConnectionManager {
                 }
                 if(ConnectionManager.this.connect()){
                     mHandler.post(() -> {
-                        String s =  EncryptionTool.encryptAES(AssociationData.getUserToken(), EncryptionTool.MD5(KEY_SERVER_PWD).toLowerCase());
+                        String s =  EncryptionTool.encryptAES(AssociationData.getUserToken(),KEY_SERVER_PWD);
                         IoBuffer buffer = IoBuffer.allocate(100000);
                         buffer.put(
                                 ("[len="+s.length()+"]"+s)
@@ -136,7 +136,6 @@ public class ConnectionManager {
 
                     Logger.e("断线重连[" + mConnection.getDefaultRemoteAddress().getHostName() + ":" +
                             mConnection.getDefaultRemoteAddress().getPort() + "]成功");
-
                     break;
                 }
                 Thread.sleep(5000);

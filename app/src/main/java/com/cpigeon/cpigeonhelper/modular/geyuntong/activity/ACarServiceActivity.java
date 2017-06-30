@@ -3,6 +3,7 @@ package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.widget.FrameLayout;
 
 import com.cpigeon.cpigeonhelper.R;
@@ -15,7 +16,9 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
+ *
  * Created by Administrator on 2017/5/31.
+ *
  */
 
 public class ACarServiceActivity extends ToolbarBaseActivity {
@@ -38,7 +41,7 @@ public class ACarServiceActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
@@ -50,7 +53,7 @@ public class ACarServiceActivity extends ToolbarBaseActivity {
         setGeYunTong(geYunTong);
         setTitle(geYunTong.getRaceName());
         setTopLeftButton(R.drawable.ic_back, this::finish);
-
+        setTopRightButton("编辑", this::changeRaceInfo);
         initFragments();
     }
 
@@ -84,7 +87,13 @@ public class ACarServiceActivity extends ToolbarBaseActivity {
         //super.onSaveInstanceState(outState);
     }
 
-
+    private void changeRaceInfo(){
+        Bundle bundle = new Bundle();
+        bundle.putParcelable("geyuntong",geYunTong);
+        Intent intent = new Intent(ACarServiceActivity.this,AddGeyuntongActivity.class);
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
 
 
 }

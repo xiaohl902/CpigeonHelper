@@ -36,7 +36,7 @@ public class RootListAdapter extends BaseQuickAdapter<RootList, BaseViewHolder> 
             baseViewHolder.setText(R.id.tv_rootlist_status,"已停用");
             baseViewHolder.setTextColor(R.id.tv_rootlist_status,mContext.getResources().getColor(R.color.colorLayoutSplitLineGray));
         }
-        Picasso.with(mContext).load(rootList.getAuthUserInfo().getHeadimgUrl())
+        Picasso.with(mContext).load(TextUtils.isEmpty(rootList.getAuthUserInfo().getHeadimgUrl())?"sss":rootList.getAuthUserInfo().getHeadimgUrl())
                 .placeholder(R.mipmap.logos)
                 .error(R.mipmap.logos)
                 .into((CircleImageView) baseViewHolder.getView(R.id.iv_rootlist_usericon));

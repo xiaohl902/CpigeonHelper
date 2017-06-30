@@ -28,6 +28,19 @@
     <!--输入框的高度-->
     <dimen name="activity_login_input_layout_height">52dp</dimen>
     <dimen name="dp_4">4dp</dimen>
-
+    <dimen name="dp_20">20dp</dimen>
+    <dimen name="split_line_width">1px</dimen>
+    <dimen name="activity_about_copyright_textsize">14sp</dimen>
+    <dimen name="activity_about_copyright_margintop">5dp</dimen>
+    <dimen name="activity_about_copyright_layout_paddingbottom">10dp</dimen>
+    <dimen name="activity_about_clickitem_textsize">16sp</dimen>
+    <dimen name="activity_about_logo_layout_minheight">240dp</dimen>
+    <dimen name="activity_about_logo_height">70dp</dimen>
+    <dimen name="activity_about_logo_margintop">35dp</dimen>
+    <dimen name="activity_about_appname_matgintop">14dp</dimen>
+    <dimen name="activity_about_appname_textsize">22sp</dimen>
+    <dimen name="activity_about_versionname_margintop">8dp</dimen>
+    <dimen name="activity_about_versionname_textsize">22sp</dimen>
+    <dimen name="activity_about_company_intro_textsize">14sp</dimen>
 
 </resources>

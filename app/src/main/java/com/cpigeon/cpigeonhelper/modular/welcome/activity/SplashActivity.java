@@ -22,6 +22,8 @@ import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +69,7 @@ public class SplashActivity extends BaseActivity {
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-        Observable.timer(2000, TimeUnit.MILLISECONDS)
+        Observable.timer(1000, TimeUnit.MILLISECONDS)
                 .compose(bindToLifecycle())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(aLong -> {
@@ -100,7 +102,15 @@ public class SplashActivity extends BaseActivity {
                     }
                     this.finishTask();
                 }, throwable -> {
-                    Logger.e("发生了异常" + throwable.getMessage());
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        CommonUitls.showToast(this,"连接超时");
+                    }else if (throwable instanceof ConnectException)
+                    {
+                        CommonUitls.showToast(this,"无法连接到服务器");
+                    }else if (throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this,"发生了不可预知的错误"+throwable.getMessage());
+                    }
                     this.finishTask();
                 });
 

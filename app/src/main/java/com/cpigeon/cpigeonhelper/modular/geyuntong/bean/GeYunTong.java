@@ -3,8 +3,6 @@ package com.cpigeon.cpigeonhelper.modular.geyuntong.bean;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.io.Serializable;
-
 /**
  * Created by Administrator on 2017/6/7.
  */
@@ -21,6 +19,10 @@ public class GeYunTong implements Parcelable{
      * flyingTime : 2017-05-19 09:39:31
      * stateCode : 0
      * state : 未开始监控|监控中|监控结束|未知状态
+     * muid : 0
+     * mTime : 2017-05-19 09:39:31
+     * mEndTime : 2017-05-19 09:39:31
+     * raceImage : url 绝对路径
      */
 
     private int id;
@@ -32,15 +34,10 @@ public class GeYunTong implements Parcelable{
     private String flyingTime;
     private int stateCode;
     private String state;
+    private int muid;
+    private String mTime;
+    private String mEndTime;
     private String raceImage;
-
-    public String getRaceImage() {
-        return raceImage;
-    }
-
-    public void setRaceImage(String raceImage) {
-        this.raceImage = raceImage;
-    }
 
     public int getId() {
         return id;
@@ -114,6 +111,38 @@ public class GeYunTong implements Parcelable{
         this.state = state;
     }
 
+    public int getMuid() {
+        return muid;
+    }
+
+    public void setMuid(int muid) {
+        this.muid = muid;
+    }
+
+    public String getMTime() {
+        return mTime;
+    }
+
+    public void setMTime(String mTime) {
+        this.mTime = mTime;
+    }
+
+    public String getMEndTime() {
+        return mEndTime;
+    }
+
+    public void setMEndTime(String mEndTime) {
+        this.mEndTime = mEndTime;
+    }
+
+    public String getRaceImage() {
+        return raceImage;
+    }
+
+    public void setRaceImage(String raceImage) {
+        this.raceImage = raceImage;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -129,11 +158,14 @@ public class GeYunTong implements Parcelable{
         dest.writeString(createTime);
         dest.writeString(flyingTime);
         dest.writeInt(stateCode);
+        dest.writeInt(muid);
         dest.writeString(state);
+        dest.writeString(mTime);
+        dest.writeString(mEndTime);
         dest.writeString(raceImage);
     }
 
-    public static final Parcelable.Creator<GeYunTong> CREATOR = new Creator<GeYunTong>() {
+    public static final Creator<GeYunTong> CREATOR = new Creator<GeYunTong>() {
         @Override
         public GeYunTong createFromParcel(Parcel source) {
             return new GeYunTong(source);
@@ -157,8 +189,13 @@ public class GeYunTong implements Parcelable{
         stateCode = in.readInt();
         state = in.readString();
         raceImage = in.readString();
+        mEndTime = in.readString();
+        mTime = in.readString();
+        muid = in.readInt();
 
     }
+
+
 
 
 }

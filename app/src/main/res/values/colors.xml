@@ -29,4 +29,24 @@
 
     <!--actionsheet模式的取消按钮背景颜色-->
     <color name="bgColor_actionsheet_cancel_nor">#ffffff</color>
+    
+    <color name="colorSvip">#9638cb</color>
+    <color name="colorVip">#6e5df7</color>
+    <color name="colorNormal">#ff7373</color>
+    <color name="colorNormalStart">#ffc297</color>
+    <color name="colorNormalEndColor">#ff4847</color>
+    <color name="colorSvipStart">#CD71EB</color>
+    <color name="colorSvipEndColor">#5B2C95</color>
+    <color name="colorVipStart">#aea1ff</color>
+    <color name="colorVipEndColor">#513eff</color>
+
+    <color name="colorRed">#d50000</color>
+    <color name="colorBule">#0081ef</color>
+    <color name="colorGary">#7f7f7f</color>
+    <color name="color_f6">#f6f6f6</color>
+
+    <color name="colorOpenVip">#E6A906</color>
+    <color name="colorOpenGyt">#1296db</color>
+    <color name="colorXuFei">#2aa515</color>
+    <color name="colorGxt">#d4237a</color>
 </resources>

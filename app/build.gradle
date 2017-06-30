@@ -111,9 +111,12 @@ dependencies {
     compile files('libs/mina-core-2.0.16.jar')
     compile files('libs/slf4j-android-1.6.1-RC1.jar')
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
+
     //高德地图相关
     compile 'com.amap.api:map3d-native:latest.integration'
     compile 'com.amap.api:map3d:latest.integration'
+    compile 'com.amap.api:location:latest.integration'
+    compile 'com.amap.api:search:latest.integration'
     compile 'com.amap.api:location:latest.integration'
 
     compile 'com.zhy:autolayout:1.4.5'
@@ -127,5 +130,9 @@ dependencies {
     compile 'org.greenrobot:eventbus:3.0.0'
 
     compile 'fm.jiecao:jiecaovideoplayer:5.5.4'
+
+    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
+
+    compile 'com.github.vipulasri:timelineview:1.0.5'
 
 }

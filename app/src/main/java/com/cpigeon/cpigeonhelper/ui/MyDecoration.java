@@ -71,7 +71,6 @@ public class MyDecoration extends RecyclerView.ItemDecoration {
 
             mDivider.setBounds(left, top, right, bottom);
             mDivider.draw(c);
-            Logger.e(left + " " + top + " "+right+"   "+bottom+" "+i);
         }
     }
 

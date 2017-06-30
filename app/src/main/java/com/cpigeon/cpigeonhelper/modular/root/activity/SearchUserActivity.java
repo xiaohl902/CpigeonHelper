@@ -2,10 +2,12 @@ package com.cpigeon.cpigeonhelper.modular.root.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +31,8 @@ import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +80,7 @@ public class SearchUserActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
@@ -92,29 +96,46 @@ public class SearchUserActivity extends ToolbarBaseActivity {
 
     @OnClick(R.id.tv_search)
     public void onViewClicked() {
-        clearData();
-        timestamp = System.currentTimeMillis() / 1000;
-        postParams = new HashMap<>();
-        postParams.put("p", searchEdittext.getText().toString().trim());
-        if (!TextUtils.isEmpty(searchEdittext.getText().toString().trim())) {
-            RetrofitHelper.getApi()
-                    .getUserInfoByTel(AssociationData.getUserToken(),
-                            searchEdittext.getText().toString().trim(),
-                            timestamp, CommonUitls.getApiSign(timestamp,postParams))
-                    .throttleFirst(10, TimeUnit.MILLISECONDS)
-                    .compose(bindToLifecycle())
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(listApiResponse -> {
-                        if (listApiResponse.isStatus()&&listApiResponse.getData()!=null)
-                        {
-                            mAdapter.setNewData(listApiResponse.getData());
-                            finishTask();
-                        }else {
-                            initEmptyView("暂无数据");
-                        }
-                    }, throwable -> initEmptyView("出错了"+throwable.getMessage()));
+        if (TextUtils.isEmpty(searchEdittext.getText().toString().trim()))
+        {
+            CommonUitls.showToast(this,"请输入需要授权用户的手机号");
+        }else {
+            clearData();
+            timestamp = System.currentTimeMillis() / 1000;
+            postParams = new HashMap<>();
+            postParams.put("p", searchEdittext.getText().toString().trim());
+            if (!TextUtils.isEmpty(searchEdittext.getText().toString().trim())) {
+
+                RetrofitHelper.getApi()
+                        .getUserInfoByTel(AssociationData.getUserToken(),
+                                searchEdittext.getText().toString().trim(),
+                                timestamp, CommonUitls.getApiSign(timestamp,postParams))
+                        .throttleFirst(10, TimeUnit.MILLISECONDS)
+                        .compose(bindToLifecycle())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(listApiResponse -> {
+                            if (listApiResponse.getErrorCode() == 0 &&listApiResponse.getData()!=null && listApiResponse.getData().size()>0)
+                            {
+                                mAdapter.setNewData(listApiResponse.getData());
+                                finishTask();
+                            }else {
+                                initEmptyView(listApiResponse.getMsg());
+                            }
+                        }, throwable -> {
+                            if (throwable instanceof SocketTimeoutException)
+                            {
+                                initEmptyView("啊偶，连接超时了，都啥年代了还塞网络？");
+                            }else if (throwable instanceof ConnectException){
+                                initEmptyView("啊偶，连接失败了，都啥年代了无网络？");
+                            }else {
+                                initEmptyView("啊偶，发生了不可预期的错误："+throwable.getMessage());
+                            }
+                        });
+            }
         }
+
+
     }
 
     private void clearData() {
@@ -167,10 +188,16 @@ public class SearchUserActivity extends ToolbarBaseActivity {
         RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
                 .addFormDataPart("auuid", String.valueOf(auuid))
+                .addFormDataPart("enable", String.valueOf(1))
+                .addFormDataPart("per", String.valueOf(1))
+                .addFormDataPart("type", "ZGZS")
                 .build();
         postParams = new HashMap<>();
         postParams.put("uid", String.valueOf(AssociationData.getUserId()));
         postParams.put("auuid", String.valueOf(auuid));
+        postParams.put("enable", String.valueOf(1));
+        postParams.put("per", String.valueOf(1));
+        postParams.put("type", "ZGZS");
         RetrofitHelper.getApi()
                 .setAuthUserPermissions(AssociationData.getUserToken(),
                         requestBody,timestamp,CommonUitls.getApiSign(timestamp,postParams))
@@ -178,25 +205,36 @@ public class SearchUserActivity extends ToolbarBaseActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(rootManagerListApiResponse -> {
-                    new SweetAlertDialog(this,SweetAlertDialog.SUCCESS_TYPE)
-                            .setTitleText("添加成功")
-                            .setContentText("成功添加"+s+"为授权用户")
-                            .setConfirmText("确定")
-                            .setConfirmClickListener(sweetAlertDialog -> {
-                                sweetAlertDialog.dismissWithAnimation();
-                                finish();
-                            }
+                   if (rootManagerListApiResponse.getErrorCode() == 0)
+                   {
+                       new SweetAlertDialog(this,SweetAlertDialog.SUCCESS_TYPE)
+                               .setTitleText("添加成功")
+                               .setContentText("成功添加"+s+"为授权用户")
+                               .setConfirmText("确定")
+                               .setConfirmClickListener(sweetAlertDialog -> {
+                                           sweetAlertDialog.dismissWithAnimation();
+                                           finish();
+                                       }
 
-                            ).show();
+                               ).show();
+                   }else {
+                       new SweetAlertDialog(this,SweetAlertDialog.ERROR_TYPE)
+                               .setTitleText("添加失败")
+                               .setContentText(rootManagerListApiResponse.getMsg())
+                               .setConfirmText("确定")
+                               .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation
+
+                               ).show();
+                   }
                 },throwable -> {
-                    new SweetAlertDialog(this,SweetAlertDialog.ERROR_TYPE)
-                            .setTitleText("添加错误")
-                            .setContentText(throwable.getMessage())
-                            .setConfirmText("确定")
-                            .setConfirmClickListener(sweetAlertDialog -> {
-                                sweetAlertDialog.dismissWithAnimation();
-                                finish();
-                            }).show();
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        CommonUitls.showToast(this,"连接超时了，都啥年代了还塞网络？");
+                    }else if (throwable instanceof ConnectException){
+                        CommonUitls.showToast(this,"连接失败了，都啥年代了无网络？");
+                    }else {
+                        CommonUitls.showToast(this,"发生了不可预期的错误："+throwable.getMessage());
+                    }
                 });
     }
 

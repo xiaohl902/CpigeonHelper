@@ -1,20 +1,26 @@
 package com.cpigeon.cpigeonhelper.modular.xiehui.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
-import com.cpigeon.cpigeonhelper.modular.xiehui.fragment.EditDialogFragment;
-import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
+import com.cpigeon.cpigeonhelper.modular.xiehui.fragment.MyDialogFragment;
+import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
-import com.r0adkll.slidr.Slidr;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -26,54 +32,35 @@ import io.reactivex.schedulers.Schedulers;
  */
 
 public class XieHuiInfoActivity extends ToolbarBaseActivity {
-    @BindView(R.id.tv_xiehui_type_name)
-    TextView tvXiehuiTypeName;
+
+
     @BindView(R.id.tv_xiehui_name)
     TextView tvXiehuiName;
-    @BindView(R.id.ll_xiehui_name)
-    LinearLayout llXiehuiName;
     @BindView(R.id.tv_xiehui_shotname)
-    TextView tvXiehuiShotname;
-    @BindView(R.id.ll_xiehui_shotname)
-    LinearLayout llXiehuiShotname;
+    EditText tvXiehuiShotname;
     @BindView(R.id.tv_xiehui_yuming)
-    TextView tvXiehuiYuming;
-    @BindView(R.id.ll_xiehui_yuming)
-    LinearLayout llXiehuiYuming;
+    EditText tvXiehuiYuming;
     @BindView(R.id.tv_xiehui_user)
-    TextView tvXiehuiUser;
-    @BindView(R.id.ll_xiehui_user)
-    LinearLayout llXiehuiUser;
+    EditText tvXiehuiUser;
     @BindView(R.id.tv_xiehui_tel)
-    TextView tvXiehuiTel;
-    @BindView(R.id.ll_xiehui_tel)
-    LinearLayout llXiehuiTel;
+    EditText tvXiehuiTel;
     @BindView(R.id.tv_xiehui_mail)
-    TextView tvXiehuiMail;
-    @BindView(R.id.ll_xiehui_mail)
-    LinearLayout llXiehuiMail;
+    EditText tvXiehuiMail;
     @BindView(R.id.tv_xiehui_address)
-    TextView tvXiehuiAddress;
-    @BindView(R.id.ll_xiehui_address)
-    LinearLayout llXiehuiAddress;
+    EditText tvXiehuiAddress;
     @BindView(R.id.tv_xiehui_registertime)
     TextView tvXiehuiRegistertime;
-    @BindView(R.id.ll_xiehui_registertime)
-    LinearLayout llXiehuiRegistertime;
     @BindView(R.id.tv_xiehui_createtime)
     TextView tvXiehuiCreatetime;
-    @BindView(R.id.ll_xiehui_createtime)
-    LinearLayout llXiehuiCreatetime;
     @BindView(R.id.tv_xiehui_endtime)
     TextView tvXiehuiEndtime;
-    @BindView(R.id.ll_xiehui_endtime)
-    LinearLayout llXiehuiEndtime;
-    @BindView(R.id.empty_layout)
-    CustomEmptyView mCustomEmptyView;
+    @BindView(R.id.ll_xiehui_name)
+    LinearLayout llXiehuiNameLayout;
+    @BindView(R.id.ll_xiehui_createtime)
+    LinearLayout llXiehuiCreatetimeLayout;
 
     @Override
     protected void swipeBack() {
-        Slidr.attach(this);
     }
 
     @Override
@@ -83,76 +70,154 @@ public class XieHuiInfoActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this, R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
-        this.setTitle("支付");
+        this.setTitle("信息修改");
         this.setTopLeftButton(R.drawable.ic_back, this::finish);
-        this.setTopRightButton("完成", () -> Toast.makeText(this, "点击了右上角按钮！", Toast.LENGTH_LONG).show());
+        this.setTopRightButton("保存", this::saveInfo);
         loadData();
     }
 
     @Override
     public void loadData() {
         RetrofitHelper.getApi()
-                .getOrgInfo(AssociationData.getUserToken(),AssociationData.getUserId())
+                .getOrgInfo(AssociationData.getUserToken(), AssociationData.getUserId())
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(orgInfoApiResponse -> {
-                    if (orgInfoApiResponse.isStatus()) {
-                        tvXiehuiName.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getName()) ? "无名称" : orgInfoApiResponse.getData().getName());
-                        tvXiehuiAddress.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getAddr()) ? "无地点" : orgInfoApiResponse.getData().getAddr());
-                        tvXiehuiShotname.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getShortname()) ? "无地点" : orgInfoApiResponse.getData().getShortname());
-                        tvXiehuiUser.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getContacts()) ? "无联系人" : orgInfoApiResponse.getData().getContacts());
-                        tvXiehuiTel.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getPhone()) ? "无联系电话" : orgInfoApiResponse.getData().getPhone());
-                        tvXiehuiMail.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getEmail()) ? "无邮箱" : orgInfoApiResponse.getData().getEmail());
-                        tvXiehuiYuming.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getDomain()) ? "无二级域名" : orgInfoApiResponse.getData().getDomain());
-                        tvXiehuiRegistertime.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getRegistTime()) ? "无注册时间" : orgInfoApiResponse.getData().getRegistTime());
-                        tvXiehuiCreatetime.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getSetupTime()) ? "无建立时间" : orgInfoApiResponse.getData().getSetupTime());
-                        tvXiehuiEndtime.setText(TextUtils.isEmpty(orgInfoApiResponse.getData().getExpireTime()) ? "无到期时间" : orgInfoApiResponse.getData().getExpireTime());
+                    if (orgInfoApiResponse.getErrorCode() == 0) {
+                        tvXiehuiName.setText(orgInfoApiResponse.getData().getName());
 
+                        tvXiehuiAddress.setText(orgInfoApiResponse.getData().getAddr());
+
+                        tvXiehuiShotname.setText(orgInfoApiResponse.getData().getShortname());
+
+                        tvXiehuiUser.setText(orgInfoApiResponse.getData().getContacts());
+
+                        tvXiehuiTel.setText(orgInfoApiResponse.getData().getPhone());
+
+                        tvXiehuiMail.setText(orgInfoApiResponse.getData().getEmail());
+
+                        tvXiehuiYuming.setText(orgInfoApiResponse.getData().getDomain());
+
+                        tvXiehuiRegistertime.setText(orgInfoApiResponse.getData().getRegistTime());
+
+                        tvXiehuiCreatetime.setText(orgInfoApiResponse.getData().getSetupTime());
+
+                        tvXiehuiEndtime.setText(orgInfoApiResponse.getData().getExpireTime());
+                    } else {
+                        CommonUitls.showToast(this, orgInfoApiResponse.getMsg());
                     }
-                },throwable -> {
-                    initEmptyView("连接失败，请您检查网络");
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "获取失败，连接超时");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "获取失败，连接异常");
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "获取失败");
+                    }
                 });
     }
 
-    @OnClick({R.id.ll_xiehui_name, R.id.ll_xiehui_shotname, R.id.ll_xiehui_yuming, R.id.ll_xiehui_user, R.id.ll_xiehui_tel, R.id.ll_xiehui_mail, R.id.ll_xiehui_address, R.id.ll_xiehui_registertime, R.id.ll_xiehui_createtime, R.id.ll_xiehui_endtime})
+
+    @OnClick({R.id.ll_xiehui_name, R.id.tv_xiehui_shotname, R.id.tv_xiehui_yuming, R.id.tv_xiehui_user, R.id.tv_xiehui_tel, R.id.tv_xiehui_mail, R.id.tv_xiehui_address, R.id.ll_xiehui_createtime})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll_xiehui_name:
+                startActivity(new Intent(XieHuiInfoActivity.this,ChangeNameActivity.class));
                 break;
-            case R.id.ll_xiehui_shotname:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_SHORTNAME,"修改简称",tvXiehuiShotname.getText().toString()).show(getSupportFragmentManager(),"提示");
+            case R.id.tv_xiehui_shotname:
+                tvXiehuiShotname.setCursorVisible(true);
+                tvXiehuiShotname.setFocusable(true);
+                tvXiehuiShotname.setFocusableInTouchMode(true);
+                tvXiehuiShotname.requestFocus();
                 break;
-            case R.id.ll_xiehui_yuming:
+            case R.id.tv_xiehui_yuming:
+                tvXiehuiYuming.setCursorVisible(true);
+                tvXiehuiYuming.setFocusable(true);
+                tvXiehuiYuming.setFocusableInTouchMode(true);
+                tvXiehuiYuming.requestFocus();
                 break;
-            case R.id.ll_xiehui_user:
+            case R.id.tv_xiehui_user:
+                tvXiehuiUser.setCursorVisible(true);
+                tvXiehuiUser.setFocusable(true);
+                tvXiehuiUser.setFocusableInTouchMode(true);
+                tvXiehuiUser.requestFocus();
                 break;
-            case R.id.ll_xiehui_tel:
+            case R.id.tv_xiehui_tel:
+                tvXiehuiTel.setCursorVisible(true);
+                tvXiehuiTel.setFocusable(true);
+                tvXiehuiTel.setFocusableInTouchMode(true);
+                tvXiehuiTel.requestFocus();
                 break;
-            case R.id.ll_xiehui_mail:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_EMAIL,"修改邮箱",tvXiehuiMail.getText().toString()).show(getSupportFragmentManager(),"提示");
+            case R.id.tv_xiehui_mail:
+                tvXiehuiMail.setCursorVisible(true);
+                tvXiehuiMail.setFocusable(true);
+                tvXiehuiMail.setFocusableInTouchMode(true);
+                tvXiehuiMail.requestFocus();
                 break;
-            case R.id.ll_xiehui_address:
-                EditDialogFragment.getInstance(EditDialogFragment.DIALOG_TYPE_ADDRESS,"修改地址",tvXiehuiAddress.getText().toString()).show(getSupportFragmentManager(),"提示");
-                break;
-            case R.id.ll_xiehui_registertime:
+            case R.id.tv_xiehui_address:
+                tvXiehuiAddress.setCursorVisible(true);
+                tvXiehuiAddress.setFocusable(true);
+                tvXiehuiAddress.setFocusableInTouchMode(true);
+                tvXiehuiAddress.requestFocus();
                 break;
             case R.id.ll_xiehui_createtime:
-                break;
-            case R.id.ll_xiehui_endtime:
+                MyDialogFragment.getInstance(MyDialogFragment.DIALOG_TYPE_DATE).show(getFragmentManager(), "提示");
                 break;
         }
     }
 
-    public void initEmptyView(String tips) {
-        mCustomEmptyView.setVisibility(View.VISIBLE);
-        mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
-        mCustomEmptyView.setEmptyText(tips);
+    /**
+     * 保存修改
+     */
+    public void saveInfo() {
+        long timestamp = System.currentTimeMillis() / 1000;
+        if (TextUtils.isEmpty(tvXiehuiShotname.getText().toString().trim()) ||
+                TextUtils.isEmpty(tvXiehuiAddress.getText().toString().trim()) ||
+                TextUtils.isEmpty(tvXiehuiTel.getText().toString().trim()) ||
+                TextUtils.isEmpty(tvXiehuiMail.getText().toString().trim()) ||
+                TextUtils.isEmpty(tvXiehuiUser.getText().toString().trim()) ||
+                TextUtils.isEmpty(tvXiehuiRegistertime.getText().toString().trim())) {
+            CommonUitls.showToast(this, "修改失败，请检查输入是否完整");
+        } else {
+            Map<String, Object> postParams = new HashMap<>();
+            postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+            postParams.put("type", AssociationData.getUserType());
+            postParams.put("contacts", tvXiehuiUser.getText().toString().trim());
+            postParams.put("phone", tvXiehuiTel.getText().toString().trim());
+            postParams.put("email", tvXiehuiMail.getText().toString().trim());
+            postParams.put("addr", tvXiehuiAddress.getText().toString().trim());
+            postParams.put("sname", tvXiehuiShotname.getText().toString().trim());
+            postParams.put("setuptime", tvXiehuiCreatetime.getText().toString().trim());
+            RetrofitHelper.getApi()
+                    .setOrgInfo(AssociationData.getUserToken(), postParams, timestamp,
+                            CommonUitls.getApiSign(timestamp, postParams))
+                    .compose(bindToLifecycle())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(orgInfoApiResponse -> {
+                        if (orgInfoApiResponse.getErrorCode() == 0) {
+                            CommonUitls.showToast(this, "修改成功");
+                            this.finish();
+                        } else {
+                            CommonUitls.showToast(this, orgInfoApiResponse.getMsg());
+                        }
+                    }, throwable -> {
+                        if (throwable instanceof SocketTimeoutException) {
+                            CommonUitls.showToast(this, "修改失败，连接超时");
+                        } else if (throwable instanceof ConnectException) {
+                            CommonUitls.showToast(this, "修改失败，连接失败");
+                        } else if (throwable instanceof RuntimeException) {
+                            CommonUitls.showToast(this, "修改失败");
+                        }
+                    });
+        }
     }
+
 }

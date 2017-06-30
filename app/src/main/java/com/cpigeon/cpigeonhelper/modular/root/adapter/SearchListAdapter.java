@@ -28,7 +28,7 @@ public class SearchListAdapter extends BaseQuickAdapter<UserInfoByTelBean,BaseVi
         baseViewHolder.setText(R.id.tv_rootlist_username, TextUtils.isEmpty(userInfoByTelBean.getNickname())?userInfoByTelBean.getName():userInfoByTelBean.getNickname());
         baseViewHolder.setText(R.id.tv_rootlist_usertel,userInfoByTelBean.getPhone());
         Picasso.with(mContext)
-                .load(userInfoByTelBean.getHeadimgUrl())
+                .load(TextUtils.isEmpty(userInfoByTelBean.getHeadimgUrl())?"www":userInfoByTelBean.getHeadimgUrl())
                 .placeholder(R.mipmap.logos)
                 .error(R.mipmap.logos)
                 .into((CircleImageView) baseViewHolder.getView(R.id.iv_rootlist_usericon));

@@ -31,6 +31,24 @@ public class UserBean extends RealmObject implements Serializable {
     private String headimgurl;
     private String accountType;
     private String password;
+    private String type;
+    private String atype;
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getAtype() {
+        return atype;
+    }
+
+    public void setAtype(String atype) {
+        this.atype = atype;
+    }
 
     public String getPassword() {
         return password;

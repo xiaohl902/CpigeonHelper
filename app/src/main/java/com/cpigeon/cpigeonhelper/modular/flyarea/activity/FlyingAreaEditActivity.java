@@ -2,6 +2,7 @@ package com.cpigeon.cpigeonhelper.modular.flyarea.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -14,6 +15,8 @@ import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -59,7 +62,7 @@ public class FlyingAreaEditActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
@@ -89,7 +92,7 @@ public class FlyingAreaEditActivity extends ToolbarBaseActivity {
         timestamp = System.currentTimeMillis() / 1000;
         RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
-                .addFormDataPart("type", "xiehui")
+                .addFormDataPart("type", AssociationData.getUserType())
                 .addFormDataPart("faid", String.valueOf(faid))
                 .addFormDataPart("alias", etFlyingareaAlias.getText().toString().trim())
                 .addFormDataPart("area", etFlyingareaPlace.getText().toString().trim())
@@ -98,7 +101,7 @@ public class FlyingAreaEditActivity extends ToolbarBaseActivity {
                 .build();
         Map<String,Object> postParams = new HashMap<>();
         postParams.put("uid", String.valueOf(AssociationData.getUserId()));
-        postParams.put("type", "xiehui");
+        postParams.put("type", AssociationData.getUserType());
         postParams.put("faid", String.valueOf(faid));
         postParams.put("alias", etFlyingareaAlias.getText().toString().trim());
         postParams.put("area", etFlyingareaPlace.getText().toString().trim());
@@ -119,7 +122,7 @@ public class FlyingAreaEditActivity extends ToolbarBaseActivity {
                                 .setContentText("修改成功")
                                 .setConfirmText("好的")
                                 .setConfirmClickListener(sweetAlertDialog -> {
-                                    sweetAlertDialog.dismissWithAnimation();
+                                    sweetAlertDialog.dismiss();
                                     finish();
                                 })
                                 .show();
@@ -160,22 +163,31 @@ public class FlyingAreaEditActivity extends ToolbarBaseActivity {
                 .subscribe(objectApiResponse -> {
                     if (objectApiResponse.getErrorCode() == 0){
                         new SweetAlertDialog(this,SweetAlertDialog.SUCCESS_TYPE)
+                                .setTitleText("温馨提示")
                                 .setContentText("删除成功")
                                 .setConfirmText("好的")
                                 .setConfirmClickListener(sweetAlertDialog -> {
-                                    sweetAlertDialog.dismissWithAnimation();
+                                    sweetAlertDialog.dismiss();
                                     finish();
                                 })
                                 .show();
                     }else {
                         new SweetAlertDialog(this,SweetAlertDialog.ERROR_TYPE)
+                                .setTitleText("温馨提示")
                                 .setContentText(objectApiResponse.getMsg())
                                 .setConfirmText("好的")
                                 .show();
                     }
-                }, throwable -> new SweetAlertDialog(this,SweetAlertDialog.ERROR_TYPE)
-                        .setContentText(throwable.getMessage())
-                        .setConfirmText("好的")
-                        .show());
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        CommonUitls.showToast(this,"连接超时，网络不太稳定");
+                    }else if (throwable instanceof ConnectException)
+                    {
+                        CommonUitls.showToast(this,"连接失败，请您检查一下网络");
+                    }else if (throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this,"连接出错，请联系管理员"+throwable.getMessage());
+                    }
+                });
     }
 }

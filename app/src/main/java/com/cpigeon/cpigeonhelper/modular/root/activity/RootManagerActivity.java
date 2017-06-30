@@ -2,6 +2,8 @@ package com.cpigeon.cpigeonhelper.modular.root.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -23,6 +25,8 @@ import com.r0adkll.slidr.Slidr;
 import com.squareup.picasso.MemoryPolicy;
 import com.squareup.picasso.Picasso;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,7 +44,7 @@ import okhttp3.RequestBody;
  * Created by Administrator on 2017/5/27.
  */
 
-public class RootManagerActivity extends ToolbarBaseActivity implements CompoundButton.OnCheckedChangeListener {
+public class RootManagerActivity extends ToolbarBaseActivity implements CompoundButton.OnCheckedChangeListener, View.OnClickListener {
     @BindView(R.id.iv_rootlist_usericon)
     CircleImageView ivRootlistUsericon;
     @BindView(R.id.tv_rootlist_username)
@@ -53,14 +57,16 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
     RecyclerView mRecyclerView;
     @BindView(R.id.btn_delete_root)
     Button btnDeleteRoot;
+    @BindView(R.id.swipe_refresh_layout)
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    private boolean mIsRefreshing = false;
     private int enablestatus = 1;//当前启动的状态,默认值是1，表示已经启用了
     private int auuid;//被授权的用户的ID
     private StringBuilder stringBuilder;
     private int remove = 0;//是否删除，默认值为0,1则代表删除
     private long timestamp;
-    private String imgurl;
-    private String name;
     private PermissionAdapter mAdapter;
+    private SweetAlertDialog mDialog;
 
     @Override
     protected void swipeBack() {
@@ -74,7 +80,7 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
 
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
@@ -86,14 +92,30 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
         auuid = intent.getIntExtra("auuid", 0);
         this.setTitle("修改权限");
         this.setTopLeftButton(R.drawable.ic_back, this::finish);
-        loadData();
+        initRefreshLayout();
         initRecyclerView();
     }
 
     @Override
-    public void loadData() {
-        swRoot.setOnCheckedChangeListener(this);
+    public void initRefreshLayout() {
+        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        mSwipeRefreshLayout.post(() -> {
 
+            mSwipeRefreshLayout.setRefreshing(true);
+            mIsRefreshing = true;
+            loadData();
+        });
+
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
+
+            mIsRefreshing = true;
+            loadData();
+        });
+    }
+
+    @Override
+    public void loadData() {
+        swRoot.setOnClickListener(this);
         stringBuilder = new StringBuilder(",");
         RequestBody rqb = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
@@ -106,11 +128,8 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(userPermissionsApiResponse -> {
-                    if (userPermissionsApiResponse.isStatus()) {
-
-                        enablestatus = userPermissionsApiResponse.getData().isEnable() ? 0 : 1;
-
-
+                    if (userPermissionsApiResponse.getErrorCode() == 0) {
+                        enablestatus = userPermissionsApiResponse.getData().isEnable() ? 1 : 0;
                         swRoot.setChecked(userPermissionsApiResponse.getData().isEnable());
                         Picasso.with(mContext)
                                 .load(userPermissionsApiResponse.getData().getAuthUserInfo().getHeadimgUrl())
@@ -119,36 +138,43 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                         tvRootlistUsername.setText(userPermissionsApiResponse.getData().getAuthUserInfo().getNickname());
                         tvRootlistUsertel.setText(userPermissionsApiResponse.getData().getAuthUserInfo().getPhone());
                         mAdapter.setNewData(userPermissionsApiResponse.getData().getPermissions());
-                        for (UserPermissions.PermissionsBean bean : userPermissionsApiResponse.getData().getPermissions()) {
-                            if (bean.isEnable()) {
-                                stringBuilder.append(bean.getId());
-                                stringBuilder.append(",");
-
-                            }
-
-                        }
-                        Logger.e(stringBuilder.toString());
+                        finishTask();
+                    } else {
+                        CommonUitls.showToast(this, userPermissionsApiResponse.getMsg());
                     }
                 }, throwable -> {
-
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "连接超时了，都啥年代了还塞网络？");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "连接失败了，都啥年代了无网络？");
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "发生了不可预期的错误：" + throwable.getMessage());
+                    }
                 });
+    }
+
+    @Override
+    public void finishTask() {
+        mSwipeRefreshLayout.setRefreshing(false);
+        mIsRefreshing = false;
+        mAdapter.notifyDataSetChanged();
     }
 
     @OnClick({R.id.btn_delete_root})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.btn_delete_root:
-                new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                        .setTitleText("警告")
-                        .setContentText("确认要删除该授权用户吗？")
-                        .setConfirmText("我确认")
-                        .setConfirmClickListener(sweetAlertDialog -> {
-                            remove = 1;
-                            setAuthUserPermission();
-                        })
-                        .setCancelText("点错了")
-                        .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
-                        .show();
+                mDialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE);
+                mDialog.setTitleText("警告");
+                mDialog.setContentText("确认要删除该授权用户吗？");
+                mDialog.setConfirmText("我确认");
+                mDialog.setConfirmClickListener(sweetAlertDialog -> {
+                    remove = 1;
+                    mDialog.dismissWithAnimation();
+                    setAuthUserPermission();
+                });
+                mDialog.setCancelClickListener(SweetAlertDialog::dismissWithAnimation);
+                mDialog.show();
                 break;
         }
     }
@@ -170,6 +196,7 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
             }
             Logger.e(stringBuilder.toString());
             Logger.e(stringBuilder.toString().substring(1, stringBuilder.length() > 2 ? stringBuilder.length() - 1 : stringBuilder.length()));
+            setAuthUserPermission();
         });
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -185,6 +212,7 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                 .addFormDataPart("remove", String.valueOf(remove))
                 .addFormDataPart("type", "ZGZS")
                 .build();
+
         Map<String, Object> postParams = new HashMap<>();
         postParams.put("uid", String.valueOf(AssociationData.getUserId()));
         postParams.put("auuid", String.valueOf(auuid));
@@ -201,46 +229,59 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(rootManagerListApiResponse -> {
-                            if (rootManagerListApiResponse.isStatus()) {
-                                new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                                        .setTitleText("成功")
-                                        .setContentText("修改成功")
-                                        .setConfirmText("好的")
-                                        .setConfirmClickListener(sweetAlertDialog -> {
-                                            sweetAlertDialog.dismissWithAnimation();
-                                            finish();
-                                        })
-                                        .show();
-
+                            if (rootManagerListApiResponse.getErrorCode() == 0) {
+                                mDialog = new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE);
+                                mDialog.setTitleText("成功");
+                                mDialog.setContentText("修改成功");
+                                mDialog.setConfirmText("好的");
+                                mDialog.setConfirmClickListener(sweetAlertDialog -> {
+                                    sweetAlertDialog.dismissWithAnimation();
+                                    mDialog.dismissWithAnimation();
+                                    RootManagerActivity.this.finish();
+                                });
+                                mDialog.show();
                             } else {
-                                new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                                        .setTitleText("失败")
-                                        .setContentText("修改失败")
-                                        .setConfirmText("好的")
-                                        .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation)
-                                        .show();
+                                mDialog = new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE);
+                                mDialog.setTitleText("出错了");
+                                mDialog.setContentText(rootManagerListApiResponse.getMsg());
+                                mDialog.setConfirmText("好的");
+                                mDialog.setConfirmClickListener(sweetAlertDialog -> mDialog.dismissWithAnimation());
+                                mDialog.show();
                             }
                         }, throwable -> {
-                            new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                                    .setTitleText("出错了")
-                                    .setContentText(throwable.getMessage())
-                                    .setConfirmText("好的")
-                                    .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation)
-                                    .show();
+                            if (throwable instanceof SocketTimeoutException) {
+                                CommonUitls.showToast(this, "连接超时了，都啥年代了还塞网络？");
+                            } else if (throwable instanceof ConnectException) {
+                                CommonUitls.showToast(this, "连接失败了，都啥年代了无网络？");
+                            } else {
+                                CommonUitls.showToast(this, "发生了不可预期的错误：" + throwable.getMessage());
+                            }
                         }
                 );
     }
 
+
+    @Override
+    public void onClick(View v) {
+        if (swRoot.isChecked()) {
+            enablestatus = 1;
+
+        } else {
+            enablestatus = 0;
+
+        }
+        setAuthUserPermission();
+    }
+
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-        switch (buttonView.getId()) {
-            case R.id.sw_root:
-                if (swRoot.isChecked()) {
-                    enablestatus = 1;
-                } else {
-                    enablestatus = 0;
-                }
-                break;
+        if (swRoot.isChecked()) {
+            enablestatus = 1;
+
+        } else {
+            enablestatus = 0;
+
         }
     }
+
 }

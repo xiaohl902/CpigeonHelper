@@ -16,10 +16,13 @@ import butterknife.ButterKnife;
 import butterknife.Unbinder;
 
 /**
+ *
  * Created by Administrator on 2017/5/25.
+ *
  */
 
 public abstract class BaseFragment extends RxFragment{
+
     private View parentView;
 
     private FragmentActivity activity;

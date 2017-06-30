@@ -1,6 +1,7 @@
 package com.cpigeon.cpigeonhelper.modular.flyarea.activity;
 
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.widget.EditText;
 
 import com.cpigeon.cpigeonhelper.R;
@@ -11,6 +12,8 @@ import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.r0adkll.slidr.Slidr;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -48,7 +51,7 @@ public class AddFlyingAreaActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
@@ -82,7 +85,7 @@ public class AddFlyingAreaActivity extends ToolbarBaseActivity {
 
             RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
-                    .addFormDataPart("type", "xiehui")
+                    .addFormDataPart("type", AssociationData.getUserType())
                     .addFormDataPart("alias", etFlyingareaAlias.getText().toString().trim())
                     .addFormDataPart("area", etFlyingareaPlace.getText().toString().trim())
                     .addFormDataPart("lo", etFlyingareaLo.getText().toString().trim())
@@ -91,7 +94,7 @@ public class AddFlyingAreaActivity extends ToolbarBaseActivity {
 
             Map<String, Object> postParams = new HashMap<>();
             postParams.put("uid", String.valueOf(AssociationData.getUserId()));
-            postParams.put("type", "xiehui");
+            postParams.put("type", AssociationData.getUserType());
             postParams.put("alias", etFlyingareaAlias.getText().toString().trim());
             postParams.put("area", etFlyingareaPlace.getText().toString().trim());
             postParams.put("lo", etFlyingareaLo.getText().toString().trim());
@@ -124,11 +127,17 @@ public class AddFlyingAreaActivity extends ToolbarBaseActivity {
                                     .setConfirmText("好的")
                                     .show();
                         }
-                    }, throwable -> new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
-                            .setTitleText("错误")
-                            .setContentText(throwable.getMessage())
-                            .setConfirmText("好的")
-                            .show());
+                    }, throwable -> {
+                        if (throwable instanceof SocketTimeoutException)
+                        {
+                            CommonUitls.showToast(this,"连接超时，网络不太稳定");
+                        }else if (throwable instanceof ConnectException)
+                        {
+                            CommonUitls.showToast(this,"连接失败，请您检查一下网络");
+                        }else if (throwable instanceof RuntimeException){
+                            CommonUitls.showToast(this,"连接出错，请联系管理员"+throwable.getMessage());
+                        }
+                    });
         }
 
     }

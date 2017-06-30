@@ -1,6 +1,7 @@
 package com.cpigeon.cpigeonhelper.common.db;
 
 
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PathRecord;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
 
@@ -73,22 +74,33 @@ public class RealmUtils {
     }
 
     public void deleteUserInfo() {
-
         RealmResults<UserBean> results = getRealm().where(UserBean.class).findAll();
-        getRealm().executeTransaction(new Realm.Transaction() {
-            @Override
-            public void execute(Realm realm) {
-                results.deleteAllFromRealm();
-            }
-        });
+        getRealm().executeTransaction(realm -> results.deleteAllFromRealm());
     }
 
-//    public void insertLocation(PathRecord mRecord)
-//    {
-//        getRealm().beginTransaction();//开启事务
-//        getRealm().copyToRealmOrUpdate(mRecord);
-//        getRealm().commitTransaction();
-//    }
+    public RealmResults<GYTService> queryGTYInfo(){
+        return getRealm().where(GYTService.class).findAll();
+    }
+
+    public void insertGYTService(GYTService gytService) {
+        getRealm().beginTransaction();//开启事务
+        getRealm().copyToRealm(gytService);
+        getRealm().commitTransaction();
+    }
+
+    public boolean existGYTInfo(){
+        RealmResults<GYTService> results = getRealm().where(GYTService.class).findAll();
+        if (results!=null && results.size()>0)
+        {
+            return true;
+        }
+        return false;
+    }
+
+    public void deleteGYTInfo() {
+        RealmResults<GYTService> results = getRealm().where(GYTService.class).findAll();
+        getRealm().executeTransaction(realm -> results.deleteAllFromRealm());
+    }
 
 
 

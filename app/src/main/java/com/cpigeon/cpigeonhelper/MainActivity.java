@@ -1,12 +1,14 @@
 package com.cpigeon.cpigeonhelper;
 
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
@@ -19,18 +21,27 @@ import android.widget.Toast;
 import com.cpigeon.cpigeonhelper.base.BaseActivity;
 import com.cpigeon.cpigeonhelper.base.MyApp;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
+import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
+import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.flyarea.activity.FlyingAreaActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.GeYunTongListActivity;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.OpeningGeyuntongActivity;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.UploadVideoActivity;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.UploadImgActivity;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GeYunTongListAdapter;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.HomeGYTAdapter;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
 import com.cpigeon.cpigeonhelper.modular.home.bean.HomeAd;
+import com.cpigeon.cpigeonhelper.modular.order.activity.MyBalanceActivity;
+import com.cpigeon.cpigeonhelper.modular.order.activity.OpeningGeyuntongActivity;
+import com.cpigeon.cpigeonhelper.modular.order.activity.OrderListActivity;
 import com.cpigeon.cpigeonhelper.modular.root.activity.RootListActivity;
+import com.cpigeon.cpigeonhelper.modular.setting.activity.AboutActivity;
 import com.cpigeon.cpigeonhelper.modular.xiehui.activity.XieHuiInfoActivity;
+import com.cpigeon.cpigeonhelper.ui.MyDecoration;
 import com.cpigeon.cpigeonhelper.ui.textview.MarqueeTextView;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
+import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.PicassoImageLoader;
 import com.cpigeon.cpigeonhelper.utils.ScreenTool;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
@@ -40,19 +51,26 @@ import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
 
+import org.apache.commons.codec.binary.StringUtils;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
-
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -70,7 +88,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     LinearLayout llXiehuiIntroduce;
     @BindView(R.id.ll_xiehui_geyuntong)
     LinearLayout llXiehuiGeyuntong;
-
+    @BindView(R.id.recyclerview)
+    RecyclerView mRecyclerView;
+    private HomeGYTAdapter mAdapter;
     private int count = 1;
 
 
@@ -86,6 +106,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
     @Override
     public void initViews(Bundle savedInstanceState) {
+
         View headerView = navView.getHeaderView(0);
         CircleImageView mUserIcon = (CircleImageView) headerView.findViewById(R.id.iv_userheadimage);
         TextView mUserName = (TextView) headerView.findViewById(R.id.tv_userName);
@@ -101,9 +122,59 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
         navView.setNavigationItemSelectedListener(this);
-        Logger.e("当前用户类型" + AssociationData.getUsetType());
         loadAd();
+        loadRace();
+        loadGTYServer();
         loadTopNews();
+    }
+
+    private void loadGTYServer() {
+        Map<String,Object> urlParams = new HashMap<>();
+        urlParams.put("uid",AssociationData.getUserId());
+        urlParams.put("type",AssociationData.getUserType());
+        urlParams.put("atype",AssociationData.getUserAType());
+        RetrofitHelper.getApi()
+                .getGYTInfo(AssociationData.getUserToken(),urlParams)
+                .compose(bindToLifecycle())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(gytServiceApiResponse -> {
+                    if (gytServiceApiResponse.getErrorCode() == 0) {
+                        RealmUtils.getInstance().insertGYTService(gytServiceApiResponse.getData());
+                    }else {
+                        CommonUitls.showToast(this,gytServiceApiResponse.getMsg());
+                    }
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this,"连接超时，网络不太好");
+                    }else if (throwable instanceof ConnectException){
+                        CommonUitls.showToast(this,"连接异常，网络不通畅");
+                    }else if (throwable instanceof RuntimeException){
+//                        CommonUitls.showToast(this,"发生了不可预期的错误"+throwable.getMessage());
+                    }
+                });
+    }
+
+    private void loadRace() {
+        Map<String,Object> urlParams = new HashMap<>();
+        urlParams.put("uid",AssociationData.getUserId());
+        urlParams.put("type",AssociationData.getUserType());
+        RetrofitHelper.getApi()
+                .getGeYunTongRaceList(AssociationData.getUserToken(),urlParams)
+                .compose(bindToLifecycle())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(listApiResponse -> {
+                    if (listApiResponse.getErrorCode() == 0)
+                    {
+                        mAdapter = new HomeGYTAdapter(listApiResponse.getData());
+                        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+                        mRecyclerView.setAdapter(mAdapter);
+                        mRecyclerView.addItemDecoration(new MyDecoration(this, MyDecoration.VERTICAL_LIST));
+                    }
+                }, throwable -> {
+
+                });
     }
 
     private void loadAd() {
@@ -120,8 +191,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         }
                         showAd(homeAds);
                     }
-                },throwable -> {
-                    Logger.e("错误消息:"+throwable.getMessage());
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "连接超时");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "无法连接到服务器，请检查连接");
+                    }
                 });
     }
 
@@ -132,14 +207,19 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(announcementListApiResponse -> {
-                    if (announcementListApiResponse.isStatus())
-                    {
-                        listHeaderRaceDetialGg.setText(TextUtils.isEmpty(announcementListApiResponse.getData().getTitle())?"暂无任何消息":announcementListApiResponse.getData().getTitle());
-                    }else {
+                    if (announcementListApiResponse.isStatus()) {
+                        listHeaderRaceDetialGg.setText(TextUtils.isEmpty(announcementListApiResponse.getData().getTitle()) ? "暂无任何消息" : announcementListApiResponse.getData().getTitle());
+                    } else {
                         Logger.e("返回数据为空");
                     }
-                },throwable -> {
-                    Logger.e("错误消息"+throwable.getMessage());
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "连接超时，请检查检查网络");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "连接失败，请检查连接");
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "连接失败");
+                    }
                 });
     }
 
@@ -215,7 +295,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 startActivity(new Intent(MainActivity.this, XieHuiInfoActivity.class));
                 break;
             case R.id.money://钱包
-
+                startActivity(new Intent(MainActivity.this, MyBalanceActivity.class));
                 break;
             case R.id.my_geyuntong://我的鸽运通
                 startActivity(new Intent(MainActivity.this, GeYunTongListActivity.class));
@@ -226,14 +306,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             case R.id.my_authorization://账户授权
                 startActivity(new Intent(MainActivity.this, RootListActivity.class));
                 break;
-            case R.id.my_zone://我的空间
-                startActivity(new Intent(MainActivity.this, UploadImgActivity.class));
-                break;
             case R.id.my_order://我的订单
-                startActivity(new Intent(MainActivity.this, UploadVideoActivity.class));
+                startActivity(new Intent(MainActivity.this, OrderListActivity.class));
                 break;
             case R.id.setting://设置
-
+                startActivity(new Intent(MainActivity.this, AboutActivity.class));
                 break;
 
         }
@@ -241,18 +318,19 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         return true;
     }
 
-    @OnClick({R.id.layout_gg, R.id.ll_xiehui_introduce,R.id.ll_xiehui_geyuntong})
+    @OnClick({R.id.layout_gg, R.id.ll_xiehui_introduce, R.id.ll_xiehui_geyuntong})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.layout_gg:
+
                 break;
             case R.id.ll_xiehui_introduce:
+                startActivity(new Intent(MainActivity.this, XieHuiInfoActivity.class));
                 break;
             case R.id.ll_xiehui_geyuntong:
                 startActivity(new Intent(MainActivity.this, OpeningGeyuntongActivity.class));
                 break;
         }
     }
-
 
 }

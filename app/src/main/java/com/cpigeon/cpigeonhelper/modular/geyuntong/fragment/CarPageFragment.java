@@ -1,10 +1,13 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.fragment;
 
+import android.app.Activity;
 import android.os.Bundle;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.ACarServiceActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.HomePagerAdapter;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.ui.NoScrollViewPager;
 import com.flyco.tablayout.SlidingTabLayout;
 
@@ -23,12 +26,17 @@ public class CarPageFragment extends BaseFragment {
     SlidingTabLayout mSlidingTab;
     @BindView(R.id.view_pager)
     NoScrollViewPager mViewPager;
-
+    private GeYunTong geYunTong;
     public static CarPageFragment newInstance() {
 
         return new CarPageFragment();
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        geYunTong = ((ACarServiceActivity) activity).getGeYunTong();
+    }
 
     @Override
     public int getLayoutResId() {
@@ -46,7 +54,7 @@ public class CarPageFragment extends BaseFragment {
     private void initViewPager() {
 
         HomePagerAdapter mHomeAdapter = new HomePagerAdapter(getChildFragmentManager(),
-                getApplicationContext());
+                getApplicationContext(),geYunTong.getStateCode());
         mViewPager.setOffscreenPageLimit(5);
         mViewPager.setAdapter(mHomeAdapter);
         mSlidingTab.setViewPager(mViewPager);

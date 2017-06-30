@@ -45,6 +45,7 @@
             android:layout_height="wrap_content"
             />
         <EditText
+            android:inputType="numberDecimal"
             android:id="@+id/et_flyingarea_la"
             android:background="@null"
             android:layout_marginLeft="16dp"
@@ -59,6 +60,7 @@
             android:layout_width="1dp"
             android:layout_height="match_parent"/>
         <EditText
+            android:inputType="numberDecimal"
             android:id="@+id/et_flyingarea_lo"
             android:background="@null"
             android:textSize="14sp"

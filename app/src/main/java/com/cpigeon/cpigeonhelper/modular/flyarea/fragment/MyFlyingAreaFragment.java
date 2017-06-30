@@ -17,6 +17,8 @@ import com.cpigeon.cpigeonhelper.modular.flyarea.adapter.FlyingAreaAdapter;
 import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -111,10 +113,17 @@ public class MyFlyingAreaFragment extends BaseFragment {
                         mAdapter.setNewData(listApiResponse.getData());
                         finishTask();
                     }else {
-                        initEmptyView();
+                        initEmptyView(listApiResponse.getMsg());
                     }
                 }, throwable -> {
-                    initErrorView();
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        initEmptyView("啊偶，连接超时了，都啥年代了还塞网络？");
+                    }else if (throwable instanceof ConnectException){
+                        initEmptyView("啊偶，连接失败了，都啥年代了无网络？");
+                    }else {
+                        initEmptyView("啊偶，发生了不可预期的错误："+throwable.getMessage());
+                    }
                 });
     }
 
@@ -158,19 +167,11 @@ public class MyFlyingAreaFragment extends BaseFragment {
         mRecyclerView.setOnTouchListener((v, event) -> mIsRefreshing);
     }
 
-    public void initErrorView() {
+    public void initEmptyView(String tips) {
         mSwipeRefreshLayout.setRefreshing(false);
         mCustomEmptyView.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.GONE);
         mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
-        mCustomEmptyView.setEmptyText("加载失败~(≧▽≦)~啦啦啦.");
-    }
-
-    public void initEmptyView() {
-        mSwipeRefreshLayout.setRefreshing(false);
-        mCustomEmptyView.setVisibility(View.VISIBLE);
-        mRecyclerView.setVisibility(View.GONE);
-        mCustomEmptyView.setEmptyImage(R.mipmap.img_tips_error_load_error);
-        mCustomEmptyView.setEmptyText("暂无数据，快去添加吧");
+        mCustomEmptyView.setEmptyText(tips);
     }
 }

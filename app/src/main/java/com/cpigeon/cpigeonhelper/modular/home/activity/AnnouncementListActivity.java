@@ -4,9 +4,13 @@ import android.os.Bundle;
 
 import com.cpigeon.cpigeonhelper.base.BaseActivity;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -55,12 +59,18 @@ public class AnnouncementListActivity extends BaseActivity {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(listApiResponse -> {
                     if (listApiResponse.isStatus()) {
-                        Logger.e("6666");
+
                     } else {
-                        Logger.e("12312312312313");
+
                     }
                 },throwable -> {
-                    Logger.e("错误消息:"+throwable.getMessage());
+                    if(throwable instanceof SocketTimeoutException){
+                        CommonUitls.showToast(this,"连接超时了，都啥年代了还塞网络？");
+                    }else if(throwable instanceof ConnectException){
+                        CommonUitls.showToast(this,"连接失败了，都啥年代了无网络？");
+                    }else if(throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this,"发生了不可预期的错误："+throwable.getMessage());
+                    }
                 });
     }
 }

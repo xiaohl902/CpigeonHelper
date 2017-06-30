@@ -1,55 +1,91 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Pair;
+import android.os.Handler;
+import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
+import android.widget.RelativeLayout;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
+import com.amap.api.location.AMapLocation;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.MapView;
 import com.amap.api.maps.TextureMapView;
-import com.amap.api.maps.model.BitmapDescriptor;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.LatLngBounds;
 import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
+import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
+import com.amap.api.trace.LBSTraceClient;
+import com.amap.api.trace.TraceListener;
+import com.amap.api.trace.TraceLocation;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.BaseFragment;
-import com.cpigeon.cpigeonhelper.ui.SmoothMarker;
-import com.cpigeon.cpigeonhelper.utils.PointsUtil;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.DbAdapter;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.LocationInfoReports;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PathRecord;
+import com.cpigeon.cpigeonhelper.ui.Util;
+import com.cpigeon.cpigeonhelper.utils.TraceRePlay;
 import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
+import java.util.PriorityQueue;
+import java.util.Queue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
  * Created by Administrator on 2017/6/9.
  */
 
-public class CarPlaybackFragment extends BaseFragment {
-    private AMap aMap;
+public class CarPlaybackFragment extends BaseFragment implements AMap.OnMapLoadedListener,TraceListener, View.OnClickListener {
 
+    private final static int AMAP_LOADED = 2;
+    @BindView(R.id.displaybtn)
+    ToggleButton mDisplaybtn;
+    @BindView(R.id.title)
+    RelativeLayout title;
     @BindView(R.id.mapView)
-    TextureMapView mapView;
-    @BindView(R.id.btn_playback)
-    ToggleButton mToggleButton;
-
+    TextureMapView mMapView;
+    @BindView(R.id.record_show_activity_origin_radio_button)
+    RadioButton mOriginRadioButton;
+    @BindView(R.id.record_show_activity_grasp_radio_button)
+    RadioButton mGraspRadioButton;
+    @BindView(R.id.record_show_activity_trace_group)
+    RadioGroup recordShowActivityTraceGroup;
+    private DbAdapter mDataBaseHelper;
+    private List<PathRecord> mAllRecord = new ArrayList<PathRecord>();
+    private AMap mAMap;
+    private Marker mOriginStartMarker, mOriginEndMarker, mOriginRoleMarker;
+    private Marker mGraspStartMarker, mGraspEndMarker, mGraspRoleMarker;
+    private Polyline mOriginPolyline, mGraspPolyline;
+    private int mRecordItemId;
+    private List<LatLng> mOriginLatLngList;
+    private List<LatLng> mGraspLatLngList;
+    private boolean mGraspChecked = false;
+    private boolean mOriginChecked = true;
+    private ExecutorService mThreadPool;
+    private TraceRePlay mRePlay;
+    private int id;
 
     public static CarPlaybackFragment newInstance() {
-
         return new CarPlaybackFragment();
     }
 
@@ -60,209 +96,345 @@ public class CarPlaybackFragment extends BaseFragment {
 
     @Override
     public void finishCreateView(Bundle state) {
-        mapView.onCreate(state);
+        mMapView.onCreate(state);
         setUpMap();
+        mOriginRadioButton.setOnClickListener(this);
+        mGraspRadioButton.setOnClickListener(this);
     }
 
     private void setUpMap() {
-        if (aMap == null) {
-            aMap = mapView.getMap();
+        if (mAMap == null) {
+            mAMap = mMapView.getMap();
+            mAMap.setOnMapLoadedListener(this);
         }
     }
 
-    public void move() {
 
-        addPolylineInPlayGround();
-
-        List<LatLng> points = readLatLngs();
-        LatLngBounds.Builder b = LatLngBounds.builder();
-        for (int i = 0; i < points.size(); i++) {
-            b.include(points.get(i));
+    private void startMove() {
+        if(mRePlay !=null){
+            mRePlay.stopTrace();
         }
-        LatLngBounds bounds = b.build();
-        aMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+        if (mOriginChecked) {
+            mRePlay = rePlayTrace(mOriginLatLngList, mOriginRoleMarker);
+        } else if (mGraspChecked) {
+            mRePlay = rePlayTrace(mGraspLatLngList, mGraspRoleMarker);
+        }
+    }
 
-        SmoothMarker smoothMarker = new SmoothMarker(aMap);
-        smoothMarker.setDescriptor(BitmapDescriptorFactory.fromResource(R.mipmap.car));
+    /**
+     * 轨迹回放方法
+     */
+    private TraceRePlay rePlayTrace(List<LatLng> list, final Marker updateMarker) {
+        TraceRePlay replay = new TraceRePlay(list, 100,
+                new TraceRePlay.TraceRePlayListener() {
 
-        LatLng drivePoint = points.get(0);
-        Pair<Integer, LatLng> pair = PointsUtil.calShortestDistancePoint(points, drivePoint);
-        points.set(pair.first, drivePoint);
-        List<LatLng> subList = points.subList(pair.first, points.size());
+                    @Override
+                    public void onTraceUpdating(LatLng latLng) {
+                        if (updateMarker != null) {
+                            updateMarker.setPosition(latLng); // 更新小人实现轨迹回放
+                        }
+                    }
 
-        smoothMarker.setPoints(subList);
-        smoothMarker.setTotalDuration(20000);
+                    @Override
+                    public void onTraceUpdateFinish() {
+                        mDisplaybtn.setChecked(false);
+                        mDisplaybtn.setClickable(true);
+                    }
+                });
+        mThreadPool.execute(replay);
+        return replay;
+    }
 
-        aMap.setInfoWindowAdapter(infoWindowAdapter);
-        smoothMarker.setMoveListener(distance -> (getActivity()).runOnUiThread(() -> {
-            if (infoWindowLayout != null && title != null) {
+    /**
+     * 将纠偏后轨迹小人设置到起点
+     */
+    private void resetGraspRole() {
+        if (mGraspLatLngList == null) {
+            return;
+        }
+        LatLng startLatLng = mGraspLatLngList.get(0);
+        if (mGraspRoleMarker != null) {
+            mGraspRoleMarker.setPosition(startLatLng);
+        }
+    }
 
-                title.setText("距离终点还有： " + (int) distance + "米");
+    /**
+     * 将原始轨迹小人设置到起点
+     */
+    private void resetOriginRole() {
+        if (mOriginLatLngList == null) {
+            return;
+        }
+        LatLng startLatLng = mOriginLatLngList.get(0);
+        if (mOriginRoleMarker != null) {
+            mOriginRoleMarker.setPosition(startLatLng);
+        }
+    }
+
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler() {
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case AMAP_LOADED:
+                    setupRecord();
+                    break;
+                default:
+                    break;
             }
-        }));
-        smoothMarker.getMarker().showInfoWindow();
-
-        smoothMarker.startSmoothMove();
-
-
-    }
-
-    AMap.InfoWindowAdapter infoWindowAdapter = new AMap.InfoWindowAdapter() {
-        @Override
-        public View getInfoWindow(Marker marker) {
-
-            return getInfoWindowView(marker);
         }
 
-        @Override
-        public View getInfoContents(Marker marker) {
-
-
-            return getInfoWindowView(marker);
-        }
     };
 
-    LinearLayout infoWindowLayout;
-    TextView title;
-    TextView snippet;
-
-
-    private View getInfoWindowView(Marker marker) {
-        if (infoWindowLayout == null) {
-            infoWindowLayout = new LinearLayout(getActivity());
-            infoWindowLayout.setOrientation(LinearLayout.VERTICAL);
-            title = new TextView(getActivity());
-            snippet = new TextView(getActivity());
-            title.setTextColor(Color.BLACK);
-            snippet.setTextColor(Color.BLACK);
-            infoWindowLayout.setBackgroundResource(R.drawable.infowindow_bg);
-
-            infoWindowLayout.addView(title);
-            infoWindowLayout.addView(snippet);
+    public void onBackClick(View view) {
+        getActivity().finish();
+        if (mThreadPool != null) {
+            mThreadPool.shutdownNow();
         }
-
-        return infoWindowLayout;
     }
 
-
-    private void addPolylineInPlayGround() {
-        List<LatLng> list = readLatLngs();
-        List<Integer> colorList = new ArrayList<Integer>();
-        List<BitmapDescriptor> bitmapDescriptors = new ArrayList<BitmapDescriptor>();
-
-        int[] colors = new int[]{Color.argb(255, 0, 255, 0), Color.argb(255, 255, 255, 0), Color.argb(255, 255, 0, 0)};
-
-        //用一个数组来存放纹理
-        List<BitmapDescriptor> textureList = new ArrayList<BitmapDescriptor>();
-        textureList.add(BitmapDescriptorFactory.fromResource(R.drawable.custtexture));
-
-        List<Integer> texIndexList = new ArrayList<Integer>();
-        texIndexList.add(0);//对应上面的第0个纹理
-        texIndexList.add(1);
-        texIndexList.add(2);
-
-        Random random = new Random();
-        for (int i = 0; i < list.size(); i++) {
-            colorList.add(colors[random.nextInt(3)]);
-            bitmapDescriptors.add(textureList.get(0));
-
+    public void onDestroy() {
+        super.onDestroy();
+        if (mThreadPool != null) {
+            mThreadPool.shutdownNow();
         }
-
-        aMap.addPolyline(new PolylineOptions().setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.custtexture)) //setCustomTextureList(bitmapDescriptors)
-//				.setCustomTextureIndex(texIndexList)
-                .addAll(list)
-                .useGradient(true)
-                .width(18));
     }
 
-    private List<LatLng> readLatLngs() {
-        List<LatLng> points = new ArrayList<LatLng>();
-        for (int i = 0; i < coords.length; i += 2) {
-            points.add(new LatLng(coords[i + 1], coords[i]));
+    private LatLngBounds getBounds() {
+        LatLngBounds.Builder b = LatLngBounds.builder();
+        if (mOriginLatLngList == null) {
+            return b.build();
         }
-        return points;
+        for (int i = 0; i < mOriginLatLngList.size(); i++) {
+            b.include(mOriginLatLngList.get(i));
+        }
+        return b.build();
+
     }
 
-    private double[] coords = {
-            116.3499049793749, 39.97617053371078,
-            116.34978804908442, 39.97619854213431,
-            116.349674596623, 39.97623045687959,
-            116.34955525200917, 39.97626931100656,
-            116.34943728748914, 39.976285626595036,
-            116.34930864705592, 39.97628129172198,
-            116.34918981582413, 39.976260803938594,
-            116.34906721558868, 39.97623535890678,
-            116.34895185151584, 39.976214717128855,
-            116.34886935936889, 39.976280148755315,
-            116.34873954611332, 39.97628182112874,
-            116.34860763527448, 39.97626038855863,
-            116.3484658907622, 39.976306080391836,
-            116.34834585430347, 39.976358252119745,
-            116.34831166130878, 39.97645709321835,
-            116.34827643560175, 39.97655231226543,
-            116.34824186261169, 39.976658372925556,
-            116.34825080406188, 39.9767570732376,
-            116.34825631960626, 39.976869087779995,
-            116.34822111635201, 39.97698451764595,
-            116.34822901510276, 39.977079745909876,
-            116.34822234337618, 39.97718701787645,
-            116.34821627457707, 39.97730766147824,
-            116.34820593515043, 39.977417746816776,
-            116.34821013897107, 39.97753930933358,
-            116.34821304891533, 39.977652209132174,
-            116.34820923399242, 39.977764016531076,
-            116.3482045955917, 39.97786190186833,
-            116.34822159449203, 39.977958856930286,
-            116.3482256370537, 39.97807288885813,
-            116.3482098441266, 39.978170063673524,
-            116.34819564465377, 39.978266951404066,
-            116.34820541974412, 39.978380693859116,
-            116.34819672351216, 39.97848741209275,
-            116.34816588867105, 39.978593409607825,
-            116.34818489339459, 39.97870216883567,
-            116.34818473446943, 39.978797222300166,
-            116.34817728972234, 39.978893492422685,
-            116.34816491505472, 39.978997133775266,
-            116.34815408537773, 39.97911413849568,
-            116.34812908154862, 39.97920553614499,
-            116.34809495907906, 39.979308267469264,
-            116.34805113358091, 39.97939658036473,
-            116.3480310509613, 39.979491697188685,
-            116.3480082124968, 39.979588529006875,
-            116.34799530586834, 39.979685789111635,
-            116.34798818413954, 39.979801430587926,
-            116.3479996420353, 39.97990758587515,
-            116.34798697544538, 39.980000796262615,
-            116.3479912988137, 39.980116318796085, 116.34799204219203,
-            39.98021407403913, 116.34798535084123, 39.980325006125696,
-            116.34797702460183, 39.98042511477518, 116.34796288754136,
-            39.98054129336908, 116.34797509821901, 39.980656820423505,
-            116.34793922017285, 39.98074576792626, 116.34792586413015,
-            39.98085620772756, 116.3478962642899, 39.98098214824056,
-            116.34782449883967, 39.98108306010269, 116.34774758827285,
-            39.98115277119176, 116.34761476652932, 39.98115430642997,
-            116.34749135408349, 39.98114590845294, 116.34734772765582,
-            39.98114337322547, 116.34722082902628, 39.98115066909245,
-            116.34708205250223, 39.98114532232906, 116.346963237696,
-            39.98112245161927, 116.34681500222743, 39.981136637759604,
-            116.34669622104072, 39.981146248090866, 116.34658043260109,
-            39.98112495260716, 116.34643721418927, 39.9811107163792,
-            116.34631638374302, 39.981085081075676, 116.34614782996252,
-            39.98108046779486, 116.3460256053666, 39.981049089345206,
-            116.34588814050122, 39.98104839362087, 116.34575119741586,
-            39.9810544889668, 116.34562885420186, 39.981040940565734,
-            116.34549232235582, 39.98105271658809, 116.34537348820508,
-            39.981052294975264, 116.3453513775533, 39.980956549928244
-    };
+    /**
+     * 轨迹数据初始化
+     *
+     */
+    private void setupRecord() {
+        // 轨迹纠偏初始化
+        LBSTraceClient mTraceClient = new LBSTraceClient(
+                getApplicationContext());
+        DbAdapter dbhelper = new DbAdapter(this.getApplicationContext());
+        dbhelper.open();
+        PathRecord mRecord = dbhelper.queryRecordById(mRecordItemId);
+        dbhelper.close();
+        if (mRecord != null) {
+            List<AMapLocation> recordList = mRecord.getPathline();
+            AMapLocation startLoc = mRecord.getStartpoint();
+            AMapLocation endLoc = mRecord.getEndpoint();
+            if (recordList == null || startLoc == null || endLoc == null) {
+                return;
+            }
+            LatLng startLatLng = new LatLng(startLoc.getLatitude(),
+                    startLoc.getLongitude());
+            LatLng endLatLng = new LatLng(endLoc.getLatitude(),
+                    endLoc.getLongitude());
+            mOriginLatLngList = Util.parseLatLngList(recordList);
+            addOriginTrace(startLatLng, endLatLng, mOriginLatLngList);
 
-    @OnClick(R.id.btn_playback)
-    public void onViewClicked() {
-
-
-        if (mToggleButton.isChecked()) {
-            move();
+            List<TraceLocation> mGraspTraceLocationList = Util
+                    .parseTraceLocationList(recordList);
+            // 调用轨迹纠偏，将mGraspTraceLocationList进行轨迹纠偏处理
+            mTraceClient.queryProcessedTrace(1, mGraspTraceLocationList,
+                    LBSTraceClient.TYPE_AMAP, this);
         } else {
-            move();
+        }
+
+    }
+
+    /**
+     * 地图上添加原始轨迹线路及起终点、轨迹动画小人
+     *
+     * @param startPoint
+     * @param endPoint
+     * @param originList
+     */
+    private void addOriginTrace(LatLng startPoint, LatLng endPoint,
+                                List<LatLng> originList) {
+        mOriginPolyline = mAMap.addPolyline(new PolylineOptions().color(
+                Color.BLUE).addAll(originList));
+        mOriginStartMarker = mAMap.addMarker(new MarkerOptions().position(
+                startPoint).icon(
+                BitmapDescriptorFactory.fromResource(R.drawable.start)));
+        mOriginEndMarker = mAMap.addMarker(new MarkerOptions().position(
+                endPoint).icon(
+                BitmapDescriptorFactory.fromResource(R.drawable.end)));
+
+        try {
+            mAMap.moveCamera(CameraUpdateFactory.newLatLngBounds(getBounds(),
+                    50));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        mOriginRoleMarker = mAMap.addMarker(new MarkerOptions().position(
+                startPoint).icon(
+                BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                        .decodeResource(getResources(), R.mipmap.car))));
+    }
+
+    /**
+     * 设置是否显示原始轨迹
+     *
+     * @param enable
+     */
+    private void setOriginEnable(boolean enable) {
+        mDisplaybtn.setClickable(true);
+        if (mOriginPolyline == null || mOriginStartMarker == null
+                || mOriginEndMarker == null || mOriginRoleMarker == null) {
+            return;
+        }
+        if (enable) {
+            mOriginPolyline.setVisible(true);
+            mOriginStartMarker.setVisible(true);
+            mOriginEndMarker.setVisible(true);
+            mOriginRoleMarker.setVisible(true);
+        } else {
+            mOriginPolyline.setVisible(false);
+            mOriginStartMarker.setVisible(false);
+            mOriginEndMarker.setVisible(false);
+            mOriginRoleMarker.setVisible(false);
+        }
+    }
+
+    /**
+     * 地图上添加纠偏后轨迹线路及起终点、轨迹动画小人
+     *
+     */
+    private void addGraspTrace(List<LatLng> graspList, boolean mGraspChecked) {
+
+        if (graspList == null || graspList.size() < 2) {
+            return;
+        }
+
+        LatLng startPoint = graspList.get(0);
+        LatLng endPoint = graspList.get(graspList.size() - 1);
+
+        mGraspPolyline = mAMap.addPolyline(new PolylineOptions()
+                .setCustomTexture(
+                        BitmapDescriptorFactory
+                                .fromResource(R.drawable.grasp_trace_line))
+                .width(40).addAll(graspList));
+
+        mGraspStartMarker = mAMap.addMarker(new MarkerOptions().position(
+                startPoint).icon(
+                BitmapDescriptorFactory.fromResource(R.drawable.start)));
+
+        mGraspEndMarker = mAMap.addMarker(new MarkerOptions()
+                .position(endPoint).icon(
+                        BitmapDescriptorFactory.fromResource(R.drawable.end)));
+
+        mGraspRoleMarker = mAMap.addMarker(new MarkerOptions().position(
+                startPoint).icon(
+                BitmapDescriptorFactory.fromBitmap(BitmapFactory
+                        .decodeResource(getResources(), R.mipmap.car))));
+
+        if (!mGraspChecked) {
+            mGraspPolyline.setVisible(false);
+            mGraspStartMarker.setVisible(false);
+            mGraspEndMarker.setVisible(false);
+            mGraspRoleMarker.setVisible(false);
+        }
+    }
+
+    /**
+     * 设置是否显示纠偏后轨迹
+     *
+     * @param enable
+     */
+    private void setGraspEnable(boolean enable) {
+        mDisplaybtn.setClickable(true);
+        if (mGraspPolyline == null || mGraspStartMarker == null
+                || mGraspEndMarker == null || mGraspRoleMarker == null) {
+            return;
+        }
+        if (enable) {
+            mGraspPolyline.setVisible(true);
+            mGraspStartMarker.setVisible(true);
+            mGraspEndMarker.setVisible(true);
+            mGraspRoleMarker.setVisible(true);
+        } else {
+            mGraspPolyline.setVisible(false);
+            mGraspStartMarker.setVisible(false);
+            mGraspEndMarker.setVisible(false);
+            mGraspRoleMarker.setVisible(false);
+        }
+    }
+
+    @Override
+    public void onMapLoaded() {
+        Message msg = handler.obtainMessage();
+        msg.what = AMAP_LOADED;
+        handler.sendMessage(msg);
+    }
+
+    /**
+     * 轨迹纠偏完成数据回调
+     */
+    @Override
+    public void onFinished(int arg0, List<LatLng> list, int arg2, int arg3) {
+        addGraspTrace(list, mGraspChecked);
+        mGraspLatLngList = list;
+    }
+
+    @Override
+    public void onRequestFailed(int arg0, String arg1) {
+        Toast.makeText(this.getApplicationContext(), "轨迹纠偏失败:" + arg1,
+                Toast.LENGTH_SHORT).show();
+
+    }
+
+    @Override
+    public void onTraceProcessing(int arg0, int arg1, List<LatLng> arg2) {
+
+    }
+
+    @Override
+    public void onClick(View v) {
+        int id = v.getId();
+        switch (id) {
+            case R.id.displaybtn:
+                if (mDisplaybtn.isChecked()) {
+                    startMove();
+                    mDisplaybtn.setClickable(false);
+                }
+                break;
+            case R.id.record_show_activity_grasp_radio_button:
+                mGraspChecked = true;
+                mOriginChecked = false;
+                mGraspRadioButton.setChecked(true);
+                mOriginRadioButton.setChecked(false);
+                setGraspEnable(true);
+                setOriginEnable(false);
+                mDisplaybtn.setChecked(false);
+                resetGraspRole();
+                break;
+            case R.id.record_show_activity_origin_radio_button:
+                mOriginChecked = true;
+                mGraspChecked = false;
+                mGraspRadioButton.setChecked(false);
+                mOriginRadioButton.setChecked(true);
+                setGraspEnable(false);
+                setOriginEnable(true);
+                mDisplaybtn.setChecked(false);
+                resetOriginRole();
+                break;
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (mThreadPool != null) {
+            mThreadPool.shutdownNow();
         }
     }
 }

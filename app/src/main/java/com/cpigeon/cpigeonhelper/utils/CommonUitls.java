@@ -12,6 +12,7 @@ import android.provider.Settings;
 import android.support.v4.content.FileProvider;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
@@ -19,12 +20,15 @@ import android.widget.Toast;
 import com.amap.api.maps.model.LatLng;
 import com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton;
 import com.orhanobut.logger.Logger;
+import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 
 import java.io.File;
 import java.math.RoundingMode;
 import java.net.NetworkInterface;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -33,18 +37,33 @@ import java.util.regex.Pattern;
 
 
 /**
+ *
  * Created by Administrator on 2017/5/25.
+ *
  */
 
 public class CommonUitls {
     private static final String KEY_API_SIGN = "iy087234ho78fuqy49TR23jk4h";    //只有url参数的签名算法
-    public static final String KEY_SERVER_PWD = "9834h5ok2j32hKgjvmn34JHG89";
-    public static final LatLng CHENGDU = new LatLng(30.668544, 104.03224);
+    public static final String KEY_SERVER_PWD = "Je9Ol174MbsWaq2K";
     private static String DeviceID;
     private static Toast toast;
-    public  static  final  String HOST = "192.168.0.5";
-    public  static  final  int POST = 5555;
-    public  static  final  int IDLE_TIME = 20;
+    private volatile static CommonUitls mCommonUitls;
+    private List<OnWxPayListener> onWxPayListenerList;
+
+    private CommonUitls() {
+    }
+
+    public static CommonUitls getInstance() {
+        if (mCommonUitls == null) {
+            synchronized (CommonUitls.class) {
+                if (mCommonUitls == null) {
+                    mCommonUitls = new CommonUitls();
+                }
+            }
+        }
+        return mCommonUitls;
+    }
+
     public static String getApiSign(Map<String, Object> urlParams) {
         Map<String, String> map = new TreeMap<>();
 
@@ -200,19 +219,6 @@ public class CommonUitls {
         context.startActivity(intent);
     }
 
-    /**
-     * 退出
-     *
-     * @param activity
-     */
-    public static void exitApp(Activity activity) {
-        Intent startMain = new Intent(Intent.ACTION_MAIN);
-        startMain.addCategory(Intent.CATEGORY_HOME);
-        startMain.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        activity.startActivity(startMain);
-        activity.finish();
-        System.exit(0);
-    }
 
     public static void hideIME(Context context) {
         InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);
@@ -429,6 +435,84 @@ public class CommonUitls {
 
 
         return nf.format(d);
+    }
+
+
+
+    /**
+     * 初始化微信支付回调引用
+     */
+    private void initWxPayListenerListRef() {
+        if (this.onWxPayListenerList == null) {
+            synchronized (CommonUitls.class) {
+                if (this.onWxPayListenerList == null) {
+                    this.onWxPayListenerList = new ArrayList<>();
+                }
+            }
+        }
+        //清理为空的引用
+        Iterator<OnWxPayListener> iterator = onWxPayListenerList.iterator();
+        while (iterator.hasNext()) {
+            OnWxPayListener ref = iterator.next();
+            if (ref == null)
+                iterator.remove();
+        }
+    }
+
+
+    /**
+     * 添加微信支付回调
+     *
+     */
+    public void addOnWxPayListener(OnWxPayListener onWxPayListener) {
+        initWxPayListenerListRef();
+        synchronized (this) {
+            this.onWxPayListenerList.add(onWxPayListener);
+        }
+    }
+
+    /**
+     * 移除微信支付回调
+     *
+     */
+    public void removeOnWxPayListener(OnWxPayListener onWxPayListener) {
+        initWxPayListenerListRef();
+        synchronized (this) {
+            this.onWxPayListenerList.remove(onWxPayListener);
+        }
+    }
+
+    /**
+     * 触发微信回调
+     *
+     */
+    public void onWxPay(Context context, int wxPayReturnCode) {
+        if (context instanceof IWXAPIEventHandler) {
+            if (this.onWxPayListenerList == null || onWxPayListenerList.size()==0) return;
+            for (OnWxPayListener ref : this.onWxPayListenerList) {
+                if (ref!= null) {
+
+                    ref.onPayFinished(wxPayReturnCode);
+                }
+            }
+        } else {
+            Log.e("ERROR", "onWxPay called error");
+        }
+    }
+
+    public interface OnWxPayListener {
+        int ERR_OK = 0;
+        int ERR_COMM = -1;
+        int ERR_USER_CANCEL = -2;
+        int ERR_SENT_FAILED = -3;
+        int ERR_AUTH_DENIED = -4;
+        int ERR_UNSUPPORT = -5;
+        int ERR_BAN = -6;
+
+        /**
+         *
+         */
+        void onPayFinished(int wxPayReturnCode);
     }
 
 }

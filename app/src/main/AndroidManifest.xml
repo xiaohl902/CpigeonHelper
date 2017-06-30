@@ -19,6 +19,8 @@
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.CAMERA"/>
+
+
     <application
         android:name=".base.MyApp"
         tools:replace="android:icon"
@@ -38,25 +40,71 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".modular.usercenter.activity.LoginActivity"/>
-        <activity android:name=".MainActivity"/>
-        <activity android:name=".modular.usercenter.activity.ForgetPwdActivity"/>
-        <activity android:name=".modular.geyuntong.activity.OpeningGeyuntongActivity"/>
-        <activity android:name=".modular.root.activity.RootListActivity"/>
-        <activity android:name=".modular.root.activity.RootManagerActivity"/>
-        <activity android:name=".modular.root.activity.SearchUserActivity"/>
-        <activity android:name=".modular.xiehui.activity.XieHuiInfoActivity"/>
-        <activity android:name=".modular.geyuntong.activity.ACarServiceActivity"/>
-        <activity android:name=".modular.geyuntong.activity.AddGeyuntongActivity"/>
-        <activity android:name=".modular.geyuntong.activity.GeYunTongListActivity"/>
-        <activity android:name=".modular.flyarea.activity.FlyingAreaActivity"/>
-        <activity android:name=".modular.flyarea.activity.AddFlyingAreaActivity"/>
-        <activity android:name=".modular.flyarea.activity.FlyingAreaEditActivity"/>
-        <activity android:name=".modular.geyuntong.fragment.UploadImgActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.usercenter.activity.LoginActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".MainActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.usercenter.activity.ForgetPwdActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.order.activity.OpeningGeyuntongActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.root.activity.RootListActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.root.activity.RootManagerActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.root.activity.SearchUserActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.xiehui.activity.XieHuiInfoActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.geyuntong.activity.ACarServiceActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.geyuntong.activity.AddGeyuntongActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.geyuntong.activity.GeYunTongListActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.flyarea.activity.FlyingAreaActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.flyarea.activity.AddFlyingAreaActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.flyarea.activity.FlyingAreaEditActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.geyuntong.activity.UploadImgActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.order.activity.PayGeyuntongActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.order.activity.OrderListActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.setting.activity.AboutActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.xiehui.activity.ChangeNameActivity"/>
         <activity
             android:configChanges="orientation|screenSize|keyboardHidden"
             android:screenOrientation="portrait"
             android:name=".modular.geyuntong.activity.UploadVideoActivity"/>
+        <activity
+            android:launchMode="singleTop"
+            android:exported="true"
+            android:name=".wxapi.WXPayEntryActivity"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -73,6 +121,7 @@
         <service android:name=".modular.geyuntong.fragment.CoreService"
             android:enabled="true"
             android:exported="true"/>
+        <activity android:name=".modular.order.activity.MyBalanceActivity"/>
 
         <meta-data android:name="design_width" android:value="768">
         </meta-data>

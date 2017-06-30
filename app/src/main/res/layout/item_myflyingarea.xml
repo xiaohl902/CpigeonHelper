@@ -36,12 +36,14 @@
 
 
             <TextView
+                android:maxLines="2"
                 android:layout_marginRight="16dp"
                 android:id="@+id/tv_flyingarea_discription"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="这里是司放地的描述"
-                android:textSize="16sp" />
+                android:ellipsize="end"
+                android:text="这里是司放地的描述这里是司放地的描述这里是司放地的描述这里是司放地的描述这里是司放地的描述"
+                android:textSize="14sp" />
 
 
         </LinearLayout>
@@ -50,7 +52,7 @@
         <TextView
             android:layout_marginRight="32dp"
             android:layout_alignParentRight="true"
-            android:textSize="14sp"
+            android:textSize="16sp"
             android:id="@+id/tv_flyingarea_number"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

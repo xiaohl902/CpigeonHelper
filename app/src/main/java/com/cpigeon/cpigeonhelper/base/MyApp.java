@@ -21,11 +21,15 @@ import io.realm.RealmConfiguration;
 import io.realm.rx.RealmObservableFactory;
 
 /**
+ *
  * Created by Administrator on 2017/5/25.
+ *
  */
 
 public class MyApp extends Application {
+
     public static MyApp mInstance;
+
     public static MyApp getInstance() {
         return mInstance;
     }
@@ -108,7 +112,7 @@ public class MyApp extends Application {
         return res;
     }
 
-    class MyUnCaughtExceptionHandler implements Thread.UncaughtExceptionHandler{
+    private class MyUnCaughtExceptionHandler implements Thread.UncaughtExceptionHandler{
 
         @Override
         public void uncaughtException(Thread thread, Throwable ex) {

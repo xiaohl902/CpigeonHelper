@@ -25,6 +25,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 
 public class RetrofitHelper {
     private static OkHttpClient mOkHttpClient;
+
     static {
         initOkHttpClient();
     }
@@ -52,9 +53,9 @@ public class RetrofitHelper {
                             .addNetworkInterceptor(new CacheInterceptor())
                             .addNetworkInterceptor(new StethoInterceptor())
                             .retryOnConnectionFailure(true)
-                            .connectTimeout(10, TimeUnit.SECONDS)
-                            .writeTimeout(10, TimeUnit.SECONDS)
-                            .readTimeout(10, TimeUnit.SECONDS)
+                            .connectTimeout(5, TimeUnit.SECONDS)
+                            .writeTimeout(5, TimeUnit.SECONDS)
+                            .readTimeout(5, TimeUnit.SECONDS)
                             .build();
                 }
             }
@@ -78,7 +79,6 @@ public class RetrofitHelper {
     }
 
 
-
     /**
      * 为okhttp添加缓存，这里是考虑到服务器不支持缓存时，从而让okhttp支持缓存
      */
@@ -87,9 +87,9 @@ public class RetrofitHelper {
         @Override
         public Response intercept(Chain chain) throws IOException {
 
-            // 有网络时 设置缓存超时时间1个小时
-            int maxAge = 60*5;
-            // 无网络时，设置超时为1天
+            // 有网络时 设置缓存超时时间10秒钟
+            int maxAge = 10;
+            // 无网络时，设置超时为1个小时
             int maxStale = 60 * 60;
             Request request = chain.request();
             if (NetStateUtils.isNetworkConnected(MyApp.getInstance())) {

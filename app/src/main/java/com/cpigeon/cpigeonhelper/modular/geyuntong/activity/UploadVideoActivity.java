@@ -3,6 +3,10 @@ package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -10,7 +14,9 @@ import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GridImageAdapter;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.ImgTag;
+import com.cpigeon.cpigeonhelper.ui.FullyGridLayoutManager;
 import com.cpigeon.cpigeonhelper.ui.SaActionSheetDialog;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
@@ -49,16 +55,17 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
     TextView tvChoseTag;
     @BindView(R.id.ll_chose_tag)
     LinearLayout llChoseTag;
-    @BindView(R.id.videoplayer)
-    JCVideoPlayerStandard videoplayer;
+    @BindView(R.id.recycler)
+    RecyclerView mRecyclerView;
     private int chooseMode = PictureMimeType.ofVideo();
-    private int themeId = R.style.picture_default_style;
     private List<LocalMedia> selectList = new ArrayList<>();
     private SaActionSheetDialog mSaActionSheetDialog = null;
     private int tagid = 0;
     private long timestamp;
     private File video;
-
+    private int rid;
+    private GridImageAdapter mAdapter;
+    private SweetAlertDialog mSweetAlertDialogLoading,mSweetAlertDialogSuccess;
     @Override
     protected void swipeBack() {
 
@@ -71,22 +78,28 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
+        Intent intent = getIntent();
+        rid = intent.getIntExtra("rid", 0);
         setTitle("上传视频");
         setTopLeftButton(R.drawable.ic_back, this::finish);
         setTopRightButton("上传", this::upload);
-        PictureSelector.create(UploadVideoActivity.this)
-                .openCamera(chooseMode)
-                .theme(themeId)
-                .previewVideo(true)
-                .videoQuality(0)
-                .videoSecond(7)
-                .forResult(PictureConfig.CHOOSE_REQUEST);
+        FullyGridLayoutManager manager = new FullyGridLayoutManager(UploadVideoActivity.this, 4, GridLayoutManager.VERTICAL, false);
+        mRecyclerView.setLayoutManager(manager);
+        mAdapter = new GridImageAdapter(UploadVideoActivity.this, onAddPicClickListener);
+        mAdapter.setList(selectList);
+        mRecyclerView.setAdapter(mAdapter);
+        mAdapter.setOnItemClickListener((position, v) -> {
+            if (selectList.size() > 0) {
+                LocalMedia media = selectList.get(position);
+                PictureSelector.create(UploadVideoActivity.this).externalPictureVideo(media.getPath());
+            }
+        });
     }
 
     @OnClick(R.id.ll_chose_tag)
@@ -103,11 +116,22 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
                     // 图片选择结果回调
                     selectList = PictureSelector.obtainMultipleResult(data);
                     video = new File(selectList.get(0).getPath());
-                    Logger.e(video.length() / 1024 + "k");
-                    videoplayer.setUp(selectList.get(0).getPath(), JCVideoPlayerStandard.SCREEN_LAYOUT_NORMAL, "尚龙数据");
+                    mAdapter.setList(selectList);
+                    mAdapter.notifyDataSetChanged();
                     break;
             }
         }
+    }
+
+    private void takeVideo(){
+        PictureSelector.create(UploadVideoActivity.this)
+                .openCamera(chooseMode)
+                .maxSelectNum(1)// 最大图片选择数量
+                .minSelectNum(1)// 最小选择数量
+                .previewVideo(true)
+                .videoQuality(0)
+                .videoSecond(7)
+                .forResult(PictureConfig.CHOOSE_REQUEST);
     }
 
     @Override
@@ -125,19 +149,23 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
     }
 
     private void upload() {
-        if (tagid == 0 || "请选择".equals(tvChoseTag.getText().toString().trim())) {
-            CommonUitls.showToast(this, "请选择上传类型");
+        if (tagid == 0 || "请选择".equals(tvChoseTag.getText().toString().trim())||video == null) {
+            CommonUitls.showToast(this, "上传不能为空");
         } else {
-            BottomDialog.create(getSupportFragmentManager())
-                    .setViewListener(v -> {
-                        TextView tv = (TextView) v.findViewById(R.id.tv_geyuntong_weather);
-                        tv.setText("天气好热哦哈哈哈哈哈");
-                    })
-                    .setLayoutRes(R.layout.layout_watermarkinfo)
-                    .setDimAmount(0.1f)            // Dialog window dim amount(can change window background color）, range：0 to 1，default is : 0.2f
-                    .setCancelOutside(true)     // click the external area whether is closed, default is : true
-                    .setTag("BottomDialog")     // setting the DialogFragment tag
-                    .show();
+            mSweetAlertDialogLoading = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+            mSweetAlertDialogLoading.setTitleText("正在上传...");
+            mSweetAlertDialogLoading.setCancelable(false);
+            mSweetAlertDialogLoading.show();
+//            BottomDialog.create(getSupportFragmentManager())
+//                    .setViewListener(v -> {
+//                        TextView tv = (TextView) v.findViewById(R.id.tv_geyuntong_weather);
+//                        tv.setText("天气好热哦哈哈哈哈哈");
+//                    })
+//                    .setLayoutRes(R.layout.layout_watermarkinfo)
+//                    .setDimAmount(0.1f)            // Dialog window dim amount(can change window background color）, range：0 to 1，default is : 0.2f
+//                    .setCancelOutside(true)     // click the external area whether is closed, default is : true
+//                    .setTag("BottomDialog")     // setting the DialogFragment tag
+//                    .show();
 
 
             // 创建 RequestBody，用于封装构建RequestBody
@@ -151,9 +179,8 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
 
             RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
-                    .addFormDataPart("rid", String.valueOf(8))
+                    .addFormDataPart("rid", String.valueOf(rid))
                     .addFormDataPart("ft", "video")
-                    .addFormDataPart("faid", String.valueOf(5))
                     .addFormDataPart("tagid", String.valueOf(tagid))
                     .addFormDataPart("lo", String.valueOf(tagid))
                     .addFormDataPart("la", String.valueOf(tagid))
@@ -165,9 +192,8 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
                     .build();
             Map<String, Object> postParams = new HashMap<>();
             postParams.put("uid", String.valueOf(AssociationData.getUserId()));
-            postParams.put("rid", String.valueOf(8));
+            postParams.put("rid", String.valueOf(rid));
             postParams.put("ft", "video");
-            postParams.put("faid", String.valueOf(5));
             postParams.put("tagid", String.valueOf(tagid));
             postParams.put("lo", String.valueOf(tagid));
             postParams.put("la", String.valueOf(tagid));
@@ -186,11 +212,16 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(objectApiResponse -> {
                         if (objectApiResponse.getErrorCode() == 0) {
-                            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                                    .setTitleText("成功")
-                                    .setContentText("上传成功")
-                                    .setConfirmText("好的")
-                                    .show();
+                            mSweetAlertDialogLoading.dismissWithAnimation();
+                            mSweetAlertDialogSuccess = new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE);
+                            mSweetAlertDialogSuccess.setTitleText("上传成功");
+                            mSweetAlertDialogSuccess.setConfirmText("好的");
+                            mSweetAlertDialogSuccess.setConfirmClickListener(sweetAlertDialog -> {
+                                sweetAlertDialog.dismissWithAnimation();
+                                finish();
+                            });
+                            mSweetAlertDialogSuccess.setCancelable(false);
+                            mSweetAlertDialogSuccess.show();
                         }
                     }, throwable -> {
                         Logger.e("失败" + throwable.getMessage());
@@ -221,4 +252,6 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
                     Logger.e("错误消息:" + throwable.getMessage());
                 });
     }
+
+    private GridImageAdapter.onAddPicClickListener onAddPicClickListener = this::takeVideo;
 }

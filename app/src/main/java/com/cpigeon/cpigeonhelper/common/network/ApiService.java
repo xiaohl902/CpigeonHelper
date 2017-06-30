@@ -1,11 +1,15 @@
 package com.cpigeon.cpigeonhelper.common.network;
 
 import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.ImgTag;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.LocationInfoReports;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PackageInfo;
+import com.cpigeon.cpigeonhelper.modular.order.bean.Order;
+import com.cpigeon.cpigeonhelper.modular.order.bean.OrderList;
+import com.cpigeon.cpigeonhelper.modular.order.bean.PackageInfo;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.RaceImageOrVideo;
+import com.cpigeon.cpigeonhelper.modular.order.bean.PayRequest;
 import com.cpigeon.cpigeonhelper.modular.root.bean.OrgInfo;
 import com.cpigeon.cpigeonhelper.modular.root.bean.OrgNameApplyStatus;
 import com.cpigeon.cpigeonhelper.modular.root.bean.RootList;
@@ -17,6 +21,8 @@ import com.cpigeon.cpigeonhelper.modular.usercenter.bean.AnnouncementList;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.CheckCode;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.DeviceBean;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
+import com.tencent.mm.opensdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.modelpay.PayResp;
 
 import java.util.List;
 import java.util.Map;
@@ -146,6 +152,35 @@ public interface ApiService {
     @GET("GAPI/V1/GetServicePackageInfo")
     Observable<ApiResponse<List<PackageInfo>>> getServicePackageInfo(@Query("key") String key);
 
+
+    //创建服务类订单
+    @POST("GAPI/V1/CreateServiceOrder")
+    Observable<ApiResponse<Order>> createServiceOrder(@Header("auth") String token,
+                                                      @Body RequestBody body,
+                                                      @Query("timestamp") long timestamp,
+                                                      @Query("sign") String sign);
+    @POST("GAPI/V1/GetMyOrderList")
+    Observable<ApiResponse<List<OrderList>>> getOrderList(@Header("auth") String token,
+                                                          @Body RequestBody body,
+                                                          @Query("timestamp") long timestamp,
+                                                          @Query("sign") String sign);
+
+    //创建微信预支付订单
+    @POST("GAPI/V1/GetWXPrePayOrder")
+    Observable<ApiResponse<PayRequest>> createWxOrder(@Header("auth") String token,
+                                                      @Body RequestBody body,
+                                                      @Query("timestamp") long timestamp,
+                                                      @Query("sign") String sign);
+
+    //余额支付
+    @POST("GAPI/V1/OrderPayByBalance")
+    Observable<ApiResponse<Object>> orderPayByBalance(@Header("auth") String token,
+                                                       @Body RequestBody body,
+                                                       @Query("timestamp") long timestamp,
+                                                       @Query("sign") String sign);
+
+
+
     //获取鸽运通比赛列表
     @GET("CHAPI/V1/GetGYTRaceList")
     Observable<ApiResponse<List<GeYunTong>>> getGeYunTongRaceList(@Header("auth") String token,
@@ -235,12 +270,19 @@ public interface ApiService {
                                                      @Body RequestBody body,
                                                      @Query("timestamp") long timestamp,
                                                      @Query("sign") String sign);
-
+    //获取标签
     @GET("GAPI/V1/GetTAG")
     Observable<ApiResponse<List<ImgTag>>> getTag(@Query("type") String type);
 
-
+    //获取照片或视频
     @GET("CHAPI/V1/GetGYTRaceImageOrVideo")
     Observable<ApiResponse<List<RaceImageOrVideo>>> getGYTRaceImageOrVideo(@Header("auth") String token,
                                                                            @QueryMap Map<String,Object> urlParams );
+
+
+    //获取用户开通鸽运通的信息
+    @GET("CHAPI/V1/GetGYTinfo")
+    Observable<ApiResponse<GYTService>> getGYTInfo(@Header("auth") String token,
+                                                         @QueryMap Map<String,Object> urlParams);
+
 }

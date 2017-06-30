@@ -34,6 +34,8 @@ import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 import com.squareup.picasso.Picasso;
 
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -73,7 +75,7 @@ public class LoginActivity extends BaseActivity {
     CircularProgressButton btnActionLogin;
     @BindView(R.id.tv_forget_pwd)
     TextView mForPwd;
-    private String[] accounts = {"18227595367", "18782050317", "15378196774"};//设置常用手机号
+//    private String[] accounts = {"18782050317", "15378196774"};//设置常用手机号
 
 
     @Override
@@ -88,10 +90,9 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     public void initViews(Bundle savedInstanceState) {
-        Logger.e(this.getClass().getSimpleName()+"之上有"+AppManager.getAppManager().stackSize()+"个Activity");
         btnActionLogin.setIndeterminateProgressMode(true);
-        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, accounts);
-        etUsername.setAdapter(arrayAdapter);//输入至少两个字符才会提示
+//        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, accounts);
+//        etUsername.setAdapter(arrayAdapter);//输入至少两个字符才会提示
     }
 
     private void startLogin() {
@@ -136,10 +137,7 @@ public class LoginActivity extends BaseActivity {
      * 登录
      */
     private void login() {
-
         long timestamp = System.currentTimeMillis() / 1000;
-
-
         Map<String, Object> postParams = new HashMap<>();
         postParams.put("u", etUsername.getText().toString().trim());
         postParams.put("p", EncryptionTool.encryptAES(etPassword.getText().toString().trim()));
@@ -149,19 +147,14 @@ public class LoginActivity extends BaseActivity {
         postParams.put("dev", DEV);
         postParams.put("ver", VER);
         postParams.put("appid", BuildConfig.APPLICATION_ID);
-
-
         btnActionLogin.setProgress(50);
-
         RetrofitHelper.getApi()
                 .login(postParams, timestamp, CommonUitls.getApiSign(timestamp, postParams))
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(userBeanApiResponse -> {
-                    if (userBeanApiResponse.isStatus()) {
-
-
+                    if (userBeanApiResponse.getErrorCode() == 0) {
                         if (RealmUtils.getInstance().existUserInfo()) {
                             RealmUtils.getInstance().deleteUserInfo();
                         }
@@ -178,6 +171,8 @@ public class LoginActivity extends BaseActivity {
                         bean.setToken(userBeanApiResponse.getData().getToken());
                         bean.setUid(userBeanApiResponse.getData().getUid());
                         bean.setAccountType(userBeanApiResponse.getData().getAccountType());
+                        bean.setAtype("admin");
+                        bean.setType("xiehui");
                         RealmUtils.getInstance().insertUserInfo(bean);
                         simulateSuccessProgress(btnActionLogin);
                         Observable.timer(1, TimeUnit.SECONDS)
@@ -188,22 +183,17 @@ public class LoginActivity extends BaseActivity {
                                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                                     finish();
                                 });
-
-
                     } else {
                         simulateErrorProgress(btnActionLogin);
-                        switch (userBeanApiResponse.getErrorCode()) {
-                            case 1003:
-                                Toast.makeText(mContext, "登录失败,您没有权限", Toast.LENGTH_SHORT).show();
-                                break;
-                            case 1002:
-                                Toast.makeText(mContext, "登录失败,用户名或密码错误", Toast.LENGTH_SHORT).show();
-                                break;
-                        }
-
                     }
                 }, throwable -> {
-                    Logger.e("错误消息"+throwable.getMessage());
+                    if(throwable instanceof SocketTimeoutException){
+                        CommonUitls.showToast(this,"连接超时了");
+                    }else if(throwable instanceof ConnectException){
+                        CommonUitls.showToast(this,"连接失败了");
+                    }else if(throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this,"发生了不可预期的错误："+throwable.getMessage());
+                    }
                 });
 
     }
@@ -255,8 +245,6 @@ public class LoginActivity extends BaseActivity {
 
     @OnTextChanged(value = R.id.et_username, callback = OnTextChanged.Callback.AFTER_TEXT_CHANGED)
     public void afterNameEditTextChanged(Editable s) {
-
-
         if (isAccountValid(etUsername.getText().toString().trim())) {
             RetrofitHelper.getApi()
                     .getUserHeadImg(etUsername.getText().toString().trim())
@@ -289,9 +277,6 @@ public class LoginActivity extends BaseActivity {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS);
     }
-
-
-
 
     @Override
     protected void setStatusBar() {

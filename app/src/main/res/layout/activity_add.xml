@@ -7,7 +7,6 @@
     android:layout_height="match_parent">
     <LinearLayout
         android:background="@color/colorWhite"
-        android:id="@+id/ll_geyuntong_name"
         android:padding="16dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -25,12 +24,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
-        <TextView
+
+        <EditText
             android:id="@+id/tv_geyuntong_name"
-            android:gravity="right"
-            android:textSize="@dimen/sp_16"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:gravity="right" />
 
     </LinearLayout>
     <View
@@ -40,7 +40,6 @@
 
     <LinearLayout
         android:background="@color/colorWhite"
-        android:id="@+id/ll_geyuntong_place"
         android:padding="16dp"
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -52,19 +51,20 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
-        <TextView
+        <EditText
+            android:background="@null"
             android:id="@+id/tv_geyuntong_place"
             android:layout_marginRight="8dp"
             android:gravity="right"
             android:layout_weight="1"
-            android:textSize="@dimen/sp_16"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             />
+
         <android.support.v7.widget.AppCompatImageView
             app:srcCompat="@drawable/ic_start"
-            android:layout_width="20dp"
-            android:layout_height="20dp" />
+            android:layout_width="16dp"
+            android:layout_height="16dp" />
 
     </LinearLayout>
     <View
@@ -74,7 +74,6 @@
 
     <LinearLayout
        android:background="@color/colorWhite"
-       android:id="@+id/ll_geyuntong_latitude"
        android:padding="16dp"
        android:layout_width="match_parent"
        android:layout_height="wrap_content">
@@ -86,40 +85,46 @@
            android:text="司放地纬度："
            android:layout_height="wrap_content"
             />
-       <TextView
-           android:id="@+id/tv_latitude"
-           android:textSize="@dimen/sp_16"
-           android:textColor="@color/colorPrimary"
-           android:layout_width="wrap_content"
-           android:layout_height="wrap_content" />
 
-   </LinearLayout>
+        <EditText
+            android:inputType="numberDecimal"
+            android:id="@+id/tv_latitude"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:gravity="right" />
+
+    </LinearLayout>
     <View
         android:background="@color/colorLayoutSplitLineGray"
         android:layout_width="match_parent"
         android:layout_height="1dp"/>
+
     <LinearLayout
-        android:id="@+id/ll_geyuntong_longitude"
-        android:background="@color/colorWhite"
-        android:padding="16dp"
-        android:orientation="horizontal"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:background="@color/colorWhite"
+        android:orientation="horizontal"
+        android:padding="16dp">
+
         <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_marginLeft="9dp"
             android:gravity="center"
-            android:layout_width="wrap_content"
-            android:textSize="@dimen/sp_16"
             android:text="司放地经度："
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:layout_width="wrap_content"
+            android:textSize="@dimen/sp_16" />
+
+        <EditText
+            android:inputType="numberDecimal"
             android:id="@+id/tv_longitude"
-            android:textSize="@dimen/sp_16"
-            android:textColor="@color/colorPrimary"
-            android:layout_height="wrap_content" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:background="@null" />
 
     </LinearLayout>
+
     <View
         android:background="@color/colorLayoutSplitLineGray"
         android:layout_width="match_parent"
@@ -131,6 +136,15 @@
         android:textSize="14sp"
         android:gravity="right"
         android:text="*为必填项"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+    <Button
+        android:visibility="gone"
+        android:layout_margin="8dp"
+        android:textColor="@color/colorWhite"
+        android:background="@color/colorPrimary"
+        android:text="删除比赛"
+        android:id="@+id/btn_delete_race"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

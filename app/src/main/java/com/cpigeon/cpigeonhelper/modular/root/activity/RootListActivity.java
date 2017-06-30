@@ -2,6 +2,7 @@ package com.cpigeon.cpigeonhelper.modular.root.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,8 +17,12 @@ import com.cpigeon.cpigeonhelper.modular.root.adapter.RootListAdapter;
 import com.cpigeon.cpigeonhelper.modular.root.bean.RootList;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
 import com.cpigeon.cpigeonhelper.ui.MyDecoration;
+import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.r0adkll.slidr.Slidr;
+
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 
 import butterknife.BindView;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -50,7 +55,7 @@ public class RootListActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = mContext.getResources().getColor(R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
@@ -58,7 +63,7 @@ public class RootListActivity extends ToolbarBaseActivity {
     @Override
     protected void initViews(Bundle savedInstanceState) {
         this.setTitle("账户授权");
-        this.setTopLeftButton(R.drawable.ic_back, () -> RootListActivity.this.finish());
+        this.setTopLeftButton(R.drawable.ic_back, this::finish);
         this.setTopRightButton("完成",
                 R.drawable.ic_addroot, () -> startActivity(new Intent(RootListActivity.this, SearchUserActivity.class)));
         initRefreshLayout();
@@ -69,14 +74,12 @@ public class RootListActivity extends ToolbarBaseActivity {
     public void initRefreshLayout() {
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefreshLayout.post(() -> {
-
             mSwipeRefreshLayout.setRefreshing(true);
             mIsRefreshing = true;
             loadData();
         });
 
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
-
             mIsRefreshing = true;
             loadData();
         });
@@ -90,14 +93,22 @@ public class RootListActivity extends ToolbarBaseActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(listApiResponse -> {
-                    if (listApiResponse.isStatus()&&listApiResponse.getData()!=null&&listApiResponse.getData().size()>0) {
+                    if (listApiResponse.getErrorCode() == 0&&listApiResponse.getData()!=null&&listApiResponse.getData().size()>0) {
                         mAdapter.setNewData(listApiResponse.getData());
                         finishTask();
                     } else {
-                        initEmptyView("暂无数据");
+                        initEmptyView(listApiResponse.getMsg());
                     }
                 }, throwable -> {
-                    initEmptyView("加载失败，请检查网络设置。");
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        initEmptyView("连接超时");
+                    }else if (throwable instanceof ConnectException)
+                    {
+                        initEmptyView("无法连接到服务器");
+                    }else if (throwable instanceof RuntimeException){
+                        initEmptyView("发生了不可预知的错误"+throwable.getMessage());
+                    }
                 });
     }
 
@@ -114,7 +125,6 @@ public class RootListActivity extends ToolbarBaseActivity {
         mAdapter = new RootListAdapter(null);
         mAdapter.setOnItemClickListener((baseQuickAdapter, view, i) -> {
             RootList rootList = (RootList) baseQuickAdapter.getData().get(i);
-
             Intent intent = new Intent(RootListActivity.this, RootManagerActivity.class);
             intent.putExtra("auuid", rootList.getAuthUserInfo().getUid());
             intent.putExtra("imgurl", rootList.getAuthUserInfo().getHeadimgUrl());
@@ -144,9 +154,4 @@ public class RootListActivity extends ToolbarBaseActivity {
         mRecyclerView.setVisibility(View.VISIBLE);
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        initRefreshLayout();
-    }
 }

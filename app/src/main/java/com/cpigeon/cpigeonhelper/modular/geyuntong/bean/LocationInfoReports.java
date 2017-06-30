@@ -14,6 +14,27 @@ public class LocationInfoReports {
     private WeatherBean weather;
     private double la;
 
+    public LocationInfoReports() {
+    }
+
+    public LocationInfoReports(int id, String time, double lo, int speed, double la) {
+        this.id = id;
+        this.time = time;
+        this.lo = lo;
+        this.speed = speed;
+        this.la = la;
+    }
+
+
+    public LocationInfoReports(int id, String time, double lo, int speed, WeatherBean weather, double la) {
+        this.id = id;
+        this.time = time;
+        this.lo = lo;
+        this.speed = speed;
+        this.weather = weather;
+        this.la = la;
+    }
+
     public int getId() {
         return id;
     }
