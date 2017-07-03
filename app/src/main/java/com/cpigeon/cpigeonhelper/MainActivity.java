@@ -92,18 +92,14 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     RecyclerView mRecyclerView;
     private HomeGYTAdapter mAdapter;
     private int count = 1;
-
-
     @Override
     protected void swipeBack() {
 
     }
-
     @Override
     protected int getLayoutId() {
         return R.layout.activity_main;
     }
-
     @Override
     public void initViews(Bundle savedInstanceState) {
 
@@ -127,7 +123,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         loadGTYServer();
         loadTopNews();
     }
-
     private void loadGTYServer() {
         Map<String,Object> urlParams = new HashMap<>();
         urlParams.put("uid",AssociationData.getUserId());
@@ -154,7 +149,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                 });
     }
-
     private void loadRace() {
         Map<String,Object> urlParams = new HashMap<>();
         urlParams.put("uid",AssociationData.getUserId());
@@ -176,7 +170,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
 
                 });
     }
-
     private void loadAd() {
         RetrofitHelper.getApi()
                 .getAllAd()
@@ -199,7 +192,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                 });
     }
-
     private void loadTopNews() {
         RetrofitHelper.getApi()
                 .getAnnouncementTop()
@@ -222,7 +214,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                 });
     }
-
     private void showAd(List<HomeAd> homeAds) {
 
         ViewGroup.LayoutParams lp = mBanner.getLayoutParams();
@@ -244,13 +235,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mBanner.start();
 
     }
-
     @Override
     public void initToolBar() {
         setSupportActionBar(toolbar);
     }
-
-
     /**
      * 如果按下返回键的时候Drawerlayout未关闭，那么就先关闭
      */
@@ -272,7 +260,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
     }
-
     /**
      * 设置statusbar的颜色
      */
@@ -282,7 +269,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         StatusBarUtil.setColorForDrawerLayout(this, drawerLayout, mColor, 0);
 
     }
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {

@@ -1,41 +1,26 @@
 package com.cpigeon.cpigeonhelper.common.db;
 
 
+import com.cpigeon.cpigeonhelper.base.MyApp;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PathRecord;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.MyLocation;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
+import com.cpigeon.cpigeonhelper.utils.CommonUitls;
+import com.orhanobut.logger.Logger;
 
 import io.realm.Realm;
+import io.realm.RealmAsyncTask;
 import io.realm.RealmResults;
 
 /**
+ *
  * Created by Administrator on 2017/5/16.
+ *
  */
 
 public class RealmUtils {
-    public static final String DB_NAME = "cpigeon.realm";
-    private Realm mRealm;
-    private static RealmUtils instance;
+    public static final String DB_NAME = "cpigeonhelper.realm";
 
-    private RealmUtils() {
-    }
-
-    public static RealmUtils getInstance() {
-        if (instance == null) {
-            synchronized (RealmUtils.class) {
-                if (instance == null)
-                    instance = new RealmUtils();
-            }
-        }
-        return instance;
-    }
-
-
-    protected Realm getRealm() {
-        if (mRealm == null || mRealm.isClosed())
-            mRealm = Realm.getDefaultInstance();
-        return mRealm;
-    }
     ///////////////////////////////////////////////////////////////////////////
     // 登录相关
     ///////////////////////////////////////////////////////////////////////////
@@ -102,6 +87,67 @@ public class RealmUtils {
         getRealm().executeTransaction(realm -> results.deleteAllFromRealm());
     }
 
+    ///////////////////////////////////////////////////////////////////////////
+    // 写入坐标数据
+    ///////////////////////////////////////////////////////////////////////////
+    public void insertLocation(MyLocation location)
+    {
+        if (getRealm().isInTransaction())
+        {
+            getRealm().cancelTransaction();
+            getRealm().beginTransaction();
+            getRealm().copyToRealmOrUpdate(location);
+            getRealm().commitTransaction();
+        }
 
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // 查询
+    ///////////////////////////////////////////////////////////////////////////
+    public RealmResults<MyLocation> queryLocation(int raceid)
+    {
+        return getRealm().where(MyLocation.class).equalTo("raceid",raceid).findAll();
+    }
+
+    private Realm mRealm;
+    private static RealmUtils instance;
+    private RealmUtils() {
+    }
+
+    public static RealmUtils getInstance() {
+        if (instance == null) {
+            synchronized (RealmUtils.class) {
+                if (instance == null)
+                    instance = new RealmUtils();
+            }
+        }
+        return instance;
+    }
+
+
+    private Realm getRealm() {
+        if (mRealm == null || mRealm.isClosed())
+            mRealm = Realm.getDefaultInstance();
+        return mRealm;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // 写入坐标数据
+    ///////////////////////////////////////////////////////////////////////////
+//    public void insertLocation(MyLocation location)
+//    {
+//        getRealm().beginTransaction();
+//        getRealm().copyToRealmOrUpdate(location);
+//        getRealm().commitTransaction();
+//    }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // 查询
+    ///////////////////////////////////////////////////////////////////////////
+    public RealmResults<MyLocation> queryChapter(int localid)
+    {
+        return getRealm().where(MyLocation.class).equalTo("localid",localid).findAll();
+    }
 
 }

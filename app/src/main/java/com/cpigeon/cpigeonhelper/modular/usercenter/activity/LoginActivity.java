@@ -256,6 +256,17 @@ public class LoginActivity extends BaseActivity {
                                 .placeholder(R.mipmap.logos)
                                 .error(R.mipmap.logos)
                                 .into(civUserHeadImg);
+                    },throwable -> {
+                        if (throwable instanceof SocketTimeoutException)
+                        {
+                            CommonUitls.showToast(this,"网路有点不稳定，请检查网速");
+                        }else if (throwable instanceof ConnectException)
+                        {
+                            CommonUitls.showToast(this,"未能连接到服务器，请检查连接");
+                        }else if (throwable instanceof RuntimeException)
+                        {
+                            CommonUitls.showToast(this,"发生了不可预期的问题");
+                        }
                     });
         } else if (etUsername.getText().toString().trim().length() < 11 || !isAccountValid(etUsername.getText().toString())) {
             Picasso.with(mContext).load(R.mipmap.logos).into(civUserHeadImg);

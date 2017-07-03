@@ -1,5 +1,7 @@
 package com.cpigeon.cpigeonhelper.ui;
 
+import android.location.Location;
+
 import com.amap.api.location.AMapLocation;
 import com.amap.api.maps.model.LatLng;
 import com.amap.api.trace.TraceLocation;
@@ -15,14 +17,14 @@ public class Util {
 	 * @return
 	 */
 	public static List<TraceLocation> parseTraceLocationList(
-			List<AMapLocation> list) {
+			List<Location> list) {
 		List<TraceLocation> traceList = new ArrayList<TraceLocation>();
 		if (list == null) {
 			return traceList;
 		}
 		for (int i = 0; i < list.size(); i++) {
 			TraceLocation location = new TraceLocation();
-			AMapLocation amapLocation = list.get(i);
+			Location amapLocation = list.get(i);
 			location.setBearing(amapLocation.getBearing());
 			location.setLatitude(amapLocation.getLatitude());
 			location.setLongitude(amapLocation.getLongitude());
@@ -32,7 +34,7 @@ public class Util {
 		}
 		return traceList;
 	}
-	public static TraceLocation parseTraceLocation(AMapLocation amapLocation) {
+	public static TraceLocation parseTraceLocation(Location amapLocation) {
 		TraceLocation location = new TraceLocation();
 		location.setBearing(amapLocation.getBearing());
 		location.setLatitude(amapLocation.getLatitude());
@@ -47,13 +49,13 @@ public class Util {
 	 * @param list
 	 * @return
 	 */
-	public static List<LatLng> parseLatLngList(List<AMapLocation> list) {
+	public static List<LatLng> parseLatLngList(List<Location> list) {
 		List<LatLng> traceList = new ArrayList<LatLng>();
 		if (list == null) {
 			return traceList;
 		}
 		for (int i = 0; i < list.size(); i++) {
-			AMapLocation loc = list.get(i);
+			Location loc = list.get(i);
 			double lat = loc.getLatitude();
 			double lng = loc.getLongitude();
 			LatLng latlng = new LatLng(lat, lng);
@@ -62,7 +64,7 @@ public class Util {
 		return traceList;
 	}
 	
-	public static AMapLocation parseLocation(String latLonStr) {
+	public static Location parseLocation(String latLonStr) {
 		if (latLonStr == null || latLonStr.equals("") || latLonStr.equals("[]")) {
 			return null;
 		}
@@ -85,11 +87,11 @@ public class Util {
 		return location;
 	}
 	
-	public static ArrayList<AMapLocation> parseLocations(String latLonStr) {
-		ArrayList<AMapLocation> locations = new ArrayList<AMapLocation>();
+	public static ArrayList<Location> parseLocations(String latLonStr) {
+		ArrayList<Location> locations = new ArrayList<Location>();
 		String[] latLonStrs = latLonStr.split(";");
 		for (int i = 0; i < latLonStrs.length; i++) {
-			AMapLocation location = Util.parseLocation(latLonStrs[i]);
+			Location location = Util.parseLocation(latLonStrs[i]);
 			if (location != null) {
 				locations.add(location);
 			}

@@ -1,5 +1,6 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.bean;
 
+import android.location.Location;
 
 import com.amap.api.location.AMapLocation;
 
@@ -7,97 +8,97 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Administrator on 2017/6/9.
+ * Created by andysong on 2017/6/28.
  */
 
-public class PathRecord{
-    private int mId = 0;
+public class PathRecord {
     private AMapLocation mStartPoint;
     private AMapLocation mEndPoint;
-    private List<AMapLocation> mPathLinePoints = new ArrayList<AMapLocation>();
+    private List<Location> mPathLinePoints = new ArrayList<>();
     private String mDistance;
     private String mDuration;
     private String mAveragespeed;
     private String mDate;
+    private int mId = 0;
 
     public PathRecord() {
 
     }
 
-    public int getId() {
-        return mId;
-    }
-
-    public void setId(int id) {
-        this.mId = id;
-    }
-
-    public AMapLocation getStartpoint() {
+    public AMapLocation getmStartPoint() {
         return mStartPoint;
     }
 
-    public void setStartpoint(AMapLocation startpoint) {
-        this.mStartPoint = startpoint;
+    public void setmStartPoint(AMapLocation mStartPoint) {
+        this.mStartPoint = mStartPoint;
     }
 
-    public AMapLocation getEndpoint() {
+    public AMapLocation getmEndPoint() {
         return mEndPoint;
     }
 
-    public void setEndpoint(AMapLocation endpoint) {
-        this.mEndPoint = endpoint;
+    public void setmEndPoint(AMapLocation mEndPoint) {
+        this.mEndPoint = mEndPoint;
     }
 
-    public List<AMapLocation> getPathline() {
+    public List<Location> getmPathLinePoints() {
         return mPathLinePoints;
     }
 
-    public void setPathline(List<AMapLocation> pathline) {
-        this.mPathLinePoints = pathline;
+    public void setmPathLinePoints(List<Location> mPathLinePoints) {
+        this.mPathLinePoints = mPathLinePoints;
     }
 
-    public String getDistance() {
+    public String getmDistance() {
         return mDistance;
     }
 
-    public void setDistance(String distance) {
-        this.mDistance = distance;
+    public void setmDistance(String mDistance) {
+        this.mDistance = mDistance;
     }
 
-    public String getDuration() {
+    public String getmDuration() {
         return mDuration;
     }
 
-    public void setDuration(String duration) {
-        this.mDuration = duration;
+    public void setmDuration(String mDuration) {
+        this.mDuration = mDuration;
     }
 
-    public String getAveragespeed() {
+    public String getmAveragespeed() {
         return mAveragespeed;
     }
 
-    public void setAveragespeed(String averagespeed) {
-        this.mAveragespeed = averagespeed;
+    public void setmAveragespeed(String mAveragespeed) {
+        this.mAveragespeed = mAveragespeed;
     }
 
-    public String getDate() {
+    public String getmDate() {
         return mDate;
     }
 
-    public void setDate(String date) {
-        this.mDate = date;
+    public void setmDate(String mDate) {
+        this.mDate = mDate;
     }
 
-    public void addpoint(AMapLocation point) {
+    public int getmId() {
+        return mId;
+    }
+
+    public void setmId(int mId) {
+        this.mId = mId;
+    }
+
+    public void addpoint(Location point) {
         mPathLinePoints.add(point);
     }
 
     @Override
     public String toString() {
         StringBuilder record = new StringBuilder();
-        record.append("recordSize:" + getPathline().size() + ", ");
-        record.append("distance:" + getDistance() + "m, ");
-        record.append("duration:" + getDuration() + "s");
+        record.append("recordSize:" + getmPathLinePoints().size() + ", ");
+        record.append("distance:" + getmDistance() + "m, ");
+        record.append("duration:" + getmDuration() + "s");
         return record.toString();
     }
 }
