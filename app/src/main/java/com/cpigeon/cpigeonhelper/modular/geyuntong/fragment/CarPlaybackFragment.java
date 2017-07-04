@@ -147,10 +147,7 @@ public class CarPlaybackFragment extends BaseFragment {
 
     private List<LatLng> readLatLngs() {
         List<MyLocation> myLocations = loadLocation();
-        for (MyLocation myLocation : myLocations)
-        {
-            Logger.e(myLocation.getId()+"，的数据");
-        }
+        Logger.e(myLocations.size()+"条数据");
         List<LatLng> points = new ArrayList<LatLng>();
         for (MyLocation myLocation : myLocations) {
             points.add(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()));

@@ -30,9 +30,11 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.annotations.NonNull;
@@ -109,6 +111,12 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
                 .subscribe(objectApiResponse -> {
                     if (objectApiResponse.isStatus()) {
                         simulateSuccessProgress(btnConfim);
+                        Observable.timer(1000, TimeUnit.MILLISECONDS)
+                                .compose(bindToLifecycle())
+                                .observeOn(AndroidSchedulers.mainThread())
+                                .subscribe(aLong -> {
+                                    finish();
+                                });
                     } else {
                         simulateErrorProgress(btnConfim);
                     }
@@ -210,7 +218,7 @@ public class ForgetPwdActivity extends ToolbarBaseActivity {
                                 .build();
                         AuthCode.getInstance().with(ForgetPwdActivity.this).config(config).into((EditText) findViewById(R.id.et_checkcode));
                     } else {
-                                CommonUitls.showToast(mContext, checkCodeApiResponse.getMsg());
+                            CommonUitls.showToast(mContext, "获取失败");
                         }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException)

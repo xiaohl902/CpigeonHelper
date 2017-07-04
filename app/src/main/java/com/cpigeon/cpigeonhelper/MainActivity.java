@@ -37,6 +37,7 @@ import com.cpigeon.cpigeonhelper.modular.order.activity.OpeningGeyuntongActivity
 import com.cpigeon.cpigeonhelper.modular.order.activity.OrderListActivity;
 import com.cpigeon.cpigeonhelper.modular.root.activity.RootListActivity;
 import com.cpigeon.cpigeonhelper.modular.setting.activity.AboutActivity;
+import com.cpigeon.cpigeonhelper.modular.setting.activity.SettingActivity;
 import com.cpigeon.cpigeonhelper.modular.xiehui.activity.XieHuiInfoActivity;
 import com.cpigeon.cpigeonhelper.ui.MyDecoration;
 import com.cpigeon.cpigeonhelper.ui.textview.MarqueeTextView;
@@ -123,6 +124,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         loadGTYServer();
         loadTopNews();
     }
+
     private void loadGTYServer() {
         Map<String,Object> urlParams = new HashMap<>();
         urlParams.put("uid",AssociationData.getUserId());
@@ -135,7 +137,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(gytServiceApiResponse -> {
                     if (gytServiceApiResponse.getErrorCode() == 0) {
-                        RealmUtils.getInstance().insertGYTService(gytServiceApiResponse.getData());
+
                     }else {
                         CommonUitls.showToast(this,gytServiceApiResponse.getMsg());
                     }
@@ -145,10 +147,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }else if (throwable instanceof ConnectException){
                         CommonUitls.showToast(this,"连接异常，网络不通畅");
                     }else if (throwable instanceof RuntimeException){
-//                        CommonUitls.showToast(this,"发生了不可预期的错误"+throwable.getMessage());
+                        CommonUitls.showToast(this,"发生了不可预期的错误"+throwable.getMessage());
                     }
                 });
     }
+
     private void loadRace() {
         Map<String,Object> urlParams = new HashMap<>();
         urlParams.put("uid",AssociationData.getUserId());
@@ -162,14 +165,17 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     if (listApiResponse.getErrorCode() == 0)
                     {
                         mAdapter = new HomeGYTAdapter(listApiResponse.getData());
+                        mAdapter.setOnItemClickListener((adapter, view, position) ->
+                            startActivity(new Intent(this,GeYunTongListActivity.class))
+                        );
                         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
                         mRecyclerView.setAdapter(mAdapter);
-                        mRecyclerView.addItemDecoration(new MyDecoration(this, MyDecoration.VERTICAL_LIST));
                     }
                 }, throwable -> {
 
                 });
     }
+
     private void loadAd() {
         RetrofitHelper.getApi()
                 .getAllAd()
@@ -192,6 +198,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                 });
     }
+
     private void loadTopNews() {
         RetrofitHelper.getApi()
                 .getAnnouncementTop()
@@ -214,6 +221,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                 });
     }
+
     private void showAd(List<HomeAd> homeAds) {
 
         ViewGroup.LayoutParams lp = mBanner.getLayoutParams();
@@ -296,7 +304,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 startActivity(new Intent(MainActivity.this, OrderListActivity.class));
                 break;
             case R.id.setting://设置
-                startActivity(new Intent(MainActivity.this, AboutActivity.class));
+                startActivity(new Intent(MainActivity.this, SettingActivity.class));
                 break;
 
         }

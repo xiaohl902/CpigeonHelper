@@ -2,18 +2,15 @@ package com.cpigeon.cpigeonhelper.mina;
 
 
 
-import com.cpigeon.cpigeonhelper.mina.domain.MinaMsgHead;
-
 import org.apache.mina.core.buffer.IoBuffer;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.sql.SQLException;
-
-
 /**
- * 消息事件处理
+ * Created by Administrator on 2017/7/4.
  */
+
 public class HandlerEvent {
     private static HandlerEvent handlerEvent;
     public static HandlerEvent getInstance() {

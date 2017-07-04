@@ -105,6 +105,10 @@
             android:launchMode="singleTop"
             android:exported="true"
             android:name=".wxapi.WXPayEntryActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.setting.activity.SettingActivity"
+            android:screenOrientation="portrait"/>
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -118,9 +122,7 @@
 
 
         <service android:name="com.amap.api.location.APSService"/>
-        <service android:name=".modular.geyuntong.fragment.CoreService"
-            android:enabled="true"
-            android:exported="true"/>
+        <service android:name=".mina.CoreService"/>
         <activity android:name=".modular.order.activity.MyBalanceActivity"/>
 
         <meta-data android:name="design_width" android:value="768">

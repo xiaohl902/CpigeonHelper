@@ -24,6 +24,7 @@ public class HomeGYTAdapter extends BaseQuickAdapter<GeYunTong,BaseViewHolder>{
     @Override
     protected void convert(BaseViewHolder helper, GeYunTong item) {
         helper.setText(R.id.tv_geyuntong_race,item.getRaceName());
+        helper.setTextColor(R.id.tv_geyuntong_race,ContextCompat.getColor(mContext,R.color.colorRed));
         helper.setText(R.id.tv_geyuntong_race_status,item.getState());
         switch (item.getStateCode())
         {
@@ -37,5 +38,10 @@ public class HomeGYTAdapter extends BaseQuickAdapter<GeYunTong,BaseViewHolder>{
                 helper.setTextColor(R.id.tv_geyuntong_race_status, ContextCompat.getColor(mContext,R.color.colorGary));
                 break;
         }
+    }
+
+    @Override
+    public int getItemCount() {
+        return 3;
     }
 }

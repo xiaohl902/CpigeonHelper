@@ -185,6 +185,7 @@ public class LoginActivity extends BaseActivity {
                                 });
                     } else {
                         simulateErrorProgress(btnActionLogin);
+                        CommonUitls.showToast(this,userBeanApiResponse.getMsg()+",错误代码:"+userBeanApiResponse.getErrorCode());
                     }
                 }, throwable -> {
                     if(throwable instanceof SocketTimeoutException){

@@ -1,0 +1,12 @@
+<component name="libraryTable">
+  <library name="update-app-3.0.0">
+    <CLASSES>
+      <root url="file://$USER_HOME$/.android/build-cache/ba4a9c85ecd0e38db23b78399fea37e1e7b48a84/output/res" />
+      <root url="jar://$USER_HOME$/.android/build-cache/ba4a9c85ecd0e38db23b78399fea37e1e7b48a84/output/jars/classes.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.qianwen/update-app/3.0.0/e70d6f15235c5317646340d80bee406f79b7d14f/update-app-3.0.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

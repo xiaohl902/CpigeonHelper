@@ -97,6 +97,7 @@ public class OrderListActivity extends ToolbarBaseActivity implements BaseQuickA
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter.setEnableLoadMore(true);
+        setRecycleNoScroll();
     }
 
     @Override

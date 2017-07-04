@@ -5,6 +5,10 @@ import org.apache.mina.core.session.IoSession;
 import org.apache.mina.filter.codec.CumulativeProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolDecoderOutput;
 
+/**
+ * Created by Administrator on 2017/7/4.
+ */
+
 public class MyDataDecoder extends CumulativeProtocolDecoder {
     /**
      * 返回值含义:

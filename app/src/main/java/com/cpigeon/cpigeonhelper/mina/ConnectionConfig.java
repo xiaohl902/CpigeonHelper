@@ -3,8 +3,9 @@ package com.cpigeon.cpigeonhelper.mina;
 import android.content.Context;
 
 /**
- * Created by admin on 2016/12/22.
+ * Created by Administrator on 2017/7/4.
  */
+
 public class ConnectionConfig {
 
     private Context context;
@@ -35,8 +36,8 @@ public class ConnectionConfig {
 
     public static class Builder{
         private Context context;
-        private String ip = "192.168.0.10";
-        private int port = 5556;
+        private String ip = "192.168.0.5";
+        private int port = 5555;
         private int readBufferSize = 1024;
         private long connectionTimeout = 10000;
 

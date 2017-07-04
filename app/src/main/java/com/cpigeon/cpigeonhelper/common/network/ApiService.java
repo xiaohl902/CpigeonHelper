@@ -17,6 +17,7 @@ import com.cpigeon.cpigeonhelper.modular.root.bean.RootManagerList;
 import com.cpigeon.cpigeonhelper.modular.root.bean.UserInfoByTelBean;
 import com.cpigeon.cpigeonhelper.modular.root.bean.UserPermissions;
 import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
+import com.cpigeon.cpigeonhelper.modular.setting.UpdateBean;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.AnnouncementList;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.CheckCode;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.DeviceBean;
@@ -284,5 +285,9 @@ public interface ApiService {
     @GET("CHAPI/V1/GetGYTinfo")
     Observable<ApiResponse<GYTService>> getGYTInfo(@Header("auth") String token,
                                                          @QueryMap Map<String,Object> urlParams);
+
+    //检查更新
+    @GET("GAPI/V1/Version?id=com.cpigeon.cpigeonhelper")
+    Observable<List<UpdateBean>> checkForUpdate();
 
 }

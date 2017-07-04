@@ -8,6 +8,7 @@ import android.widget.FrameLayout;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
+import com.cpigeon.cpigeonhelper.mina.CoreService;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.fragment.CarPageFragment;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;

@@ -1,6 +1,7 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.activity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -10,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
@@ -17,6 +19,7 @@ import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GeYunTongListAdapter;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
+import com.cpigeon.cpigeonhelper.ui.CustomLoadMoreView;
 import com.cpigeon.cpigeonhelper.ui.MyDecoration;
 import com.cpigeon.cpigeonhelper.ui.searchview.SearchEditText;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
@@ -39,7 +42,7 @@ import io.reactivex.schedulers.Schedulers;
  * Created by Administrator on 2017/6/7.
  */
 
-public class GeYunTongListActivity extends ToolbarBaseActivity implements SearchEditText.OnSearchClickListener {
+public class GeYunTongListActivity extends ToolbarBaseActivity implements SearchEditText.OnSearchClickListener, BaseQuickAdapter.RequestLoadMoreListener {
     @BindView(R.id.search_edittext)
     SearchEditText searchEdittext;
     @BindView(R.id.recycleview_geyutong_list)
@@ -48,12 +51,14 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
     CustomEmptyView mCustomEmptyView;
     @BindView(R.id.iv_add)
     FloatingActionButton ivAdd;
-//    @BindView(R.id.iv_help)
-//    ImageView ivHelp;
     @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout mSwipeRefreshLayout;
     private GeYunTongListAdapter mAdapter;
     private boolean mIsRefreshing = false;
+    private static final int ps = 6;
+    private int pi = 1;
+    boolean canLoadMore = true,isMoreDateLoading = false;
+    private int mCurrentCounter = 0;
     @Override
     protected void swipeBack() {
     }
@@ -80,7 +85,7 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
 
     @Override
     public void initRefreshLayout() {
-        mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
+        mSwipeRefreshLayout.setColorSchemeColors(Color.rgb(47, 223, 189));
         mSwipeRefreshLayout.post(() -> {
             mSwipeRefreshLayout.setRefreshing(true);
             mIsRefreshing = true;
@@ -88,7 +93,7 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
         });
 
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
-            mIsRefreshing = true;
+            clearData();
             loadData();
         });
     }
@@ -115,9 +120,15 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
 
 
         });
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mRecyclerView.setAdapter(mAdapter);
+
+
+        mAdapter.setLoadMoreView(new CustomLoadMoreView());
+        mAdapter.setOnLoadMoreListener(this, mRecyclerView);
+        mAdapter.openLoadAnimation(BaseQuickAdapter.ALPHAIN);
         mRecyclerView.addItemDecoration(new MyDecoration(this, MyDecoration.VERTICAL_LIST));
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mAdapter.setEnableLoadMore(true);
     }
 
     @Override
@@ -125,7 +136,10 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
         Map<String, Object> urlParams = new HashMap<>();
         urlParams.put("uid", AssociationData.getUserId());
         urlParams.put("type", AssociationData.getUserType());
+        urlParams.put("ps", String.valueOf(ps));
+        urlParams.put("pi",String.valueOf(pi));
         urlParams.put("key", "");
+
         RetrofitHelper.getApi()
                 .getGeYunTongRaceList(AssociationData.getUserToken(), urlParams)
                 .compose(bindToLifecycle())
@@ -133,7 +147,9 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(listApiResponse -> {
                     if (listApiResponse.getErrorCode() == 0&&listApiResponse.getData() != null && listApiResponse.getData().size() > 0) {
-                        mAdapter.setNewData(listApiResponse.getData());
+                        mAdapter.addData(listApiResponse.getData());
+                        canLoadMore = listApiResponse.getData()!=null && listApiResponse.getData().size() == ps;
+                        mCurrentCounter = mAdapter.getData().size();
                         finishTask();
                     } else if (listApiResponse.getErrorCode() == 0 &&listApiResponse.getData().size() == 0){
                         initEmptyView("暂时比赛信息");
@@ -163,7 +179,16 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
 
     @Override
     public void finishTask() {
+        if (canLoadMore)
+        {
+            pi++;
+            mAdapter.loadMoreComplete();
+        }else {
+            mAdapter.loadMoreEnd(false);
+        }
+        isMoreDateLoading = mIsRefreshing = false;
         mSwipeRefreshLayout.setRefreshing(false);
+        mSwipeRefreshLayout.setEnabled(true);
         mIsRefreshing = false;
         hideEmptyView();
         mAdapter.notifyDataSetChanged();
@@ -188,4 +213,20 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
 
     }
 
+    @Override
+    public void onLoadMoreRequested() {
+        if (canLoadMore)
+        {
+            mSwipeRefreshLayout.setEnabled(false);
+            isMoreDateLoading = true;
+            loadData();
+        }else {
+            mAdapter.setEnableLoadMore(false);
+
+        }
+    }
+
+    private void clearData() {
+        mIsRefreshing = true;
+    }
 }

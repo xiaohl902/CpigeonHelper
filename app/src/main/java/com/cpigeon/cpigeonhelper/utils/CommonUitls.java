@@ -44,6 +44,7 @@ import java.util.regex.Pattern;
 
 public class CommonUitls {
     private static final String KEY_API_SIGN = "iy087234ho78fuqy49TR23jk4h";    //只有url参数的签名算法
+
     public static final String KEY_SERVER_PWD = "Je9Ol174MbsWaq2K";
     private static String DeviceID;
     private static Toast toast;

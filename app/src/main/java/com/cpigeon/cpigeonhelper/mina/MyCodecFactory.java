@@ -5,6 +5,10 @@ import org.apache.mina.filter.codec.ProtocolCodecFactory;
 import org.apache.mina.filter.codec.ProtocolDecoder;
 import org.apache.mina.filter.codec.ProtocolEncoder;
 
+/**
+ * Created by Administrator on 2017/7/4.
+ */
+
 public class MyCodecFactory implements ProtocolCodecFactory {
     private MyDataDecoder decoder;
     private MyDataEncoder encoder;

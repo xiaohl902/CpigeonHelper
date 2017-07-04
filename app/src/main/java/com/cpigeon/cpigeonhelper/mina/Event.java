@@ -1,9 +1,11 @@
 package com.cpigeon.cpigeonhelper.mina;
 
 /**
- * 与服务器协议好的事件号
+ * Created by Administrator on 2017/7/4.
  */
+
 public class Event {
+
     /**
      * 客户端发送给服务器事件号
      */

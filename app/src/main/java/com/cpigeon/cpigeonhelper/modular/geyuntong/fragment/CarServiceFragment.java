@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
@@ -20,6 +19,16 @@ import com.amap.api.maps.model.LatLng;
 import com.amap.api.maps.model.MyLocationStyle;
 import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
+import com.amap.api.services.core.LatLonPoint;
+import com.amap.api.services.geocoder.GeocodeResult;
+import com.amap.api.services.geocoder.GeocodeSearch;
+import com.amap.api.services.geocoder.RegeocodeQuery;
+import com.amap.api.services.geocoder.RegeocodeResult;
+import com.amap.api.services.weather.LocalWeatherForecastResult;
+import com.amap.api.services.weather.LocalWeatherLive;
+import com.amap.api.services.weather.LocalWeatherLiveResult;
+import com.amap.api.services.weather.WeatherSearch;
+import com.amap.api.services.weather.WeatherSearchQuery;
 import com.amap.api.trace.LBSTraceClient;
 import com.amap.api.trace.TraceListener;
 import com.amap.api.trace.TraceLocation;
@@ -29,10 +38,10 @@ import com.cpigeon.cpigeonhelper.base.BaseFragment;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.mina.CoreService;
 import com.cpigeon.cpigeonhelper.mina.SessionManager;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.ACarServiceActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.LocationInfoReports;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.MyLocation;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PathRecord;
 import com.cpigeon.cpigeonhelper.ui.Util;
@@ -46,7 +55,6 @@ import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -57,17 +65,17 @@ import butterknife.OnClick;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
-import io.realm.RealmAsyncTask;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 import static com.cpigeon.cpigeonhelper.utils.CommonUitls.KEY_SERVER_PWD;
 
+
 /**
  * Created by Administrator on 2017/5/31.
  */
 
-public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocationChangeListener, TraceListener {
+public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocationChangeListener, TraceListener, GeocodeSearch.OnGeocodeSearchListener, WeatherSearch.OnWeatherSearchListener {
     @BindView(R.id.mapView)
     TextureMapView mMapView;
     @BindView(R.id.tvMileage)
@@ -97,13 +105,18 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     private TraceOverlay mTraceoverlay;
     private List<TraceLocation> mTracelocationlist = new ArrayList<>();
     private List<TraceOverlay> mOverlayList = new ArrayList<>();
-    private List<AMapLocation> recordList = new ArrayList<>();
     private PathRecord record;
     private int mDistance = 0;
     private int i = 1;
     private AMap aMap;
-    private MyLocation mMyLocation = new MyLocation();
     private int ift;
+    private GeocodeSearch geocodeSearch;
+    private LatLng mylocation;
+    private MyLocation mMyLocation = new MyLocation();
+    private Location location;
+    private WeatherSearchQuery mquery;
+    private WeatherSearch mweathersearch;
+    private LocalWeatherLive weatherlive;
     public static CarServiceFragment newInstance() {
 
         return new CarServiceFragment();
@@ -135,14 +148,16 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
 
     private void initpolyline() {
         mPolyoptions = new PolylineOptions();
-        mPolyoptions.width(10f);
-        mPolyoptions.color(Color.GRAY);
-        PolylineOptions tracePolytion = new PolylineOptions();
-        tracePolytion.width(40);
-        tracePolytion.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.grasp_trace_line));
+        mPolyoptions.width(40);
+//        mPolyoptions.color(Color.GRAY);
+        mPolyoptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.grasp_trace_line));
+//        PolylineOptions tracePolytion = new PolylineOptions();
+//        tracePolytion.width(40);
+//        tracePolytion.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.grasp_trace_line));
     }
 
     private void initMap() {
+        getActivity().startService(new Intent(getActivity(), CoreService.class));
         if (aMap == null) {
             aMap = mMapView.getMap();
             setUpMap();
@@ -166,28 +181,24 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
         myLocationStyle.interval(5000); //设置连续定位模式下的定位间隔,单位为毫秒。
         myLocationStyle.strokeColor(R.color.colorAccent);//设置定位蓝点精度圆圈的边框颜色的方法。
         myLocationStyle.radiusFillColor(R.color.colorPrimary);//设置定位蓝点精度圆圈的边框颜色的方法。
+
         aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
         aMap.setMyLocationEnabled(true);// 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
         aMap.setOnMyLocationChangeListener(this);
+        aMap.moveCamera(CameraUpdateFactory.zoomTo(19));
+
+        mweathersearch = new WeatherSearch(getActivity());
+        mweathersearch.setOnWeatherSearchListener(this);
+
+        geocodeSearch = new GeocodeSearch(getActivity());
+        geocodeSearch.setOnGeocodeSearchListener(this);
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         geYunTong = ((ACarServiceActivity) activity).getGeYunTong();
-    }
-
-    /**
-     * 给服务器发送一条消息
-     */
-    public void sendMsg(String msg) {
-        String s = EncryptionTool.encryptAES(AssociationData.getUserToken(), KEY_SERVER_PWD);
-        IoBuffer buffer = IoBuffer.allocate(100000);
-        buffer.put(
-                ("[len=" + s.length() + "]" + s)
-                        .getBytes());
-        SessionManager.getInstance().writeToServer(buffer);
-
+        Logger.e("鸽运通id：" + geYunTong.getId());
     }
 
     @OnClick(R.id.btn_stop)
@@ -252,6 +263,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(objectApiResponse -> {
                     if (objectApiResponse.getErrorCode() == 0) {
+
                         initMap();
                         initpolyline();
                     } else {
@@ -277,7 +289,10 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
      * 停止鸽车监控
      */
     private void stopRaceMonitor() {
-
+        if (mMapView != null) {
+            mMapView.onDestroy();
+            aMap.clear();
+        }
         new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
                 .setTitleText("温馨提示")
                 .setContentText("是否将当前时间设为司放时间？")
@@ -295,11 +310,10 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 })
                 .show();
 
-
     }
 
-
     public void stopRace() {
+        getActivity().stopService(new Intent(getActivity(), CoreService.class));
         RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
                 .addFormDataPart("type", AssociationData.getUserType())
@@ -321,7 +335,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(objectApiResponse -> {
                     if (objectApiResponse.getErrorCode() == 0) {
-
+                        getActivity().finish();
                     } else {
                         new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
                                 .setTitleText("温馨提示")
@@ -343,17 +357,12 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     @Override
     public void onMyLocationChange(Location location) {
         if (location != null) {
-
-            LatLng mylocation = new LatLng(location.getLatitude(),
+            this.location = location;
+            mylocation = new LatLng(location.getLatitude(),
                     location.getLongitude());
-
-            mMyLocation.setId(i);
-            mMyLocation.setRaceid(geYunTong.getId());
-            mMyLocation.setLatitude(location.getLatitude());
-            mMyLocation.setLongitude(location.getLongitude());
-            RealmUtils.getInstance().insertLocation(mMyLocation);
-            i++;
-            aMap.moveCamera(CameraUpdateFactory.zoomTo(19));
+            LatLonPoint latLonPoint = new LatLonPoint(location.getLatitude(), location.getLongitude());
+            RegeocodeQuery query = new RegeocodeQuery(latLonPoint, 10, GeocodeSearch.AMAP);
+            geocodeSearch.getFromLocationAsyn(query);
             Log.e("szx", location.getLatitude() + "," + location.getLongitude());
             record.addpoint(location);
             mPolyoptions.add(mylocation);
@@ -442,4 +451,68 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
         mMapView.onSaveInstanceState(outState);
     }
 
+    @Override
+    public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int code) {
+        if (code == 1000) {
+            mquery = new WeatherSearchQuery(regeocodeResult.getRegeocodeAddress().getCity(),WeatherSearchQuery.WEATHER_TYPE_LIVE);
+            mweathersearch.setQuery(mquery);
+            mweathersearch.searchWeatherAsyn();
+        }
+    }
+
+    @Override
+    public void onGeocodeSearched(GeocodeResult geocodeResult, int i) {
+
+    }
+
+    @Override
+    public void onWeatherLiveSearched(LocalWeatherLiveResult localWeatherLiveResult, int code) {
+        if (code == 1000)
+        {
+            if (localWeatherLiveResult !=null && localWeatherLiveResult.getLiveResult()!=null)
+            {
+                weatherlive = localWeatherLiveResult.getLiveResult();
+                mMyLocation.setId(i);
+                i++;
+                mMyLocation.setRaceid(geYunTong.getId());
+                mMyLocation.setLatitude(location.getLatitude());
+                mMyLocation.setLongitude(location.getLongitude());
+                mMyLocation.setGetReportTime(weatherlive.getReportTime());
+                mMyLocation.setHumidity(weatherlive.getHumidity());
+                mMyLocation.setTemperature(weatherlive.getTemperature());
+                mMyLocation.setWindDirection(weatherlive.getWindDirection());
+                mMyLocation.setWeather(weatherlive.getWeather());
+                Logger.e("天气"+weatherlive.getWeather());
+                RealmUtils.getInstance().insertLocation(mMyLocation);
+                Logger.e("code run there");
+                sendMsg(location.getLatitude()+"|"+location.getLongitude()+"|"+
+                        3.00+"|"+System.currentTimeMillis()/1000+"|"+
+                        weatherlive.getWeather()+"|"+weatherlive.getWindDirection()+"|"+
+                        weatherlive.getWindPower()+"|"+weatherlive.getReportTime()+"|"+
+                        weatherlive.getTemperature());
+            }
+        }
+    }
+
+    @Override
+    public void onWeatherForecastSearched(LocalWeatherForecastResult localWeatherForecastResult, int i) {
+
+    }
+
+    /**
+     * 给服务器发送一条消息
+     */
+    public void sendMsg(String msg) {
+
+        String s = EncryptionTool.encryptAES(AssociationData.getUserToken(), KEY_SERVER_PWD);
+        String header1 = "[len=" + s.length() + "&typ=2&sign=" + EncryptionTool.MD5(
+                "len=" + s.length() + "&typ=2&" + s + "&soiDuo3inKjSdi")+"]";
+        String result = header1 + s;
+        IoBuffer buffer = IoBuffer.allocate(100000);
+        buffer.put(result.getBytes());
+        SessionManager.getInstance().writeToServer(buffer);
+
+//
+
+    }
 }

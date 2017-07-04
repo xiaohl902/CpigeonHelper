@@ -1,6 +1,8 @@
 package com.cpigeon.cpigeonhelper;
 
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
+import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
+import com.orhanobut.logger.Logger;
 
 import org.junit.Test;
 
@@ -15,6 +17,6 @@ public class ExampleUnitTest {
     @Test
     public void addition_isCorrect() throws Exception {
         assertEquals(4, 2 + 2);
-
     }
+
 }

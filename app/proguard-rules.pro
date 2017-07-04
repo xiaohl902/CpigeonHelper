@@ -24,6 +24,11 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -dontwarn com.tencent.bugly.**
+-dontwarn com.squareup.picasso.**
+-dontwarn org.apache.mina.**
+-dontwarn okio.Okio.**
+-dontwarn com.squareup.retrofit2.**
+
 -keep public class com.tencent.bugly.**{*;}
 
 -keep class com.amap.api.maps2d.**{*;}
@@ -39,27 +44,3 @@
 
 -keep class com.amap.api.navi.**{*;}
 -keep class com.autonavi.**{*;}
-
-# 保留Parcelable序列化类不被混淆
--keep class * implements android.os.Parcelable {
-    public static final android.os.Parcelable$Creator *;
-}
-
-# 保留Serializable序列化的类不被混淆
--keepclassmembers class * implements java.io.Serializable {
-    static final long serialVersionUID;
-    private static final java.io.ObjectStreamField[] serialPersistentFields;
-    !static !transient <fields>;
-    !private <fields>;
-    !private <methods>;
-    private void writeObject(java.io.ObjectOutputStream);
-    private void readObject(java.io.ObjectInputStream);
-    java.lang.Object writeReplace();
-    java.lang.Object readResolve();
-}
-
-# 对于带有回调函数的onXXEvent、**On*Listener的，不能被混淆
--keepclassmembers class * {
-    void *(**On*Event);
-    void *(**On*Listener);
-}

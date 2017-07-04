@@ -73,7 +73,7 @@ public class CarPhotoFragment extends BaseFragment {
 
     @Override
     public void finishCreateView(Bundle state) {
-        Logger.e(geYunTong.getStateCode()+"的状态码");
+
         if (geYunTong.getStateCode()==2)
         {
             btnAddPhoto.setVisibility(View.GONE);

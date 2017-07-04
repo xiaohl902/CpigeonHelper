@@ -1,8 +1,11 @@
 package com.cpigeon.cpigeonhelper.mina;
 
+/**
+ * Created by Administrator on 2017/7/4.
+ */
+
 import android.content.Context;
 import android.os.Handler;
-import android.util.Log;
 
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
@@ -24,13 +27,15 @@ import static com.cpigeon.cpigeonhelper.utils.CommonUitls.KEY_SERVER_PWD;
 
 public class ConnectionManager {
 
+    public static final String TAG = "ConnectionManager";
     private ConnectionConfig mConfig;
     private WeakReference<Context> mContext;
     public NioSocketConnector mConnection;
     private IoSession mSession;
     private InetSocketAddress mAddress;
     private Handler mHandler = new Handler();
-    public ConnectionManager(ConnectionConfig config){
+
+    public ConnectionManager(ConnectionConfig config) {
 
         this.mConfig = config;
         this.mContext = new WeakReference<Context>(config.getContext());
@@ -42,9 +47,9 @@ public class ConnectionManager {
         mConnection = new NioSocketConnector();
         mConnection.getSessionConfig().setReadBufferSize(mConfig.getReadBufferSize());
         //设置多长时间没有进行读写操作进入空闲状态，会调用sessionIdle方法，单位（秒）
-        mConnection.getSessionConfig().setReaderIdleTime(60*5);
-        mConnection.getSessionConfig().setWriterIdleTime(60*5);
-        mConnection.getSessionConfig().setBothIdleTime(60*5);
+        mConnection.getSessionConfig().setReaderIdleTime(60 * 5);
+        mConnection.getSessionConfig().setWriterIdleTime(60 * 5);
+        mConnection.getSessionConfig().setBothIdleTime(60 * 5);
         mConnection.getFilterChain().addFirst("reconnection", new MyIoFilterAdapter());
         //自定义编解码器
         mConnection.getFilterChain().addLast("mycoder", new ProtocolCodecFilter(new MyCodecFactory()));
@@ -55,19 +60,20 @@ public class ConnectionManager {
 
     /**
      * 与服务器连接
+     *
      * @return true连接成功，false连接失败
      */
-    public boolean connect(){
-        try{
+    public boolean connect() {
+        try {
             ConnectFuture future = mConnection.connect();
             future.awaitUninterruptibly();
             mSession = future.getSession();
-            if(mSession!=null && mSession.isConnected()) {
+            if (mSession != null && mSession.isConnected()) {
                 SessionManager.getInstance().setSession(mSession);
-            }else {
+            } else {
                 return false;
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
@@ -77,24 +83,26 @@ public class ConnectionManager {
     /**
      * 断开连接
      */
-    public void disConnect(){
+    public void disConnect() {
         mConnection.dispose();
-        mConnection=null;
-        mSession=null;
-        mAddress=null;
+        mConnection = null;
+        mSession = null;
+        mAddress = null;
         mContext = null;
     }
 
     private class DefaultHandler extends IoHandlerAdapter {
 
         private Context mContext;
-        private DefaultHandler(Context context){
+
+        private DefaultHandler(Context context) {
             this.mContext = context;
         }
 
         @Override
         public void sessionOpened(IoSession session) throws Exception {
             super.sessionOpened(session);
+
             Logger.e("连接打开");
         }
 
@@ -110,29 +118,29 @@ public class ConnectionManager {
             super.sessionIdle(session, status);
             Logger.e("-客户端与服务端连接空闲");
             //进入空闲状态我们把会话关闭，接着会调用MyIoFilterAdapter的sessionClosed方法，进行重新连接
-            if(session != null){
+            if (session != null) {
                 session.closeOnFlush();
             }
         }
     }
 
-    private  class MyIoFilterAdapter extends IoFilterAdapter {
+    private class MyIoFilterAdapter extends IoFilterAdapter {
         @Override
         public void sessionClosed(NextFilter nextFilter, IoSession session) throws Exception {
-            Logger.e("连接关闭，每隔5秒进行重新连接");
-            for(;;){
-                if(mConnection==null){
+            Logger.d("连接关闭，每隔5秒进行重新连接");
+            for (; ; ) {
+                if (mConnection == null) {
                     break;
                 }
-                if(ConnectionManager.this.connect()){
-                    mHandler.post(() -> {
-                        String s =  EncryptionTool.encryptAES(AssociationData.getUserToken(),KEY_SERVER_PWD);
-                        IoBuffer buffer = IoBuffer.allocate(100000);
-                        buffer.put(
-                                ("[len="+s.length()+"]"+s)
-                                        .getBytes());
-                        SessionManager.getInstance().writeToServer(buffer);
-                    });
+                if (ConnectionManager.this.connect()) {
+
+                    String s = EncryptionTool.encryptAES(AssociationData.getUserToken(), KEY_SERVER_PWD);
+                    String header = "[len=" + s.length() + "&typ=2&sign=" + EncryptionTool.MD5(
+                            "len=" + s.length() + "&typ=2&" + s + "&soiDuo3inKjSdi")+"]";
+                    String result = header + s;
+                    IoBuffer buffer = IoBuffer.allocate(100000);
+                    buffer.put(result.getBytes());
+                    SessionManager.getInstance().writeToServer(buffer);
 
                     Logger.e("断线重连[" + mConnection.getDefaultRemoteAddress().getHostName() + ":" +
                             mConnection.getDefaultRemoteAddress().getPort() + "]成功");

@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
+import com.r0adkll.slidr.Slidr;
 
 /**
  * Created by Administrator on 2017/6/20.
@@ -12,7 +13,7 @@ import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 public class AboutActivity extends ToolbarBaseActivity{
     @Override
     protected void swipeBack() {
-
+        Slidr.attach(this);
     }
 
     @Override
