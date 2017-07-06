@@ -39,7 +39,7 @@ public class SystemFlyingAreaFragment extends BaseFragment {
         return new SystemFlyingAreaFragment();
     }
 
-    @BindView(R.id.recycle)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.empty_layout)
     CustomEmptyView mCustomEmptyView;

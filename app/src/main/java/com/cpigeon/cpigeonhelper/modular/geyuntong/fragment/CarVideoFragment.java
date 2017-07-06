@@ -49,7 +49,7 @@ public class CarVideoFragment extends BaseFragment {
 
     @BindView(R.id.btn_add_photo)
     FloatingActionButton btnAddPhoto;
-    @BindView(R.id.recycle)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.empty_layout)
     CustomEmptyView mCustomEmptyView;
@@ -142,7 +142,7 @@ public class CarVideoFragment extends BaseFragment {
                         mAdapter.setNewData(listApiResponse.getData());
                         finishTask();
                     } else {
-                        initEmptyView("暂无数据，快去添加视频吧");
+                        initEmptyView("暂无数据");
                     }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException)

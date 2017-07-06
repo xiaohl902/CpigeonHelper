@@ -74,7 +74,7 @@ public class UploadImgActivity extends ToolbarBaseActivity implements AMapLocati
     TextView tvChoseTag;
     @BindView(R.id.ll_chose_tag)
     LinearLayout llChoseTag;
-    @BindView(R.id.recycler)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     private List<LocalMedia> list = new ArrayList<>();
     private int chooseMode = PictureMimeType.ofImage();//设置选择的模式
@@ -84,8 +84,6 @@ public class UploadImgActivity extends ToolbarBaseActivity implements AMapLocati
     private int tagid = 0;
     //声明AMapLocationClient类对象
     public AMapLocationClient mLocationClient = null;
-    //声明定位回调监听器
-    public AMapLocationListener mLocationListener;
     //声明AMapLocationClientOption对象
     public AMapLocationClientOption mLocationOption = null;
     private double latitude, longitude;

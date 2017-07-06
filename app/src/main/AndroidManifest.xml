@@ -105,6 +105,14 @@
             android:launchMode="singleTop"
             android:exported="true"
             android:name=".wxapi.WXPayEntryActivity"/>
+
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.order.activity.VipLevelUpActivity"/>
+
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.geyuntong.activity.MyGYTActivity"/>
         <activity
             android:windowSoftInputMode="stateHidden"
             android:name=".modular.setting.activity.SettingActivity"

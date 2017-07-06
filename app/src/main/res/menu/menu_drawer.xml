@@ -1,36 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/levelup_vip"
-            android:icon="@drawable/ic_vip"
-            android:title="升级会员" />
+
         <item
             android:id="@+id/xiehui_zone"
             android:icon="@drawable/ic_account"
             android:title="协会信息" />
-
-        <item
-            android:id="@+id/money"
-            android:icon="@drawable/ic_money"
-            android:title="钱包" />
         <item
             android:id="@+id/my_geyuntong"
             android:icon="@drawable/ic_car"
             android:title="我的鸽运通" />
         <item
-            android:id="@+id/sifangdi"
-            android:icon="@drawable/ic_place"
-            android:title="常用司放地" />
-
-        <item
-            android:id="@+id/my_authorization"
-            android:icon="@drawable/ic_authorization"
-            android:title="账户授权" />
-        <item
             android:id="@+id/my_order"
             android:icon="@drawable/ic_order"
             android:title="我的订单" />
+
+        <item
+            android:id="@+id/money"
+            android:icon="@drawable/ic_money"
+            android:title="钱包" />
         <item
             android:id="@+id/setting"
             android:icon="@drawable/ic_setting"

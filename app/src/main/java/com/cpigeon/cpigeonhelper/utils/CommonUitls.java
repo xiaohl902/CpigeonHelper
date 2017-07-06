@@ -17,10 +17,10 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
-import com.amap.api.maps.model.LatLng;
 import com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton;
 import com.orhanobut.logger.Logger;
 import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
+
 
 import java.io.File;
 import java.math.RoundingMode;

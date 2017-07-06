@@ -45,7 +45,7 @@ public class CarPhotoFragment extends BaseFragment {
 
     @BindView(R.id.btn_add_photo)
     FloatingActionButton btnAddPhoto;
-    @BindView(R.id.recycle)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.empty_layout)
     CustomEmptyView mCustomEmptyView;
@@ -150,7 +150,7 @@ public class CarPhotoFragment extends BaseFragment {
                         Logger.e("图片的size："+list.size());
                         finishTask();
                     } else {
-                        initEmptyView("暂无数据，快去添加照片吧");
+                        initEmptyView("暂无数据");
                     }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException)

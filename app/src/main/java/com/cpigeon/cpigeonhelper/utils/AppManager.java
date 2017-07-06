@@ -120,7 +120,7 @@ public class AppManager {
      */
     public void killActivity(WeakReference<AppCompatActivity> activity) {
         try {
-            Iterator<WeakReference<AppCompatActivity>> iterator = mWeakReferences.iterator();
+            ListIterator<WeakReference<AppCompatActivity>> iterator = mWeakReferences.listIterator();
             while (iterator.hasNext()) {
                 WeakReference<AppCompatActivity> stackActivity = iterator.next();
                 if (stackActivity.get() == null) {
@@ -138,6 +138,10 @@ public class AppManager {
         }
     }
 
+    /**
+     * 结束除了当前Activity以外的所有Activity
+     * @param cls
+     */
     public void killAllToLoginActivity(Class<?> cls) {
         try {
 
@@ -145,9 +149,9 @@ public class AppManager {
             while (listIterator.hasNext()) {
                 Activity activity = listIterator.next().get();
                 if (activity != null && cls != activity.getClass()) {
-                    listIterator.remove();
                     activity.finish();
                 }
+                listIterator.remove();
             }
         } catch (Exception e) {
             Logger.e(e.getMessage());
@@ -164,15 +168,15 @@ public class AppManager {
 
             ListIterator<WeakReference<AppCompatActivity>> listIterator = mWeakReferences.listIterator();
             while (listIterator.hasNext()) {
-                Activity activity = listIterator.next().get();
-                if (activity == null) {
+                WeakReference<AppCompatActivity> stackActivity = listIterator.next();
+                if (stackActivity == null) {
                     listIterator.remove();
                     continue;
                 }
-                if (activity.getClass() == cls) {
+                if (stackActivity.getClass() == cls) {
                     listIterator.remove();
 
-                    activity.finish();
+                    stackActivity.get().finish();
 
                     break;
                 }

@@ -28,6 +28,7 @@ import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.ACarServiceActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.MyLocation;
+import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.PointsUtil;
 import com.orhanobut.logger.Logger;
 
@@ -94,6 +95,10 @@ public class CarPlaybackFragment extends BaseFragment {
         addPolylineInPlayGround();
         // 获取轨迹坐标点
         List<LatLng> points = readLatLngs();
+        if (points != null)
+        {
+
+
         LatLngBounds.Builder b = LatLngBounds.builder();
         for (int i = 0; i < points.size(); i++) {
             b.include(points.get(i));
@@ -114,46 +119,64 @@ public class CarPlaybackFragment extends BaseFragment {
         smoothMarker.setPoints(subList);
         smoothMarker.setTotalDuration(40);
         smoothMarker.startSmoothMove();
+        }else {
+            CommonUitls.showToast(getActivity(),"数据量太少，无法进行回放");
+            mDisplaybtn.setChecked(false);
+        }
     }
 
     private void addPolylineInPlayGround() {
         List<LatLng> list = readLatLngs();
-        List<Integer> colorList = new ArrayList<Integer>();
-        List<BitmapDescriptor> bitmapDescriptors = new ArrayList<BitmapDescriptor>();
+        if (list !=null)
+        {
+            List<Integer> colorList = new ArrayList<Integer>();
+            List<BitmapDescriptor> bitmapDescriptors = new ArrayList<BitmapDescriptor>();
 
-        int[] colors = new int[]{Color.argb(255, 0, 255, 0), Color.argb(255, 255, 255, 0), Color.argb(255, 255, 0, 0)};
+            int[] colors = new int[]{Color.argb(255, 0, 255, 0), Color.argb(255, 255, 255, 0), Color.argb(255, 255, 0, 0)};
 
-        //用一个数组来存放纹理
-        List<BitmapDescriptor> textureList = new ArrayList<BitmapDescriptor>();
-        textureList.add(BitmapDescriptorFactory.fromResource(R.drawable.custtexture));
+            //用一个数组来存放纹理
+            List<BitmapDescriptor> textureList = new ArrayList<BitmapDescriptor>();
+            textureList.add(BitmapDescriptorFactory.fromResource(R.drawable.custtexture));
 
-        List<Integer> texIndexList = new ArrayList<Integer>();
-        texIndexList.add(0);//对应上面的第0个纹理
-        texIndexList.add(1);
-        texIndexList.add(2);
+            List<Integer> texIndexList = new ArrayList<Integer>();
+            texIndexList.add(0);//对应上面的第0个纹理
+            texIndexList.add(1);
+            texIndexList.add(2);
 
-        Random random = new Random();
-        for (int i = 0; i < list.size(); i++) {
-            colorList.add(colors[random.nextInt(3)]);
-            bitmapDescriptors.add(textureList.get(0));
+            Random random = new Random();
+            for (int i = 0; i < list.size(); i++) {
+                colorList.add(colors[random.nextInt(3)]);
+                bitmapDescriptors.add(textureList.get(0));
 
+            }
+
+            aMap.addPolyline(new PolylineOptions().setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.custtexture)) //setCustomTextureList(bitmapDescriptors)
+                    .addAll(list)
+                    .useGradient(true)
+                    .width(18));
+        }else {
+            CommonUitls.showToast(getActivity(),"数据量太少，无法进行回放。");
         }
 
-        aMap.addPolyline(new PolylineOptions().setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.custtexture)) //setCustomTextureList(bitmapDescriptors)
-                .addAll(list)
-                .useGradient(true)
-                .width(18));
     }
 
     private List<LatLng> readLatLngs() {
         List<MyLocation> myLocations = loadLocation();
         Logger.e(myLocations.size()+"条数据");
-        List<LatLng> points = new ArrayList<LatLng>();
-        for (MyLocation myLocation : myLocations) {
-            points.add(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()));
+        if (myLocations!=null && myLocations.size() > 10)
+        {
+            List<LatLng> points = new ArrayList<LatLng>();
+            for (MyLocation myLocation : myLocations) {
+                points.add(new LatLng(myLocation.getLatitude(), myLocation.getLongitude()));
+            }
+            return points;
+        }else {
+            return null;
         }
 
-        return points;
+
+
+
     }
 
     @Override

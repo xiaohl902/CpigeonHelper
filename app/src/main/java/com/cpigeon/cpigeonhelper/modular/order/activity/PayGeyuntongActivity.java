@@ -12,16 +12,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.cpigeon.cpigeonhelper.R;
-import com.cpigeon.cpigeonhelper.wxapi.WXPayEntryActivity;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
+import com.cpigeon.cpigeonhelper.wxapi.WXPayEntryActivity;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 import com.tencent.mm.opensdk.modelpay.PayReq;
 import com.tencent.mm.opensdk.openapi.IWXAPI;
 import com.tencent.mm.opensdk.openapi.WXAPIFactory;
+
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -67,8 +68,8 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
     LinearLayout layoutOrderPayWay;
     private int sid;
     private long timestamp;
-    PayReq payReq;
-    private IWXAPI mWxApi = null;
+    private PayReq payReq;
+    private IWXAPI mWxApi;
     private int orderid;
     private CommonUitls.OnWxPayListener onWxPayListenerWeakReference = wxPayReturnCode -> {
         if (wxPayReturnCode == ERR_OK)
@@ -98,6 +99,10 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
         setTopLeftButton(R.drawable.ic_back,this::finish);
         Intent intent = getIntent();
         sid = intent.getIntExtra("sid",0);
+        if (mWxApi == null) {
+            mWxApi = WXAPIFactory.createWXAPI(mContext,null);
+            mWxApi.registerApp(WXPayEntryActivity.APP_ID);
+        }
         loadData();
         loadPayWay();
     }
@@ -126,10 +131,6 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
                         tvOrderNameContent.setText(orderApiResponse.getData().getItem());
                         tvOrderTimeContent.setText(orderApiResponse.getData().getTime());
                         tvOrderPriceContent.setText(String.format("%.2f元", orderApiResponse.getData().getPrice()) );
-                        if (mWxApi == null) {
-                            mWxApi = WXAPIFactory.createWXAPI(mContext, WXPayEntryActivity.APP_ID, true);
-                            mWxApi.registerApp(WXPayEntryActivity.APP_ID);
-                        }
                         CommonUitls.getInstance().addOnWxPayListener(onWxPayListenerWeakReference);
                     }
                     else {
@@ -153,7 +154,6 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
         v.setOnClickListener(v1 -> {
             if (!cbOrderProtocol.isChecked()) {
                 CommonUitls.showToast(PayGeyuntongActivity.this,"请阅读之后再来");
-                return;
             }
         });
 
@@ -207,7 +207,6 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
                         payReq.appId = payReqApiResponse.getData().getAppid();
                         payReq.partnerId = payReqApiResponse.getData().getPartnerid();
                         payReq.prepayId = payReqApiResponse.getData().getPrepayid();
-                        Logger.e(payReqApiResponse.getData().getPackageX());
                         payReq.packageValue = payReqApiResponse.getData().getPackageX();
                         payReq.nonceStr = payReqApiResponse.getData().getNoncestr();
                         payReq.timeStamp = payReqApiResponse.getData().getTimestamp();
@@ -234,14 +233,21 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
         if (mWxApi != null) {
             boolean result = mWxApi.sendReq(payReq);
             if (!result)
+            {
                 CommonUitls.showToast(this,"支付失败");
-            Logger.d("发起微信支付");
+            }else {
+                Logger.d("发起微信支付");
+            }
+
+
         }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mWxApi = null;
+        payReq = null;
         CommonUitls.getInstance().removeOnWxPayListener(onWxPayListenerWeakReference);
     }
 }

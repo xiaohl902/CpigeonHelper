@@ -35,7 +35,7 @@ import io.reactivex.schedulers.Schedulers;
 public class RootListActivity extends ToolbarBaseActivity {
 
 
-    @BindView(R.id.recycle)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.empty_layout)
     CustomEmptyView mCustomEmptyView;

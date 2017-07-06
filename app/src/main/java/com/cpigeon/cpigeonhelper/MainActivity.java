@@ -1,6 +1,8 @@
 package com.cpigeon.cpigeonhelper;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -18,28 +20,24 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.maps.AMap;
+import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.MapView;
+import com.amap.api.maps.model.MyLocationStyle;
 import com.cpigeon.cpigeonhelper.base.BaseActivity;
 import com.cpigeon.cpigeonhelper.base.MyApp;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
-import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
-import com.cpigeon.cpigeonhelper.modular.flyarea.activity.FlyingAreaActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.GeYunTongListActivity;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.MyGYTActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GeYunTongListAdapter;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.HomeGYTAdapter;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
 import com.cpigeon.cpigeonhelper.modular.home.bean.HomeAd;
 import com.cpigeon.cpigeonhelper.modular.order.activity.MyBalanceActivity;
-import com.cpigeon.cpigeonhelper.modular.order.activity.OpeningGeyuntongActivity;
 import com.cpigeon.cpigeonhelper.modular.order.activity.OrderListActivity;
-import com.cpigeon.cpigeonhelper.modular.root.activity.RootListActivity;
-import com.cpigeon.cpigeonhelper.modular.setting.activity.AboutActivity;
 import com.cpigeon.cpigeonhelper.modular.setting.activity.SettingActivity;
 import com.cpigeon.cpigeonhelper.modular.xiehui.activity.XieHuiInfoActivity;
-import com.cpigeon.cpigeonhelper.ui.MyDecoration;
 import com.cpigeon.cpigeonhelper.ui.textview.MarqueeTextView;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
@@ -52,8 +50,6 @@ import com.youth.banner.Banner;
 import com.youth.banner.BannerConfig;
 import com.youth.banner.Transformer;
 
-import org.apache.commons.codec.binary.StringUtils;
-
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.ArrayList;
@@ -63,15 +59,12 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
-public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, AMap.OnMyLocationChangeListener {
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -85,22 +78,23 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     MarqueeTextView listHeaderRaceDetialGg;
     @BindView(R.id.layout_gg)
     LinearLayout layoutGg;
-    @BindView(R.id.ll_xiehui_introduce)
-    LinearLayout llXiehuiIntroduce;
-    @BindView(R.id.ll_xiehui_geyuntong)
-    LinearLayout llXiehuiGeyuntong;
-    @BindView(R.id.recyclerview)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
-    private HomeGYTAdapter mAdapter;
+    @BindView(R.id.mapView)
+    MapView mMapView;
+    private GeYunTongListAdapter mAdapter;
     private int count = 1;
+    private AMap aMap;
     @Override
     protected void swipeBack() {
 
     }
+
     @Override
     protected int getLayoutId() {
         return R.layout.activity_main;
     }
+
     @Override
     public void initViews(Bundle savedInstanceState) {
 
@@ -112,6 +106,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .load(AssociationData.getUserImgUrl())
                 .placeholder(R.mipmap.logos)
                 .error(R.mipmap.logos)
+                .resizeDimen(R.dimen.image_width_headicon,R.dimen.image_height_headicon)
+                .config(Bitmap.Config.RGB_565)
+                .onlyScaleDown()
                 .into(mUserIcon);
         mUserName.setText(AssociationData.getUserName());
         mUserSign.setText(AssociationData.getUserSign());
@@ -120,7 +117,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         actionBarDrawerToggle.syncState();
         navView.setNavigationItemSelectedListener(this);
         loadAd();
-        loadRace();
+        loadMap(savedInstanceState);
+//        loadRace();
         loadGTYServer();
         loadTopNews();
     }
@@ -137,7 +135,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(gytServiceApiResponse -> {
                     if (gytServiceApiResponse.getErrorCode() == 0) {
-
+                        Logger.e("等级:"+gytServiceApiResponse.getData().getGrade());
+                        Logger.e("开通时间:"+gytServiceApiResponse.getData().getOpenTime());
+                        Logger.e("是否关闭:"+gytServiceApiResponse.getData().isIsClosed());
+                        Logger.e("是否到期:"+gytServiceApiResponse.getData().isIsExpired());
+                        Logger.e("到期时间:"+gytServiceApiResponse.getData().getExpireTime());
+                        Logger.e("等级对应时间:"+gytServiceApiResponse.getData().getUsefulTime());
+                        Logger.e("可授权人数:"+gytServiceApiResponse.getData().getAuthNumber());
+                        Logger.e("关闭原因:"+gytServiceApiResponse.getData().getReason());
+                        RealmUtils.getInstance().insertGYTService(gytServiceApiResponse.getData());
                     }else {
                         CommonUitls.showToast(this,gytServiceApiResponse.getMsg());
                     }
@@ -153,9 +159,15 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void loadRace() {
+
+        mMapView.setVisibility(View.GONE);
+        mRecyclerView.setVisibility(View.VISIBLE);
+
         Map<String,Object> urlParams = new HashMap<>();
         urlParams.put("uid",AssociationData.getUserId());
         urlParams.put("type",AssociationData.getUserType());
+        urlParams.put("ps",3);
+        urlParams.put("pi",1);
         RetrofitHelper.getApi()
                 .getGeYunTongRaceList(AssociationData.getUserToken(),urlParams)
                 .compose(bindToLifecycle())
@@ -164,7 +176,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .subscribe(listApiResponse -> {
                     if (listApiResponse.getErrorCode() == 0)
                     {
-                        mAdapter = new HomeGYTAdapter(listApiResponse.getData());
+                        mAdapter = new GeYunTongListAdapter(listApiResponse.getData());
                         mAdapter.setOnItemClickListener((adapter, view, position) ->
                             startActivity(new Intent(this,GeYunTongListActivity.class))
                         );
@@ -172,8 +184,36 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         mRecyclerView.setAdapter(mAdapter);
                     }
                 }, throwable -> {
-
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "连接超时");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "无法连接到服务器，请检查连接");
+                    }else if (throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this, "发生了不可预期的错误，错误信息:"+throwable.getMessage());
+                    }
                 });
+    }
+
+
+    private void loadMap(Bundle savedInstanceState){
+        mMapView.setVisibility(View.VISIBLE);
+        mRecyclerView.setVisibility(View.GONE);
+        mMapView.onCreate(savedInstanceState);
+        if (aMap == null)
+        {
+            aMap = mMapView.getMap();
+            setUpMap();
+        }
+    }
+
+    private void setUpMap() {
+        MyLocationStyle myLocationStyle;
+        myLocationStyle = new MyLocationStyle();//初始化定位蓝点样式类myLocationStyle.myLocationType(MyLocationStyle.LOCATION_TYPE_LOCATION_ROTATE);//连续定位、且将视角移动到地图中心点，定位点依照设备方向旋转，并且会跟随设备移动。（1秒1次定位）如果不设置myLocationType，默认也会执行此种模式。
+        myLocationStyle.interval(2000); //设置连续定位模式下的定位间隔，只在连续定位模式下生效，单次定位模式下不会生效。单位为毫秒。
+        aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
+        aMap.setMyLocationEnabled(true);// 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
+        aMap.moveCamera(CameraUpdateFactory.zoomTo(14));
+        aMap.setOnMyLocationChangeListener(this);
     }
 
     private void loadAd() {
@@ -195,6 +235,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         CommonUitls.showToast(this, "连接超时");
                     } else if (throwable instanceof ConnectException) {
                         CommonUitls.showToast(this, "无法连接到服务器，请检查连接");
+                    }else if (throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this, "发生了不可预期的错误，错误信息:"+throwable.getMessage());
                     }
                 });
     }
@@ -282,9 +324,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
         int id = menuItem.getItemId();
         switch (id) {
-            case R.id.levelup_vip://升级会员
-                startActivity(new Intent(MainActivity.this, OpeningGeyuntongActivity.class));
-                break;
             case R.id.xiehui_zone://协会空间
                 startActivity(new Intent(MainActivity.this, XieHuiInfoActivity.class));
                 break;
@@ -292,13 +331,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 startActivity(new Intent(MainActivity.this, MyBalanceActivity.class));
                 break;
             case R.id.my_geyuntong://我的鸽运通
-                startActivity(new Intent(MainActivity.this, GeYunTongListActivity.class));
-                break;
-            case R.id.sifangdi://常用司放地
-                startActivity(new Intent(MainActivity.this, FlyingAreaActivity.class));
-                break;
-            case R.id.my_authorization://账户授权
-                startActivity(new Intent(MainActivity.this, RootListActivity.class));
+                startActivity(new Intent(MainActivity.this, MyGYTActivity.class));
                 break;
             case R.id.my_order://我的订单
                 startActivity(new Intent(MainActivity.this, OrderListActivity.class));
@@ -312,19 +345,44 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         return true;
     }
 
-    @OnClick({R.id.layout_gg, R.id.ll_xiehui_introduce, R.id.ll_xiehui_geyuntong})
-    public void onViewClicked(View view) {
-        switch (view.getId()) {
-            case R.id.layout_gg:
-
-                break;
-            case R.id.ll_xiehui_introduce:
-                startActivity(new Intent(MainActivity.this, XieHuiInfoActivity.class));
-                break;
-            case R.id.ll_xiehui_geyuntong:
-                startActivity(new Intent(MainActivity.this, OpeningGeyuntongActivity.class));
-                break;
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (mMapView!=null)
+        {
+            mMapView.onPause();
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (mMapView!=null)
+        {
+            mMapView.onResume();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mMapView!=null)
+        {
+            mMapView.onDestroy();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (mMapView!=null)
+        {
+            mMapView.onSaveInstanceState(outState);
+        }
+    }
+
+    @Override
+    public void onMyLocationChange(Location location) {
+
+    }
 }

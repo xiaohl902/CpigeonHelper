@@ -34,6 +34,10 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+
+        debug {
+            signingConfig signingConfigs.release
+        }
     }
 
     compileOptions {
@@ -110,28 +114,17 @@ dependencies {
     compile files('libs/mina-core-2.0.16.jar')
     compile files('libs/slf4j-android-1.6.1-RC1.jar')
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
-
     //高德地图相关
     compile 'com.amap.api:navi-3dmap:latest.integration'
     compile 'com.amap.api:location:latest.integration'
     compile 'com.amap.api:search:latest.integration'
-
     compile 'com.zhy:autolayout:1.4.5'
-
     compile 'com.android.support:multidex:'
-
     compile 'com.github.LuckSiege.PictureSelector:picture_library:v2.0.4'
-
     compile 'me.shaohui:bottomdialog:1.1.9'
-
     compile 'org.greenrobot:eventbus:3.0.0'
-
     compile 'fm.jiecao:jiecaovideoplayer:5.5.4'
-
     compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
-
     compile 'com.github.vipulasri:timelineview:1.0.5'
-
     compile 'com.qianwen:update-app:3.0.0'
-
 }

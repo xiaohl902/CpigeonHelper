@@ -156,17 +156,6 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
             mSweetAlertDialogLoading.setTitleText("正在上传...");
             mSweetAlertDialogLoading.setCancelable(false);
             mSweetAlertDialogLoading.show();
-//            BottomDialog.create(getSupportFragmentManager())
-//                    .setViewListener(v -> {
-//                        TextView tv = (TextView) v.findViewById(R.id.tv_geyuntong_weather);
-//                        tv.setText("天气好热哦哈哈哈哈哈");
-//                    })
-//                    .setLayoutRes(R.layout.layout_watermarkinfo)
-//                    .setDimAmount(0.1f)            // Dialog window dim amount(can change window background color）, range：0 to 1，default is : 0.2f
-//                    .setCancelOutside(true)     // click the external area whether is closed, default is : true
-//                    .setTag("BottomDialog")     // setting the DialogFragment tag
-//                    .show();
-
 
             // 创建 RequestBody，用于封装构建RequestBody
             RequestBody requestFile =
@@ -175,7 +164,6 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
             // MultipartBody.Part  和后端约定好Key，这里的partName是用image
             MultipartBody.Part body =
                     MultipartBody.Part.createFormData("file", video.getName(), requestFile);
-
 
             RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))

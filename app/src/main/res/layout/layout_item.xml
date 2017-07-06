@@ -19,7 +19,7 @@
         android:layout_marginBottom="8dp" />
 
     <TextView
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/colorText"
         android:textStyle="bold"
         android:id="@+id/tv_rootlist_username"
         android:layout_width="wrap_content"
@@ -33,7 +33,7 @@
         app:layout_constraintBottom_toTopOf="@+id/tv_rootlist_usertel" />
 
     <TextView
-        android:textColor="@color/colorPrimary"
+        android:textColor="@color/colorText"
         android:textStyle="bold"
         android:id="@+id/tv_rootlist_usertel"
         android:layout_width="wrap_content"
@@ -47,6 +47,7 @@
         />
 
     <TextView
+        android:textColor="@color/colorText"
         android:textStyle="bold"
         android:id="@+id/tv_rootlist_status"
         android:layout_width="wrap_content"

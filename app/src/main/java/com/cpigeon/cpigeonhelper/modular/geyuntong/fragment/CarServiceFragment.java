@@ -6,12 +6,18 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v7.widget.AppCompatImageView;
+import android.support.v7.widget.CardView;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.maps.AMap;
+import com.amap.api.maps.AMapUtils;
 import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
@@ -45,6 +51,7 @@ import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.MyLocation;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PathRecord;
 import com.cpigeon.cpigeonhelper.ui.Util;
+import com.cpigeon.cpigeonhelper.ui.ViewExpandAnimation;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
 import com.orhanobut.logger.Logger;
@@ -61,7 +68,9 @@ import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
 import butterknife.OnClick;
+import butterknife.Unbinder;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
@@ -94,6 +103,12 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     TextView tvNowWeather;
     @BindView(R.id.btn_stop)
     ToggleButton mToggleButton;
+    @BindView(R.id.iv_expand_details )
+    AppCompatImageView ivExpandDetails;
+    @BindView(R.id.cardView_details_expand)
+    CardView cardViewDetailsExpand;
+    @BindView(R.id.cardView_details)
+    CardView cardViewDetails;
     ///////////////////////////////////////////////////////////////////////////
     // 高德地图相关
     ///////////////////////////////////////////////////////////////////////////
@@ -117,6 +132,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     private WeatherSearchQuery mquery;
     private WeatherSearch mweathersearch;
     private LocalWeatherLive weatherlive;
+
     public static CarServiceFragment newInstance() {
 
         return new CarServiceFragment();
@@ -130,6 +146,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
 
     @Override
     public void finishCreateView(Bundle state) {
+        cardViewDetails.setVisibility(View.GONE);
         mMapView.onCreate(state);
         switch (geYunTong.getStateCode()) {
             case 0:
@@ -149,11 +166,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     private void initpolyline() {
         mPolyoptions = new PolylineOptions();
         mPolyoptions.width(40);
-//        mPolyoptions.color(Color.GRAY);
         mPolyoptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.grasp_trace_line));
-//        PolylineOptions tracePolytion = new PolylineOptions();
-//        tracePolytion.width(40);
-//        tracePolytion.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.grasp_trace_line));
     }
 
     private void initMap() {
@@ -179,8 +192,6 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     private void setUpMap() {
         MyLocationStyle myLocationStyle = new MyLocationStyle();
         myLocationStyle.interval(5000); //设置连续定位模式下的定位间隔,单位为毫秒。
-        myLocationStyle.strokeColor(R.color.colorAccent);//设置定位蓝点精度圆圈的边框颜色的方法。
-        myLocationStyle.radiusFillColor(R.color.colorPrimary);//设置定位蓝点精度圆圈的边框颜色的方法。
 
         aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
         aMap.setMyLocationEnabled(true);// 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
@@ -201,43 +212,6 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
         Logger.e("鸽运通id：" + geYunTong.getId());
     }
 
-    @OnClick(R.id.btn_stop)
-    public void onViewClicked() {
-        if (mToggleButton.isChecked()) {
-            new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
-                    .setTitleText("温馨提示")
-                    .setContentText("确认立即开启鸽车监控？")
-                    .setConfirmText("确认")
-                    .setConfirmClickListener(sweetAlertDialog -> {
-                        sweetAlertDialog.dismissWithAnimation();
-                        mStartTime = System.currentTimeMillis() / 1000;
-                        startRaceMonitor();
-                    })
-                    .setCancelText("取消")
-                    .setCancelClickListener(sweetAlertDialog -> {
-                        sweetAlertDialog.dismissWithAnimation();
-                        mToggleButton.setChecked(false);
-                    })
-                    .show();
-        } else {
-            new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
-                    .setTitleText("警告")
-                    .setContentText("是否退出鸽车监控，退出之后无法再开启")
-                    .setConfirmText("确认")
-                    .setConfirmClickListener(sweetAlertDialog -> {
-                        sweetAlertDialog.dismissWithAnimation();
-                        mEndTime = System.currentTimeMillis() / 1000;
-                        stopRaceMonitor();
-                    })
-                    .setCancelText("取消")
-                    .setCancelClickListener(sweetAlertDialog -> {
-                        sweetAlertDialog.dismissWithAnimation();
-                        mToggleButton.setChecked(true);
-                    })
-                    .show();
-        }
-
-    }
 
     /**
      * 开始鸽车监控
@@ -454,7 +428,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     @Override
     public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int code) {
         if (code == 1000) {
-            mquery = new WeatherSearchQuery(regeocodeResult.getRegeocodeAddress().getCity(),WeatherSearchQuery.WEATHER_TYPE_LIVE);
+            mquery = new WeatherSearchQuery(regeocodeResult.getRegeocodeAddress().getCity(), WeatherSearchQuery.WEATHER_TYPE_LIVE);
             mweathersearch.setQuery(mquery);
             mweathersearch.searchWeatherAsyn();
         }
@@ -467,10 +441,8 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
 
     @Override
     public void onWeatherLiveSearched(LocalWeatherLiveResult localWeatherLiveResult, int code) {
-        if (code == 1000)
-        {
-            if (localWeatherLiveResult !=null && localWeatherLiveResult.getLiveResult()!=null)
-            {
+        if (code == 1000) {
+            if (localWeatherLiveResult != null && localWeatherLiveResult.getLiveResult() != null) {
                 weatherlive = localWeatherLiveResult.getLiveResult();
                 mMyLocation.setId(i);
                 i++;
@@ -482,13 +454,13 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 mMyLocation.setTemperature(weatherlive.getTemperature());
                 mMyLocation.setWindDirection(weatherlive.getWindDirection());
                 mMyLocation.setWeather(weatherlive.getWeather());
-                Logger.e("天气"+weatherlive.getWeather());
+                Logger.e("天气" + weatherlive.getWeather());
                 RealmUtils.getInstance().insertLocation(mMyLocation);
                 Logger.e("code run there");
-                sendMsg(location.getLatitude()+"|"+location.getLongitude()+"|"+
-                        3.00+"|"+System.currentTimeMillis()/1000+"|"+
-                        weatherlive.getWeather()+"|"+weatherlive.getWindDirection()+"|"+
-                        weatherlive.getWindPower()+"|"+weatherlive.getReportTime()+"|"+
+                sendMsg(location.getLatitude() + "|" + location.getLongitude() + "|" +
+                        3.00 + "|" + System.currentTimeMillis() / 1000 + "|" +
+                        weatherlive.getWeather() + "|" + weatherlive.getWindDirection() + "|" +
+                        weatherlive.getWindPower() + "|" + weatherlive.getReportTime() + "|" +
                         weatherlive.getTemperature());
             }
         }
@@ -505,14 +477,116 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     public void sendMsg(String msg) {
 
         String s = EncryptionTool.encryptAES(AssociationData.getUserToken(), KEY_SERVER_PWD);
-        String header1 = "[len=" + s.length() + "&typ=2&sign=" + EncryptionTool.MD5(
-                "len=" + s.length() + "&typ=2&" + s + "&soiDuo3inKjSdi")+"]";
-        String result = header1 + s;
+        String sign = EncryptionHeader(s) + s;
+        String content = EncryptionHeader(msg) + msg;
         IoBuffer buffer = IoBuffer.allocate(100000);
-        buffer.put(result.getBytes());
+        buffer.put(sign.getBytes());
+        buffer.put(content.getBytes());
         SessionManager.getInstance().writeToServer(buffer);
 
-//
-
     }
+
+    public String EncryptionHeader(String msg) {
+        return "[len=" + msg.length() + "&typ=2&sign=" + EncryptionTool.MD5(
+                "len=" + msg.length() + "&typ=2&" + msg + "&soiDuo3inKjSdi") + "]";
+    }
+
+    @OnClick({R.id.btn_stop, R.id.iv_expand_details,R.id.cardView_details_expand})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.btn_stop:
+                if (mToggleButton.isChecked()) {
+                    new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
+                            .setTitleText("温馨提示")
+                            .setContentText("确认立即开启鸽车监控？")
+                            .setConfirmText("确认")
+                            .setConfirmClickListener(sweetAlertDialog -> {
+                                sweetAlertDialog.dismissWithAnimation();
+                                mStartTime = System.currentTimeMillis() / 1000;
+                                startRaceMonitor();
+                            })
+                            .setCancelText("取消")
+                            .setCancelClickListener(sweetAlertDialog -> {
+                                sweetAlertDialog.dismissWithAnimation();
+                                mToggleButton.setChecked(false);
+                            })
+                            .show();
+                } else {
+                    new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
+                            .setTitleText("警告")
+                            .setContentText("是否退出鸽车监控，退出之后无法再开启")
+                            .setConfirmText("确认")
+                            .setConfirmClickListener(sweetAlertDialog -> {
+                                sweetAlertDialog.dismissWithAnimation();
+                                mEndTime = System.currentTimeMillis() / 1000;
+                                stopRaceMonitor();
+                            })
+                            .setCancelText("取消")
+                            .setCancelClickListener(sweetAlertDialog -> {
+                                sweetAlertDialog.dismissWithAnimation();
+                                mToggleButton.setChecked(true);
+                            })
+                            .show();
+                }
+                break;
+            case R.id.iv_expand_details:
+                expandinfo();
+                break;
+            case R.id.cardView_details_expand:
+                expandinfo();
+                break;
+        }
+    }
+    public void expandinfo()
+    {
+        if (cardViewDetails.getVisibility() == View.VISIBLE) {
+            cardViewDetails.setVisibility(View.GONE);
+            ivExpandDetails.setRotation(0);
+        } else {
+            ivExpandDetails.setRotation(180);
+            cardViewDetails.setVisibility(View.VISIBLE);
+        }
+        ViewExpandAnimation expandAnimation = new ViewExpandAnimation(cardViewDetails);
+        cardViewDetails.startAnimation(expandAnimation);
+    }
+
+    /**
+     * 获取行驶总距离
+     * @return
+     */
+    private int getTotalDistance() {
+        int distance = 0;
+        for (TraceOverlay to : mOverlayList) {
+            distance = distance + to.getDistance();
+        }
+        return distance;
+    }
+
+    private String getAverage(float distance) {
+        return String.valueOf(distance / (float) (mEndTime - mStartTime));
+    }
+
+    private String getDuration() {
+        return String.valueOf((mEndTime - mStartTime) / 1000f);
+    }
+
+    private float getDistance(List<AMapLocation> list) {
+        float distance = 0;
+        if (list == null || list.size() == 0) {
+            return distance;
+        }
+        for (int i = 0; i < list.size() - 1; i++) {
+            AMapLocation firstpoint = list.get(i);
+            AMapLocation secondpoint = list.get(i + 1);
+            LatLng firstLatLng = new LatLng(firstpoint.getLatitude(),
+                    firstpoint.getLongitude());
+            LatLng secondLatLng = new LatLng(secondpoint.getLatitude(),
+                    secondpoint.getLongitude());
+            double betweenDis = AMapUtils.calculateLineDistance(firstLatLng,
+                    secondLatLng);
+            distance = (float) (distance + betweenDis);
+        }
+        return distance;
+    }
+
 }

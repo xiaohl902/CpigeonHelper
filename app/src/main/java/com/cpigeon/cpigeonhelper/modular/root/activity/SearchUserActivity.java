@@ -60,7 +60,7 @@ public class SearchUserActivity extends ToolbarBaseActivity {
     TextView tvSearch;
     @BindView(R.id.search_edittext)
     SearchEditText searchEdittext;
-    @BindView(R.id.recycle)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.empty_layout)
     CustomEmptyView mCustomEmptyView;

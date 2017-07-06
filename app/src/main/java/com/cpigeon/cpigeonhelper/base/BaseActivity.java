@@ -18,6 +18,7 @@ import android.widget.EditText;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
+import com.orhanobut.logger.Logger;
 import com.trello.rxlifecycle2.components.support.RxAppCompatActivity;
 
 import java.lang.ref.WeakReference;
@@ -89,6 +90,7 @@ public abstract class BaseActivity extends RxAppCompatActivity{
         mWeakReference = new WeakReference<AppCompatActivity>(this);
         // 把actvity放到application栈中管理
         AppManager.getAppManager().addActivity(mWeakReference);
+        Logger.e("当前栈内存中Activity的数量:"+AppManager.getAppManager().stackSize());
         // 无标题
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         // 设置竖屏

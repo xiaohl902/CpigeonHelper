@@ -2,6 +2,7 @@ package com.cpigeon.cpigeonhelper.modular.usercenter.activity;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatImageView;
 import android.text.Editable;
@@ -80,7 +81,6 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     protected void swipeBack() {
-        Slidr.attach(this);
     }
 
     @Override
@@ -90,6 +90,7 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     public void initViews(Bundle savedInstanceState) {
+        AppManager.getAppManager().killAllToLoginActivity(LoginActivity.class);
         btnActionLogin.setIndeterminateProgressMode(true);
 //        ArrayAdapter<String> arrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, accounts);
 //        etUsername.setAdapter(arrayAdapter);//输入至少两个字符才会提示
@@ -256,6 +257,9 @@ public class LoginActivity extends BaseActivity {
                         Picasso.with(mContext).load(TextUtils.isEmpty(stringApiResponse.getData()) ? null : stringApiResponse.getData())
                                 .placeholder(R.mipmap.logos)
                                 .error(R.mipmap.logos)
+                                .resizeDimen(R.dimen.image_width_headicon,R.dimen.image_height_headicon)
+                                .config(Bitmap.Config.RGB_565)
+                                .onlyScaleDown()
                                 .into(civUserHeadImg);
                     },throwable -> {
                         if (throwable instanceof SocketTimeoutException)
@@ -315,7 +319,7 @@ public class LoginActivity extends BaseActivity {
                     view.setTag(true);
                     etPassword.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     etPassword.setSelection(etPassword.getText().toString().length());//将光标移至文字末尾
-                    ((AppCompatImageView) view).setImageResource(R.drawable.ic_visibility_on);
+                    ((AppCompatImageView) view).setImageResource(R.drawable.ic_visibility_off);
                 }
                 break;
             case R.id.btn_action_login:

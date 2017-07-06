@@ -128,7 +128,7 @@ public class AssociationData {
                 return userBean.getHeadimgurl();
             }
         }
-        return "";
+        return "www";
     }
 
 

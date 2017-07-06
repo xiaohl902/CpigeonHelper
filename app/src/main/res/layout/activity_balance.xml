@@ -20,14 +20,14 @@
 
             <android.support.v7.widget.AppCompatImageView
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/ic_openvip"
+                app:srcCompat="@drawable/ic_geyuntong"
                 android:layout_width="80dp"
                 android:layout_height="80dp" />
             <TextView
                 android:textColor="@color/colorOpenVip"
                 android:textSize="@dimen/sp_16"
                 android:layout_gravity="center_horizontal"
-                android:text="开通会员"
+                android:text="开通鸽运通"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -44,14 +44,14 @@
 
             <android.support.v7.widget.AppCompatImageView
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/ic_gyt"
+                app:srcCompat="@drawable/ic_mathlive"
                 android:layout_width="80dp"
                 android:layout_height="80dp" />
             <TextView
                 android:textColor="@color/colorOpenGyt"
                 android:textSize="@dimen/sp_16"
                 android:layout_gravity="center_horizontal"
-                android:text="开通鸽运通"
+                android:text="直播平台续费"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
         </LinearLayout>
@@ -74,7 +74,7 @@
 
             <android.support.v7.widget.AppCompatImageView
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/ic_recharge"
+                app:srcCompat="@drawable/ic_xiehui_recharge"
                 android:layout_width="80dp"
                 android:layout_height="80dp" />
             <TextView
@@ -98,7 +98,7 @@
 
             <android.support.v7.widget.AppCompatImageView
                 android:layout_gravity="center"
-                app:srcCompat="@drawable/ic_gxt"
+                app:srcCompat="@drawable/ic_gexintong"
                 android:layout_width="80dp"
                 android:layout_height="80dp" />
             <TextView
@@ -132,7 +132,6 @@
                 android:layout_height="match_parent">
                 <TextView
                     android:layout_gravity="center_horizontal"
-                    android:textStyle="bold"
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp"
                     android:text="￥300.00"

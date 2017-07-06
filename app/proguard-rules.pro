@@ -24,13 +24,19 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 -dontwarn com.tencent.bugly.**
--dontwarn com.squareup.picasso.**
+-dontwarn com.squareup.okhttp.**
 -dontwarn org.apache.mina.**
--dontwarn okio.Okio.**
--dontwarn com.squareup.retrofit2.**
+-dontwarn okio.**
+-dontwarn retrofit2.**
+-dontwarn javax.annotation.**
+-dontwarn javax.annotation.Nullable
+-dontwarn javax.annotation.ParametersAreNonnullByDefault
+-keep class okhttp3.internal.**{*;}
+-keep class retrofit2.** { *; }
+-keep class com.squareup.okhttp.** { *;}
+-keep interface com.squareup.okhttp.** { *; }
 
 -keep public class com.tencent.bugly.**{*;}
-
 -keep class com.amap.api.maps2d.**{*;}
 -keep class com.amap.api.mapcore2d.**{*;}
 
@@ -44,3 +50,9 @@
 
 -keep class com.amap.api.navi.**{*;}
 -keep class com.autonavi.**{*;}
+
+-keep class com.tencent.mm.opensdk.** {*;}
+-keep class com.tencent.wxop.** {*;}
+-keep class com.tencent.mm.sdk.** {*;}
+
+-keep class com.cpigeon.cpigeonhelper.modular.**{*;}                                   #过滤掉自己编写的实体类

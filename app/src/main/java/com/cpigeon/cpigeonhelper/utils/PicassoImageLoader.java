@@ -1,6 +1,7 @@
 package com.cpigeon.cpigeonhelper.utils;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.widget.ImageView;
 
 import com.cpigeon.cpigeonhelper.R;
@@ -19,6 +20,7 @@ public class PicassoImageLoader extends ImageLoader {
                 .load( ((HomeAd) path).getAdImageUrl())
                 .placeholder(R.mipmap.logos)
                 .error(R.mipmap.logos)
+                .config(Bitmap.Config.RGB_565)
                 .into(imageView);
     }
 }

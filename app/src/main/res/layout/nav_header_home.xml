@@ -26,6 +26,8 @@
         android:layout_toEndOf="@id/iv_userheadimage"
         android:layout_marginStart="16dp" />
     <TextView
+        android:ellipsize="end"
+        android:maxLines="1"
         android:layout_marginTop="8dp"
         android:id="@+id/tv_userName"
         android:layout_width="wrap_content"

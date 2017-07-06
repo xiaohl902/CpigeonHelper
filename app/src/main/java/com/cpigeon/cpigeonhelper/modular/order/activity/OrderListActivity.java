@@ -38,7 +38,7 @@ import okhttp3.RequestBody;
  */
 
 public class OrderListActivity extends ToolbarBaseActivity implements BaseQuickAdapter.RequestLoadMoreListener {
-    @BindView(R.id.recycle)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     @BindView(R.id.empty_layout)
     CustomEmptyView mCustomEmptyView;
