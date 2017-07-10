@@ -10,13 +10,16 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
+import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GridImageAdapter;
+import com.cpigeon.cpigeonhelper.modular.root.bean.OrgNameApplyStatus;
 import com.cpigeon.cpigeonhelper.ui.FullyGridLayoutManager;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.luck.picture.lib.PictureSelector;
@@ -37,10 +40,14 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+
+import static com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GridImageAdapter.isAllowUpLoad;
 
 /**
  * Created by Administrator on 2017/6/26.
@@ -52,8 +59,10 @@ public class ChangeNameActivity extends ToolbarBaseActivity {
     EditText tvXiehuiName;
     @BindView(R.id.tv_xiehui_reason)
     EditText tvXiehuiReason;
-    @BindView(R.id.recycler)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
+    @BindView(R.id.btn_send)
+    Button mButton;
     private long timestamp;
     private List<LocalMedia> list = new ArrayList<>();
     private int chooseMode = PictureMimeType.ofImage();//设置选择的模式
@@ -81,7 +90,7 @@ public class ChangeNameActivity extends ToolbarBaseActivity {
     protected void initViews(Bundle savedInstanceState) {
         setTitle("修改名称");
         setTopLeftButton(R.drawable.ic_back, this::finish);
-        setTopRightButton("保存", this::save);
+        setTopRightButton("状态", this::showStatus);
         FullyGridLayoutManager manager = new FullyGridLayoutManager(ChangeNameActivity.this, 4, GridLayoutManager.VERTICAL, false);
         mRecyclerView.setLayoutManager(manager);
         mAdapter = new GridImageAdapter(this, onAddPicClickListener);
@@ -97,6 +106,7 @@ public class ChangeNameActivity extends ToolbarBaseActivity {
                 PictureSelector.create(ChangeNameActivity.this).externalPicturePreview(position, list);
             }
         });
+        mButton.setOnClickListener(v -> save());
     }
 
 
@@ -118,7 +128,7 @@ public class ChangeNameActivity extends ToolbarBaseActivity {
 
     private void save() {
         timestamp = System.currentTimeMillis() / 1000;
-        if (compressimg != null && !TextUtils.isEmpty(compressimg.getPath()) &&
+        if (isAllowUpLoad && compressimg != null && !TextUtils.isEmpty(compressimg.getPath()) &&
                 !TextUtils.isEmpty(tvXiehuiName.getText().toString().trim()) &&
                 !TextUtils.isEmpty(tvXiehuiReason.getText().toString().trim())) {
             // 创建 RequestBody，用于封装构建RequestBody
@@ -189,15 +199,6 @@ public class ChangeNameActivity extends ToolbarBaseActivity {
                 tvXiehuiReason.setFocusableInTouchMode(true);
                 tvXiehuiReason.requestFocus();
                 break;
-//            case R.id.iv_add:
-//                PictureSelector.create(ChangeNameActivity.this)
-//                        .openCamera(chooseMode)
-//                        .previewImage(true)
-//                        .compressGrade(Luban.THIRD_GEAR)
-//                        .compress(true)
-//                        .compressMode(compressMode)
-//                        .forResult(PictureConfig.CHOOSE_REQUEST);
-//                break;
         }
     }
 
@@ -217,4 +218,30 @@ public class ChangeNameActivity extends ToolbarBaseActivity {
                 .forResult(PictureConfig.CHOOSE_REQUEST);//结果回调onActivityResult code
 
     };
+
+    private void showStatus(){
+        Map<String,Object> urlParams= new HashMap<>();
+        urlParams.put("uid",AssociationData.getUserId());
+        urlParams.put("type","xiehui");
+
+        RetrofitHelper.getApi()
+                .getOrgNameApplyStatus(AssociationData.getUserToken(),urlParams)
+                .compose(bindToLifecycle())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(orgNameApplyStatusApiResponse -> {
+                    CommonUitls.showToast(this,orgNameApplyStatusApiResponse.getData().getStatus());
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException)
+                    {
+                        CommonUitls.showToast(this,"连接超时，请稍后再试");
+                    }else if (throwable instanceof ConnectException)
+                    {
+                        CommonUitls.showToast(this,"连接失败，请检查连接");
+                    }
+                    else if (throwable instanceof RuntimeException){
+                        CommonUitls.showToast(this,"发生不可预期的错误："+throwable.getMessage());
+                    }
+                });
+    }
 }

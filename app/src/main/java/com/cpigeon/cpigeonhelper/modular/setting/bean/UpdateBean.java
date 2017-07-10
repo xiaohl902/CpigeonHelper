@@ -1,4 +1,4 @@
-package com.cpigeon.cpigeonhelper.modular.setting;
+package com.cpigeon.cpigeonhelper.modular.setting.bean;
 
 /**
  * Created by Administrator on 2017/7/4.

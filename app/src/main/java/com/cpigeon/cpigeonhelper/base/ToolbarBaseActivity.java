@@ -152,7 +152,6 @@ public abstract class ToolbarBaseActivity extends RxAppCompatActivity {
         super.onDestroy();
         mUnbinder.unbind();
         AppManager.getAppManager().removeActivity(mWeakReference);
-
     }
 
     @Override

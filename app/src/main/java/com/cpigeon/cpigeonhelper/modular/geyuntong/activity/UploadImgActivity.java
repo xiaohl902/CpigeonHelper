@@ -61,6 +61,8 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
+import static com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GridImageAdapter.isAllowUpLoad;
+
 /**
  *
  * Created by Administrator on 2017/6/15.
@@ -144,7 +146,7 @@ public class UploadImgActivity extends ToolbarBaseActivity implements AMapLocati
     }
 
     public void upload() {
-        if (tagid == 0 || "请选择".equals(tvChoseTag.getText().toString().trim())) {
+        if (!isAllowUpLoad||tagid == 0 || "请选择".equals(tvChoseTag.getText().toString().trim())) {
             CommonUitls.showToast(this, "请选择上传类型");
         } else if (compressimg == null) {
             CommonUitls.showToast(this, "请上传图片哦");

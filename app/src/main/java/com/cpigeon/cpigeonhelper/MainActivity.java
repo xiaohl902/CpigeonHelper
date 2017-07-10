@@ -16,6 +16,7 @@ import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -32,12 +33,17 @@ import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.GeYunTongListActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.MyGYTActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GeYunTongListAdapter;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
 import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
 import com.cpigeon.cpigeonhelper.modular.home.bean.HomeAd;
 import com.cpigeon.cpigeonhelper.modular.order.activity.MyBalanceActivity;
+import com.cpigeon.cpigeonhelper.modular.order.activity.OpeningGeyuntongActivity;
 import com.cpigeon.cpigeonhelper.modular.order.activity.OrderListActivity;
+import com.cpigeon.cpigeonhelper.modular.order.activity.ReChargeActivity;
+import com.cpigeon.cpigeonhelper.modular.setting.activity.OperatorActivity;
 import com.cpigeon.cpigeonhelper.modular.setting.activity.SettingActivity;
 import com.cpigeon.cpigeonhelper.modular.xiehui.activity.XieHuiInfoActivity;
+import com.cpigeon.cpigeonhelper.ui.MyDecoration;
 import com.cpigeon.cpigeonhelper.ui.textview.MarqueeTextView;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
@@ -59,6 +65,8 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
 import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -82,9 +90,13 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     RecyclerView mRecyclerView;
     @BindView(R.id.mapView)
     MapView mMapView;
+    @BindView(R.id.btn_enter_gyt)
+    Button mButton;
+
     private GeYunTongListAdapter mAdapter;
     private int count = 1;
     private AMap aMap;
+
     @Override
     protected void swipeBack() {
 
@@ -106,7 +118,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .load(AssociationData.getUserImgUrl())
                 .placeholder(R.mipmap.logos)
                 .error(R.mipmap.logos)
-                .resizeDimen(R.dimen.image_width_headicon,R.dimen.image_height_headicon)
+                .resizeDimen(R.dimen.image_width_headicon, R.dimen.image_height_headicon)
                 .config(Bitmap.Config.RGB_565)
                 .onlyScaleDown()
                 .into(mUserIcon);
@@ -117,43 +129,35 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         actionBarDrawerToggle.syncState();
         navView.setNavigationItemSelectedListener(this);
         loadAd();
-        loadMap(savedInstanceState);
-//        loadRace();
+        mMapView.onCreate(savedInstanceState);
+        loadRace();
         loadGTYServer();
         loadTopNews();
     }
 
     private void loadGTYServer() {
-        Map<String,Object> urlParams = new HashMap<>();
-        urlParams.put("uid",AssociationData.getUserId());
-        urlParams.put("type",AssociationData.getUserType());
-        urlParams.put("atype",AssociationData.getUserAType());
+        Map<String, Object> urlParams = new HashMap<>();
+        urlParams.put("uid", AssociationData.getUserId());
+        urlParams.put("type", AssociationData.getUserType());
+        urlParams.put("atype", AssociationData.getUserAType());
         RetrofitHelper.getApi()
-                .getGYTInfo(AssociationData.getUserToken(),urlParams)
+                .getGYTInfo(AssociationData.getUserToken(), urlParams)
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(gytServiceApiResponse -> {
-                    if (gytServiceApiResponse.getErrorCode() == 0) {
-                        Logger.e("等级:"+gytServiceApiResponse.getData().getGrade());
-                        Logger.e("开通时间:"+gytServiceApiResponse.getData().getOpenTime());
-                        Logger.e("是否关闭:"+gytServiceApiResponse.getData().isIsClosed());
-                        Logger.e("是否到期:"+gytServiceApiResponse.getData().isIsExpired());
-                        Logger.e("到期时间:"+gytServiceApiResponse.getData().getExpireTime());
-                        Logger.e("等级对应时间:"+gytServiceApiResponse.getData().getUsefulTime());
-                        Logger.e("可授权人数:"+gytServiceApiResponse.getData().getAuthNumber());
-                        Logger.e("关闭原因:"+gytServiceApiResponse.getData().getReason());
+                    if (gytServiceApiResponse.getErrorCode() == 0 && gytServiceApiResponse.getData()!= null) {
                         RealmUtils.getInstance().insertGYTService(gytServiceApiResponse.getData());
-                    }else {
-                        CommonUitls.showToast(this,gytServiceApiResponse.getMsg());
+                    } else {
+                        CommonUitls.showToast(this, "您未开通鸽运通");
                     }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException) {
-                        CommonUitls.showToast(this,"连接超时，网络不太好");
-                    }else if (throwable instanceof ConnectException){
-                        CommonUitls.showToast(this,"连接异常，网络不通畅");
-                    }else if (throwable instanceof RuntimeException){
-                        CommonUitls.showToast(this,"发生了不可预期的错误"+throwable.getMessage());
+                        CommonUitls.showToast(this, "连接超时，网络不太好");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "连接异常，网络不通畅");
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "发生了不可预期的错误" + throwable.getMessage());
                     }
                 });
     }
@@ -163,44 +167,44 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mMapView.setVisibility(View.GONE);
         mRecyclerView.setVisibility(View.VISIBLE);
 
-        Map<String,Object> urlParams = new HashMap<>();
-        urlParams.put("uid",AssociationData.getUserId());
-        urlParams.put("type",AssociationData.getUserType());
-        urlParams.put("ps",3);
-        urlParams.put("pi",1);
+        Map<String, Object> urlParams = new HashMap<>();
+        urlParams.put("uid", AssociationData.getUserId());
+        urlParams.put("type", AssociationData.getUserType());
+        urlParams.put("ps", 3);
+        urlParams.put("pi", 1);
         RetrofitHelper.getApi()
-                .getGeYunTongRaceList(AssociationData.getUserToken(),urlParams)
+                .getGeYunTongRaceList(AssociationData.getUserToken(), urlParams)
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(listApiResponse -> {
-                    if (listApiResponse.getErrorCode() == 0)
-                    {
+                    if (listApiResponse.getErrorCode() == 0 && listApiResponse.getData() != null && listApiResponse.getData().size() > 0) {
                         mAdapter = new GeYunTongListAdapter(listApiResponse.getData());
                         mAdapter.setOnItemClickListener((adapter, view, position) ->
-                            startActivity(new Intent(this,GeYunTongListActivity.class))
+                                startActivity(new Intent(this, GeYunTongListActivity.class))
                         );
                         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+                        mRecyclerView.addItemDecoration(new MyDecoration(this, MyDecoration.VERTICAL_LIST));
                         mRecyclerView.setAdapter(mAdapter);
+                    } else {
+                        loadMap();
                     }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException) {
                         CommonUitls.showToast(this, "连接超时");
                     } else if (throwable instanceof ConnectException) {
                         CommonUitls.showToast(this, "无法连接到服务器，请检查连接");
-                    }else if (throwable instanceof RuntimeException){
-                        CommonUitls.showToast(this, "发生了不可预期的错误，错误信息:"+throwable.getMessage());
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "发生了不可预期的错误，错误信息:" + throwable.getMessage());
                     }
                 });
     }
 
 
-    private void loadMap(Bundle savedInstanceState){
+    private void loadMap() {
         mMapView.setVisibility(View.VISIBLE);
         mRecyclerView.setVisibility(View.GONE);
-        mMapView.onCreate(savedInstanceState);
-        if (aMap == null)
-        {
+        if (aMap == null) {
             aMap = mMapView.getMap();
             setUpMap();
         }
@@ -235,8 +239,8 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                         CommonUitls.showToast(this, "连接超时");
                     } else if (throwable instanceof ConnectException) {
                         CommonUitls.showToast(this, "无法连接到服务器，请检查连接");
-                    }else if (throwable instanceof RuntimeException){
-                        CommonUitls.showToast(this, "发生了不可预期的错误，错误信息:"+throwable.getMessage());
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "发生了不可预期的错误，错误信息:" + throwable.getMessage());
                     }
                 });
     }
@@ -285,10 +289,12 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mBanner.start();
 
     }
+
     @Override
     public void initToolBar() {
         setSupportActionBar(toolbar);
     }
+
     /**
      * 如果按下返回键的时候Drawerlayout未关闭，那么就先关闭
      */
@@ -310,6 +316,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         }
 
     }
+
     /**
      * 设置statusbar的颜色
      */
@@ -319,6 +326,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         StatusBarUtil.setColorForDrawerLayout(this, drawerLayout, mColor, 0);
 
     }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
@@ -331,13 +339,29 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 startActivity(new Intent(MainActivity.this, MyBalanceActivity.class));
                 break;
             case R.id.my_geyuntong://我的鸽运通
-                startActivity(new Intent(MainActivity.this, MyGYTActivity.class));
+                if (RealmUtils.getInstance().existGYTInfo())
+                {
+                    GYTService gytService = RealmUtils.getInstance().queryGTYInfo().get(0);
+                    if (!gytService.isIsExpired())
+                    {
+                        startActivity(new Intent(MainActivity.this, MyGYTActivity.class));
+                    }else {
+                        startActivity(new Intent(MainActivity.this, ReChargeActivity.class));
+                    }
+
+                }else {
+                    startActivity(new Intent(MainActivity.this, OpeningGeyuntongActivity.class));
+                }
+
                 break;
             case R.id.my_order://我的订单
                 startActivity(new Intent(MainActivity.this, OrderListActivity.class));
                 break;
             case R.id.setting://设置
                 startActivity(new Intent(MainActivity.this, SettingActivity.class));
+                break;
+            case R.id.operator_log:
+                startActivity(new Intent(MainActivity.this, OperatorActivity.class));
                 break;
 
         }
@@ -348,8 +372,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onPause() {
         super.onPause();
-        if (mMapView!=null)
-        {
+        if (mMapView != null) {
             mMapView.onPause();
         }
     }
@@ -357,8 +380,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onResume() {
         super.onResume();
-        if (mMapView!=null)
-        {
+        if (mMapView != null) {
             mMapView.onResume();
         }
     }
@@ -366,8 +388,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mMapView!=null)
-        {
+        if (mMapView != null) {
             mMapView.onDestroy();
         }
     }
@@ -375,8 +396,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        if (mMapView!=null)
-        {
+        if (mMapView != null) {
             mMapView.onSaveInstanceState(outState);
         }
     }
@@ -384,5 +404,16 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     @Override
     public void onMyLocationChange(Location location) {
 
+    }
+
+    @OnClick({R.id.list_header_race_detial_gg, R.id.btn_enter_gyt})
+    public void onViewClicked(View view) {
+        switch (view.getId()) {
+            case R.id.list_header_race_detial_gg:
+                break;
+            case R.id.btn_enter_gyt:
+                startActivity(new Intent(this,GeYunTongListActivity.class));
+                break;
+        }
     }
 }

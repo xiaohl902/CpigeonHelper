@@ -28,6 +28,8 @@ import com.luck.picture.lib.entity.LocalMedia;
 import com.orhanobut.logger.Logger;
 
 import java.io.File;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +48,8 @@ import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
+import static com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GridImageAdapter.isAllowUpLoad;
+
 /**
  * Created by Administrator on 2017/6/15.
  */
@@ -55,7 +59,7 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
     TextView tvChoseTag;
     @BindView(R.id.ll_chose_tag)
     LinearLayout llChoseTag;
-    @BindView(R.id.recycler)
+    @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
     private int chooseMode = PictureMimeType.ofVideo();
     private List<LocalMedia> selectList = new ArrayList<>();
@@ -149,9 +153,10 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
     }
 
     private void upload() {
-        if (tagid == 0 || "请选择".equals(tvChoseTag.getText().toString().trim())||video == null) {
+        if (!isAllowUpLoad ||tagid == 0 || "请选择".equals(tvChoseTag.getText().toString().trim())||video == null) {
             CommonUitls.showToast(this, "上传不能为空");
         } else {
+            Logger.e(isAllowUpLoad+"");
             mSweetAlertDialogLoading = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
             mSweetAlertDialogLoading.setTitleText("正在上传...");
             mSweetAlertDialogLoading.setCancelable(false);
@@ -210,9 +215,21 @@ public class UploadVideoActivity extends ToolbarBaseActivity {
                             });
                             mSweetAlertDialogSuccess.setCancelable(false);
                             mSweetAlertDialogSuccess.show();
+                        }else {
+                            mSweetAlertDialogLoading.dismissWithAnimation();
+                            CommonUitls.showToast(this,objectApiResponse.getMsg());
                         }
                     }, throwable -> {
-                        Logger.e("失败" + throwable.getMessage());
+                        mSweetAlertDialogLoading.dismissWithAnimation();
+                        if (throwable instanceof SocketTimeoutException)
+                        {
+                            CommonUitls.showToast(this,"上传超时，请检查连接");
+                        }else if (throwable instanceof ConnectException)
+                        {
+                            CommonUitls.showToast(this,"无网络连接，请检查连接");
+                        }else if (throwable instanceof RuntimeException){
+                            CommonUitls.showToast(this,"发生了不可预期的错误:"+throwable.getMessage());
+                        }
                     });
 
         }

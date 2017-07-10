@@ -14,6 +14,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.cpigeon.cpigeonhelper.R;
 import com.luck.picture.lib.entity.LocalMedia;
 import com.luck.picture.lib.tools.DebugUtil;
+import com.orhanobut.logger.Logger;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -33,6 +34,7 @@ public class GridImageAdapter extends
     private LayoutInflater mInflater;
     private List<LocalMedia> list = new ArrayList<>();
     private int selectMax = 9;
+    public static boolean isAllowUpLoad = false;
     /**
      * 点击添加图片跳转
      */
@@ -112,6 +114,7 @@ public class GridImageAdapter extends
             viewHolder.mImg.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    isAllowUpLoad = true;
                     mOnAddPicClickListener.onAddPicClick();
                 }
             });
@@ -128,7 +131,8 @@ public class GridImageAdapter extends
                         list.remove(index);
                         notifyItemRemoved(index);
                         notifyItemRangeChanged(index, list.size());
-                        DebugUtil.i("delete position:", index + "--->remove after:" + list.size());
+                        isAllowUpLoad = false;
+                        Logger.i("delete position:"+index + "--->remove after:" + list.size());
                     }
                 }
             });

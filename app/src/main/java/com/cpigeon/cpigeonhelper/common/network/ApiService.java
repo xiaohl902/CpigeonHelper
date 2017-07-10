@@ -16,7 +16,8 @@ import com.cpigeon.cpigeonhelper.modular.root.bean.RootList;
 import com.cpigeon.cpigeonhelper.modular.root.bean.RootManagerList;
 import com.cpigeon.cpigeonhelper.modular.root.bean.UserInfoByTelBean;
 import com.cpigeon.cpigeonhelper.modular.root.bean.UserPermissions;
-import com.cpigeon.cpigeonhelper.modular.setting.UpdateBean;
+import com.cpigeon.cpigeonhelper.modular.setting.bean.OperatorLog;
+import com.cpigeon.cpigeonhelper.modular.setting.bean.UpdateBean;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.AnnouncementList;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.CheckCode;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.DeviceBean;
@@ -127,8 +128,7 @@ public interface ApiService {
     //获取组织名称修改申请状态
     @GET("CHAPI/V1/GetOrgNameApplyStatus")
     Observable<ApiResponse<OrgNameApplyStatus>> getOrgNameApplyStatus(@Header("auth") String token,
-                                                                      @QueryMap Map<String, Object> urlParams,
-                                                                      @Query("sign") String sign);
+                                                                      @QueryMap Map<String, Object> urlParams);
 
     //获取被授权的用户列表
     @GET("GAPI/V1/GetAuthUsers")
@@ -153,7 +153,7 @@ public interface ApiService {
 
 
     //创建服务类订单
-    @POST("GAPI/V1/CreateServiceOrder")
+    @POST("CHAPI/V1/CreateGYTOrder")
     Observable<ApiResponse<Order>> createServiceOrder(@Header("auth") String token,
                                                       @Body RequestBody body,
                                                       @Query("timestamp") long timestamp,
@@ -288,4 +288,25 @@ public interface ApiService {
     @GET("GAPI/V1/Version?id=com.cpigeon.cpigeonhelper")
     Observable<List<UpdateBean>> checkForUpdate();
 
+    //获取升级套餐信息
+    @GET("CHAPI/V1/GetGytUpgradeServicePackageInfo")
+    Observable<ApiResponse<List<PackageInfo>>> getUpgradeServicePackageInfo(@Header("auth") String token,
+                                                         @QueryMap Map<String,Object> urlParams);
+
+    //获取续费鸽运通套餐
+    @GET("/CHAPI/V1/GetGytRenewalServicePackageInfo")
+    Observable<ApiResponse<List<PackageInfo>>> getGytRenewalServicePackageInfo(@Header("auth") String token,
+                                                                            @QueryMap Map<String,Object> urlParams);
+
+
+    //修改支付密码
+    @POST("GAPI/V1/SetUserPayPwd")
+    Observable<ApiResponse> setUserPayPwd(@Header("auth") String token,
+                                          @Body RequestBody body,
+                                          @Query("timestamp") long timestamp,
+                                          @Query("sign") String sign);
+    //获取日志信息
+    @GET("GAPI/V1/GetUserOperateLogs")
+    Observable<ApiResponse<List<OperatorLog>>> getUserOperateLogs(@Header("auth") String token,
+                                                                  @QueryMap Map<String,Object> urlParams);
 }

@@ -45,4 +45,12 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1" />
+    <Button
+        android:id="@+id/btn_enter_gyt"
+        android:layout_margin="8dp"
+        android:textColor="@color/colorWhite"
+        android:text="进入鸽运通"
+        android:background="@drawable/bg_btn_normal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 </LinearLayout>

@@ -23,5 +23,15 @@
             android:id="@+id/setting"
             android:icon="@drawable/ic_setting"
             android:title="设置" />
+        <item
+            android:id="@+id/help"
+            android:icon="@drawable/ic_help"
+            android:title="帮助"/>
+        <item
+            android:id="@+id/operator_log"
+            android:icon="@drawable/ic_operator_log"
+            android:title="操作日志"/>
+
+
     </group>
 </menu>

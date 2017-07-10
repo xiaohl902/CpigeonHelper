@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/colorWhite"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/activity_login_input_layout_height"
+        android:background="@color/colorWhite">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/iv_icon_phonernumber"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            app:srcCompat="@drawable/ic_phonenumber" />
+
+        <AutoCompleteTextView
+            android:id="@+id/et_phonenumber"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/iv_icon_phonernumber"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="请输入您的手机号"
+            android:imeOptions="actionNext"
+            android:inputType="number"
+            android:nextFocusForward="@+id/et_checkcode"
+            android:paddingLeft="@dimen/dp_8"
+            android:singleLine="true"
+            android:textColorHint="@color/colorHint"
+            android:textSize="@dimen/sp_14" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorLayoutSplitLineGray" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:layout_alignParentBottom="true"
+            android:background="@color/colorLayoutSplitLineGray" />
+    </RelativeLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="@dimen/activity_login_input_layout_height"
+            android:layout_weight="1"
+            android:background="@color/colorWhite">
+
+            <android.support.v7.widget.AppCompatImageView
+                android:id="@+id/iv_icon_checkcode"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_centerVertical="true"
+                android:padding="8dp"
+                app:srcCompat="@drawable/ic_msg" />
+
+            <EditText
+                android:id="@+id/et_checkcode"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_toRightOf="@id/iv_icon_checkcode"
+                android:background="@null"
+                android:gravity="center_vertical"
+                android:hint="请输入您的验证码"
+                android:imeOptions="actionNext"
+                android:inputType="number"
+                android:nextFocusForward="@+id/et_newpwd"
+                android:paddingLeft="@dimen/dp_8"
+                android:singleLine="true"
+                android:textColorHint="@color/colorHint"
+                android:textSize="@dimen/sp_14" />
+
+
+        </RelativeLayout>
+
+        <Button
+            android:id="@+id/btn_sendcheckcode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:text="@string/action_send_checkcode" />
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/activity_login_input_layout_height"
+        android:background="@color/colorWhite">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/iv_icon_newpwd"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_centerVertical="true"
+            android:padding="8dp"
+            app:srcCompat="@drawable/ic_login_password" />
+
+        <AutoCompleteTextView
+            android:id="@+id/et_newpwd"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_toRightOf="@id/iv_icon_newpwd"
+            android:background="@null"
+            android:gravity="center_vertical"
+            android:hint="新的密码"
+            android:imeOptions="actionNext"
+            android:inputType="numberPassword"
+            android:nextFocusForward="@+id/et_checknewpwd"
+            android:paddingLeft="@dimen/dp_8"
+            android:singleLine="true"
+            android:textColorHint="@color/colorHint"
+            android:textSize="@dimen/sp_14" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dp_1"
+            android:layout_alignParentTop="true"
+            android:background="@color/colorLayoutSplitLineGray" />
+
+
+    </RelativeLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:layout_alignParentBottom="true"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton
+        android:id="@+id/btn_confim"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:textColor="@color/colorWhite"
+        android:textSize="@dimen/sp_14"
+        app:cpb_cornerRadius="6dp"
+        app:cpb_textComplete="修改成功"
+        app:cpb_textError="修改失败"
+        app:cpb_textIdle="@string/confirm" />
+</LinearLayout>

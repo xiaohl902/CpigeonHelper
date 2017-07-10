@@ -138,15 +138,23 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                         tvRootlistUsername.setText(userPermissionsApiResponse.getData().getAuthUserInfo().getNickname());
                         tvRootlistUsertel.setText(userPermissionsApiResponse.getData().getAuthUserInfo().getPhone());
                         mAdapter.setNewData(userPermissionsApiResponse.getData().getPermissions());
+                        for (UserPermissions.PermissionsBean permission : userPermissionsApiResponse.getData().getPermissions())
+                        {
+                            if (permission.isEnable())
+                            {
+                                stringBuilder.append(permission.getId());
+                            }
+                        }
+
                         finishTask();
                     } else {
                         CommonUitls.showToast(this, userPermissionsApiResponse.getMsg());
                     }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException) {
-                        CommonUitls.showToast(this, "连接超时了，都啥年代了还塞网络？");
+                        CommonUitls.showToast(this, "连接超时了");
                     } else if (throwable instanceof ConnectException) {
-                        CommonUitls.showToast(this, "连接失败了，都啥年代了无网络？");
+                        CommonUitls.showToast(this, "连接失败了");
                     } else if (throwable instanceof RuntimeException) {
                         CommonUitls.showToast(this, "发生了不可预期的错误：" + throwable.getMessage());
                     }
@@ -250,9 +258,9 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                             }
                         }, throwable -> {
                             if (throwable instanceof SocketTimeoutException) {
-                                CommonUitls.showToast(this, "连接超时了，都啥年代了还塞网络？");
+                                CommonUitls.showToast(this, "连接超时了");
                             } else if (throwable instanceof ConnectException) {
-                                CommonUitls.showToast(this, "连接失败了，都啥年代了无网络？");
+                                CommonUitls.showToast(this, "连接失败了");
                             } else {
                                 CommonUitls.showToast(this, "发生了不可预期的错误：" + throwable.getMessage());
                             }

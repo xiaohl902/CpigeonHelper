@@ -23,7 +23,7 @@ public class DateUtils {
     }
 
     public static String compareDate(String endTime, String nowTime) {
-        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         Date now = null;
         try {
             now = df.parse(endTime);

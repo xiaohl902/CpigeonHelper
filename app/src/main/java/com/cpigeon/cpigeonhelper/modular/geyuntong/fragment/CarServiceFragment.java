@@ -16,9 +16,13 @@ import android.widget.TextView;
 import android.widget.ToggleButton;
 
 import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapUtils;
 import com.amap.api.maps.CameraUpdateFactory;
+import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
@@ -84,7 +88,7 @@ import static com.cpigeon.cpigeonhelper.utils.CommonUitls.KEY_SERVER_PWD;
  * Created by Administrator on 2017/5/31.
  */
 
-public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocationChangeListener, TraceListener, GeocodeSearch.OnGeocodeSearchListener, WeatherSearch.OnWeatherSearchListener {
+public class CarServiceFragment extends BaseFragment implements LocationSource, AMapLocationListener, WeatherSearch.OnWeatherSearchListener, TraceListener {
     @BindView(R.id.mapView)
     TextureMapView mMapView;
     @BindView(R.id.tvMileage)
@@ -125,25 +129,25 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     private int i = 1;
     private AMap aMap;
     private int ift;
-    private GeocodeSearch geocodeSearch;
     private LatLng mylocation;
     private MyLocation mMyLocation = new MyLocation();
-    private Location location;
+    private AMapLocation  aMapLocation;
     private WeatherSearchQuery mquery;
     private WeatherSearch mweathersearch;
     private LocalWeatherLive weatherlive;
+    private OnLocationChangedListener mListener;
+    private AMapLocationClient mLocationClient;
+    private AMapLocationClientOption mLocationOption;
 
     public static CarServiceFragment newInstance() {
 
         return new CarServiceFragment();
     }
 
-
     @Override
     public int getLayoutResId() {
         return R.layout.fragment_car_service;
     }
-
     @Override
     public void finishCreateView(Bundle state) {
         cardViewDetails.setVisibility(View.GONE);
@@ -190,28 +194,16 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     }
 
     private void setUpMap() {
-        MyLocationStyle myLocationStyle = new MyLocationStyle();
-        myLocationStyle.interval(5000); //设置连续定位模式下的定位间隔,单位为毫秒。
-
-        aMap.setMyLocationStyle(myLocationStyle);//设置定位蓝点的Style
-        aMap.setMyLocationEnabled(true);// 设置为true表示启动显示定位蓝点，false表示隐藏定位蓝点并不进行定位，默认是false。
-        aMap.setOnMyLocationChangeListener(this);
-        aMap.moveCamera(CameraUpdateFactory.zoomTo(19));
-
-        mweathersearch = new WeatherSearch(getActivity());
-        mweathersearch.setOnWeatherSearchListener(this);
-
-        geocodeSearch = new GeocodeSearch(getActivity());
-        geocodeSearch.setOnGeocodeSearchListener(this);
+        aMap.setLocationSource(this);
+        aMap.setMyLocationEnabled(true);
+        aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);
     }
 
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         geYunTong = ((ACarServiceActivity) activity).getGeYunTong();
-        Logger.e("鸽运通id：" + geYunTong.getId());
     }
-
 
     /**
      * 开始鸽车监控
@@ -328,28 +320,6 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 });
     }
 
-    @Override
-    public void onMyLocationChange(Location location) {
-        if (location != null) {
-            this.location = location;
-            mylocation = new LatLng(location.getLatitude(),
-                    location.getLongitude());
-            LatLonPoint latLonPoint = new LatLonPoint(location.getLatitude(), location.getLongitude());
-            RegeocodeQuery query = new RegeocodeQuery(latLonPoint, 10, GeocodeSearch.AMAP);
-            geocodeSearch.getFromLocationAsyn(query);
-            Log.e("szx", location.getLatitude() + "," + location.getLongitude());
-            record.addpoint(location);
-            mPolyoptions.add(mylocation);
-            mTracelocationlist.add(Util.parseTraceLocation(location));
-            redrawline();
-            int tracesize = 30;
-            if (mTracelocationlist.size() > tracesize - 1) {
-                trace();
-            }
-
-        }
-
-    }
 
     private void redrawline() {
         if (mPolyoptions.getPoints().size() > 1) {
@@ -397,6 +367,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 mTraceoverlay.add(linepoints);
                 mDistance += distance;
                 mTraceoverlay.setDistance(mTraceoverlay.getDistance() + distance);
+                tvMileage.setText(mDistance+"");
             }
         } else if (lineID == 2) {
             if (linepoints != null && linepoints.size() > 0) {
@@ -426,20 +397,6 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
     }
 
     @Override
-    public void onRegeocodeSearched(RegeocodeResult regeocodeResult, int code) {
-        if (code == 1000) {
-            mquery = new WeatherSearchQuery(regeocodeResult.getRegeocodeAddress().getCity(), WeatherSearchQuery.WEATHER_TYPE_LIVE);
-            mweathersearch.setQuery(mquery);
-            mweathersearch.searchWeatherAsyn();
-        }
-    }
-
-    @Override
-    public void onGeocodeSearched(GeocodeResult geocodeResult, int i) {
-
-    }
-
-    @Override
     public void onWeatherLiveSearched(LocalWeatherLiveResult localWeatherLiveResult, int code) {
         if (code == 1000) {
             if (localWeatherLiveResult != null && localWeatherLiveResult.getLiveResult() != null) {
@@ -447,8 +404,8 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 mMyLocation.setId(i);
                 i++;
                 mMyLocation.setRaceid(geYunTong.getId());
-                mMyLocation.setLatitude(location.getLatitude());
-                mMyLocation.setLongitude(location.getLongitude());
+                mMyLocation.setLatitude(aMapLocation.getLatitude());
+                mMyLocation.setLongitude(aMapLocation.getLongitude());
                 mMyLocation.setGetReportTime(weatherlive.getReportTime());
                 mMyLocation.setHumidity(weatherlive.getHumidity());
                 mMyLocation.setTemperature(weatherlive.getTemperature());
@@ -457,7 +414,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 Logger.e("天气" + weatherlive.getWeather());
                 RealmUtils.getInstance().insertLocation(mMyLocation);
                 Logger.e("code run there");
-                sendMsg(location.getLatitude() + "|" + location.getLongitude() + "|" +
+                sendMsg(aMapLocation.getLatitude() + "|" + aMapLocation.getLongitude() + "|" +
                         3.00 + "|" + System.currentTimeMillis() / 1000 + "|" +
                         weatherlive.getWeather() + "|" + weatherlive.getWindDirection() + "|" +
                         weatherlive.getWindPower() + "|" + weatherlive.getReportTime() + "|" +
@@ -475,7 +432,6 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
      * 给服务器发送一条消息
      */
     public void sendMsg(String msg) {
-
         String s = EncryptionTool.encryptAES(AssociationData.getUserToken(), KEY_SERVER_PWD);
         String sign = EncryptionHeader(s) + s;
         String content = EncryptionHeader(msg) + msg;
@@ -537,8 +493,9 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
                 break;
         }
     }
-    public void expandinfo()
-    {
+
+
+    public void expandinfo() {
         if (cardViewDetails.getVisibility() == View.VISIBLE) {
             cardViewDetails.setVisibility(View.GONE);
             ivExpandDetails.setRotation(0);
@@ -550,24 +507,74 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
         cardViewDetails.startAnimation(expandAnimation);
     }
 
-    /**
-     * 获取行驶总距离
-     * @return
-     */
-    private int getTotalDistance() {
-        int distance = 0;
-        for (TraceOverlay to : mOverlayList) {
-            distance = distance + to.getDistance();
+
+    @Override
+    public void activate(OnLocationChangedListener onLocationChangedListener) {
+        mListener = onLocationChangedListener;
+        if (mLocationClient == null) {
+            //初始化定位
+            mLocationClient = new AMapLocationClient(getActivity());
+            //初始化定位参数
+            mLocationOption = new AMapLocationClientOption();
+            //设置定位回调监听
+            mLocationClient.setLocationListener(this);
+            //设置为高精度定位模式
+            mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
+            //定位时间的间隔
+            mLocationOption.setInterval(2000);
+            //设置定位参数
+            mLocationClient.setLocationOption(mLocationOption);
+            // 此方法为每隔固定时间会发起一次定位请求，为了减少电量消耗或网络流量消耗，
+            // 注意设置合适的定位时间的间隔（最小间隔支持为2000ms），并且在合适时间调用stopLocation()方法来取消定位请求
+            // 在定位结束后，在合适的生命周期调用onDestroy()方法
+            // 在单次定位情况下，定位无论成功与否，都无需调用stopLocation()方法移除请求，定位sdk内部会移除
+            mLocationClient.startLocation();//启动定位
         }
-        return distance;
     }
+
+    @Override
+    public void deactivate() {
+        mListener = null;
+        if (mLocationClient != null) {
+            mLocationClient.stopLocation();
+            mLocationClient.onDestroy();
+
+        }
+        mLocationClient = null;
+    }
+
+    @Override
+    public void onLocationChanged(AMapLocation aMapLocation) {
+        if (mListener != null&&aMapLocation != null) {
+            if (aMapLocation.getErrorCode() == 0) {
+                this.aMapLocation = aMapLocation;
+                mListener.onLocationChanged(aMapLocation);// 显示系统小蓝点
+                mylocation = new LatLng(aMapLocation.getLatitude(),
+                        aMapLocation.getLongitude());
+                record.addpoint(aMapLocation);
+                mPolyoptions.add(mylocation);
+                mTracelocationlist.add(Util.parseTraceLocation(aMapLocation));
+                redrawline();
+                int tracesize = 30;
+                if (mTracelocationlist.size() > tracesize - 1) {
+                    trace();
+                }
+                tvSpeed.setText(CommonUitls.doubleformat(aMapLocation.getSpeed()*3.6));
+                mquery = new WeatherSearchQuery(aMapLocation.getCity(), WeatherSearchQuery.WEATHER_TYPE_LIVE);
+                mweathersearch=new WeatherSearch(getActivity());
+                mweathersearch.setOnWeatherSearchListener(this);
+                mweathersearch.setQuery(mquery);
+                mweathersearch.searchWeatherAsyn(); //异步搜索
+            } else {
+                String errText = "定位失败," + aMapLocation.getErrorCode()+ ": " + aMapLocation.getErrorInfo();
+                Log.e("AmapErr",errText);
+            }
+        }
+    }
+
 
     private String getAverage(float distance) {
         return String.valueOf(distance / (float) (mEndTime - mStartTime));
-    }
-
-    private String getDuration() {
-        return String.valueOf((mEndTime - mStartTime) / 1000f);
     }
 
     private float getDistance(List<AMapLocation> list) {
@@ -589,4 +596,7 @@ public class CarServiceFragment extends BaseFragment implements AMap.OnMyLocatio
         return distance;
     }
 
+    private String getDuration() {
+        return String.valueOf((mEndTime - mStartTime) / 1000f);
+    }
 }

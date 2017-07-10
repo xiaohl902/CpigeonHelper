@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_marginBottom="8dp"
+    android:background="@color/colorWhite"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TextView
+        android:id="@+id/tv_operator_time"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:textColor="@color/colorPrimary"
+        android:text="2017-03-28 12:30:30"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <View
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:padding="8dp"
+        android:background="@color/colorDarkGrey"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"/>
+    <TextView
+        android:id="@+id/tv_operator_userid"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:textColor="@color/colorText"
+        android:text="用户ID："
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/tv_operator_operatorlog"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:textColor="@color/colorText"
+        android:text="操作日志："
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+    <View
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:padding="8dp"
+        android:background="@color/colorDarkGrey"
+        android:layout_width="match_parent"
+        android:layout_height="0.5dp"/>
+    <TextView
+        android:id="@+id/tv_operator_ip"
+        android:gravity="right"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:textColor="@color/colorText"
+        android:text="IP:155.235.23.56"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>

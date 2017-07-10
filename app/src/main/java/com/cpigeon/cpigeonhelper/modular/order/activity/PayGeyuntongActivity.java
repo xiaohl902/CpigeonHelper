@@ -14,8 +14,14 @@ import android.widget.TextView;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
+import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
+import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.modular.order.fragment.PayFragment;
+import com.cpigeon.cpigeonhelper.modular.order.fragment.PayPwdView;
+import com.cpigeon.cpigeonhelper.modular.usercenter.activity.PayPwdActivity;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
+import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
 import com.cpigeon.cpigeonhelper.wxapi.WXPayEntryActivity;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
@@ -30,7 +36,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
@@ -41,7 +50,7 @@ import static com.cpigeon.cpigeonhelper.utils.CommonUitls.OnWxPayListener.ERR_OK
  * Created by Administrator on 2017/5/27.
  */
 
-public class PayGeyuntongActivity extends ToolbarBaseActivity {
+public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdView.InputCallBack {
     @BindView(R.id.tv_order_number_title)
     TextView tvOrderNumberTitle;
     @BindView(R.id.tv_order_number_content)
@@ -71,11 +80,14 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
     private PayReq payReq;
     private IWXAPI mWxApi;
     private int orderid;
+    private PayFragment fragment;
+    private String price;
+    private String type;
     private CommonUitls.OnWxPayListener onWxPayListenerWeakReference = wxPayReturnCode -> {
         if (wxPayReturnCode == ERR_OK)
             new Handler().postDelayed(this::finish, 500);
         else
-            CommonUitls.showToast(PayGeyuntongActivity.this,"支付失败");
+            CommonUitls.showToast(PayGeyuntongActivity.this, "支付失败");
     };
 
     @Override
@@ -96,11 +108,12 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
     @Override
     protected void initViews(Bundle savedInstanceState) {
         setTitle("订单支付");
-        setTopLeftButton(R.drawable.ic_back,this::finish);
+        setTopLeftButton(R.drawable.ic_back, this::finish);
         Intent intent = getIntent();
-        sid = intent.getIntExtra("sid",0);
+        sid = intent.getIntExtra("sid", 0);
+        type = intent.getStringExtra("type");
         if (mWxApi == null) {
-            mWxApi = WXAPIFactory.createWXAPI(mContext,null);
+            mWxApi = WXAPIFactory.createWXAPI(mContext, null);
             mWxApi.registerApp(WXPayEntryActivity.APP_ID);
         }
         loadData();
@@ -109,35 +122,36 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
 
     @Override
     public void loadData() {
-        timestamp = System.currentTimeMillis() /1000;
+        timestamp = System.currentTimeMillis() / 1000;
         RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
                 .addFormDataPart("sid", String.valueOf(sid))
+                .addFormDataPart("type", type)
                 .build();
-        Map<String,Object> postParams = new HashMap<>();
-        postParams.put("uid",String.valueOf(AssociationData.getUserId()));
-        postParams.put("sid",String.valueOf(sid));
+        Map<String, Object> postParams = new HashMap<>();
+        postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+        postParams.put("sid", String.valueOf(sid));
+        postParams.put("type",type);
         RetrofitHelper
-                .getApi().createServiceOrder(AssociationData.getUserToken(),requestBody,timestamp,
-                CommonUitls.getApiSign(timestamp,postParams))
+                .getApi().createServiceOrder(AssociationData.getUserToken(), requestBody, timestamp,
+                CommonUitls.getApiSign(timestamp, postParams))
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(orderApiResponse -> {
-                    if (orderApiResponse.getErrorCode() == 0)
-                    {
+                    if (orderApiResponse.getErrorCode() == 0) {
                         orderid = orderApiResponse.getData().getId();
                         tvOrderNumberContent.setText(orderApiResponse.getData().getNumber());
                         tvOrderNameContent.setText(orderApiResponse.getData().getItem());
                         tvOrderTimeContent.setText(orderApiResponse.getData().getTime());
-                        tvOrderPriceContent.setText(String.format("%.2f元", orderApiResponse.getData().getPrice()) );
+                        tvOrderPriceContent.setText(String.format("%.2f元", orderApiResponse.getData().getPrice()));
+                        price = String.format("%.2f元", orderApiResponse.getData().getPrice());
                         CommonUitls.getInstance().addOnWxPayListener(onWxPayListenerWeakReference);
-                    }
-                    else {
-                        CommonUitls.showToast(this,orderApiResponse.getMsg());
+                    } else {
+                        CommonUitls.showToast(this, orderApiResponse.getMsg());
                     }
                 }, throwable -> {
-                    CommonUitls.showToast(this,throwable.getMessage());
+                    CommonUitls.showToast(this, throwable.getMessage());
                 });
     }
 
@@ -153,7 +167,14 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
         layoutOrderPayWay.addView(v);
         v.setOnClickListener(v1 -> {
             if (!cbOrderProtocol.isChecked()) {
-                CommonUitls.showToast(PayGeyuntongActivity.this,"请阅读之后再来");
+                CommonUitls.showToast(PayGeyuntongActivity.this, "请阅读之后再来");
+            } else {
+                Bundle bundle = new Bundle();
+                bundle.putString(PayFragment.EXTRA_CONTENT, "支付金额：¥ " + price);
+                fragment = new PayFragment();
+                fragment.setArguments(bundle);
+                fragment.setPaySuccessCallBack(this);
+                fragment.show(getSupportFragmentManager(), "Pay");
             }
         });
 
@@ -170,11 +191,11 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
         layoutOrderPayWay.addView(v);
         v.setOnClickListener(v12 -> {
             if (!cbOrderProtocol.isChecked()) {
-                CommonUitls.showToast(PayGeyuntongActivity.this,getString(R.string.sentence_not_watch_pay_agreement_prompt));
-            }else if (mWxApi.isWXAppInstalled()){
+                CommonUitls.showToast(PayGeyuntongActivity.this, getString(R.string.sentence_not_watch_pay_agreement_prompt));
+            } else if (mWxApi.isWXAppInstalled()) {
                 startWxPay();
             } else {
-                CommonUitls.showToast(PayGeyuntongActivity.this,"亲，您未安装微信哦");
+                CommonUitls.showToast(PayGeyuntongActivity.this, "亲，您未安装微信哦");
             }
         });
     }
@@ -190,14 +211,14 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
                 .addFormDataPart("oid", String.valueOf(orderid))
                 .addFormDataPart("app", "cpigeonhelper")
                 .build();
-        Map<String,Object> postParams = new HashMap<>();
-        postParams.put("uid",String.valueOf(AssociationData.getUserId()));
-        postParams.put("oid",String.valueOf(orderid));
-        postParams.put("app","cpigeonhelper");
+        Map<String, Object> postParams = new HashMap<>();
+        postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+        postParams.put("oid", String.valueOf(orderid));
+        postParams.put("app", "cpigeonhelper");
 
 
         RetrofitHelper.getApi()
-                .createWxOrder(AssociationData.getUserToken(),requestBody,timestamp,CommonUitls.getApiSign(timestamp,postParams))
+                .createWxOrder(AssociationData.getUserToken(), requestBody, timestamp, CommonUitls.getApiSign(timestamp, postParams))
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -212,18 +233,16 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
                         payReq.timeStamp = payReqApiResponse.getData().getTimestamp();
                         payReq.sign = payReqApiResponse.getData().getSign();
                         entryWXPay(payReq);
-                    }else {
-                        CommonUitls.showToast(this,payReqApiResponse.getMsg());
+                    } else {
+                        CommonUitls.showToast(this, payReqApiResponse.getMsg());
                     }
-                },throwable -> {
-                    if (throwable instanceof SocketTimeoutException)
-                    {
-                        CommonUitls.showToast(this,"连接超时了");
-                    }else if (throwable instanceof ConnectException){
-                        CommonUitls.showToast(this,"连接失败");
-                    }else if (throwable instanceof RuntimeException)
-                    {
-                        CommonUitls.showToast(this,"发生了不可预期的错误");
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "连接超时了");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "连接失败");
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "发生了不可预期的错误");
                     }
                 });
     }
@@ -232,10 +251,9 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
         this.payReq = payReq;
         if (mWxApi != null) {
             boolean result = mWxApi.sendReq(payReq);
-            if (!result)
-            {
-                CommonUitls.showToast(this,"支付失败");
-            }else {
+            if (!result) {
+                CommonUitls.showToast(this, "支付失败");
+            } else {
                 Logger.d("发起微信支付");
             }
 
@@ -249,5 +267,63 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity {
         mWxApi = null;
         payReq = null;
         CommonUitls.getInstance().removeOnWxPayListener(onWxPayListenerWeakReference);
+    }
+
+    @Override
+    public void onInputFinish(String result) {
+        Logger.e(result);
+        timestamp = System.currentTimeMillis() / 1000;
+        RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                .addFormDataPart("oid", String.valueOf(orderid))
+                .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
+                .addFormDataPart("p", EncryptionTool.encryptAES(result))
+                .build();
+
+        Map<String, Object> postParams = new HashMap<>();
+        postParams.put("oid", String.valueOf(orderid));
+        postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+        postParams.put("p", EncryptionTool.encryptAES(result));
+
+        RetrofitHelper.getApi()
+                .orderPayByBalance(AssociationData.getUserToken(), mRequestBody, timestamp, CommonUitls.getApiSign(timestamp, postParams))
+                .compose(bindToLifecycle())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(objectApiResponse -> {
+                    fragment.dismiss();
+                    if (objectApiResponse.getErrorCode() == 0) {
+                        CommonUitls.showToast(this, "支付成功");
+                        if (RealmUtils.getInstance().existGYTInfo())
+                        {
+                            RealmUtils.getInstance().deleteGYTInfo();
+                        }
+
+                        finish();
+                    } else if (objectApiResponse.getErrorCode() == 20010){
+                        new SweetAlertDialog(this,SweetAlertDialog.WARNING_TYPE)
+                                .setTitleText("温馨提示")
+                                .setContentText("您暂未设置支付密码，是否跳转设置？")
+                                .setConfirmText("好的")
+                                .setConfirmClickListener(sweetAlertDialog -> {
+                                    sweetAlertDialog.dismissWithAnimation();
+                                    startActivity(new Intent(PayGeyuntongActivity.this, PayPwdActivity.class));
+                                })
+                                .setCancelText("取消")
+                                .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
+                                .show();
+                    }else {
+                        CommonUitls.showToast(this, objectApiResponse.getMsg());
+                    }
+                }, throwable -> {
+                    fragment.dismiss();
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "连接超时");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "连接异常，请检查连接");
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "发生了不可预期的错误："+throwable.getMessage());
+                    }
+
+                });
     }
 }
