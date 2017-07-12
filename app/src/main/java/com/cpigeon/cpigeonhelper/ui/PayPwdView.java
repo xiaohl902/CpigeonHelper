@@ -1,4 +1,4 @@
-package com.cpigeon.cpigeonhelper.modular.order.fragment;
+package com.cpigeon.cpigeonhelper.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -21,7 +21,6 @@ import com.cpigeon.cpigeonhelper.R;
 import java.util.ArrayList;
 
 /**
- * 引用网上的一位朋友的类，具体出处找不到了
  *
  */
 public class PayPwdView extends View {

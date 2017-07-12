@@ -112,17 +112,22 @@ public class VipLevelUpActivity extends ToolbarBaseActivity {
         mAdapter = new VipLevelUpAdapter(null);
         mAdapter.setOnItemChildClickListener((adapter, view, position) -> {
             PackageInfo packageInfo = (PackageInfo) adapter.getData().get(position);
-            new SweetAlertDialog(VipLevelUpActivity.this,SweetAlertDialog.WARNING_TYPE)
-                    .setTitleText("温馨提示")
-                    .setContentText("是否从"+packageInfo.getPackageName()+"套餐?")
-                    .setConfirmText("确认")
-                    .setConfirmClickListener(sweetAlertDialog -> {
-                        sweetAlertDialog.dismiss();
-                        createWxOrder(packageInfo.getId(),"upgrade");
-                    })
-                    .setCancelText("取消")
-                    .setCancelClickListener(Dialog::dismiss)
-                    .show();
+//            new SweetAlertDialog(VipLevelUpActivity.this,SweetAlertDialog.WARNING_TYPE)
+//                    .setTitleText("温馨提示")
+//                    .setContentText("是否从"+packageInfo.getPackageName()+"套餐?")
+//                    .setConfirmText("确认")
+//                    .setConfirmClickListener(sweetAlertDialog -> {
+//                        sweetAlertDialog.dismiss();
+//                        createWxOrder(packageInfo.getId(),"upgrade");
+//                    })
+//                    .setCancelText("取消")
+//                    .setCancelClickListener(Dialog::dismiss)
+//                    .show();
+            Intent i = new Intent(this,PayGeyuntongActivity.class);
+            i.putExtra("sid",packageInfo.getId());
+            i.putExtra("type","upgrade");
+            startActivity(i);
+
         });
 
 

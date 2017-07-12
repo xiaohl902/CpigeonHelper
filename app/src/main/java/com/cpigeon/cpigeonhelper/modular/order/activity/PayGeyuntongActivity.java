@@ -15,19 +15,19 @@ import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
-import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
-import com.cpigeon.cpigeonhelper.modular.order.fragment.PayFragment;
-import com.cpigeon.cpigeonhelper.modular.order.fragment.PayPwdView;
+import com.cpigeon.cpigeonhelper.modular.order.bean.PayRequest;
+import com.cpigeon.cpigeonhelper.ui.PayFragment;
+import com.cpigeon.cpigeonhelper.ui.PayPwdView;
 import com.cpigeon.cpigeonhelper.modular.usercenter.activity.PayPwdActivity;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
 import com.cpigeon.cpigeonhelper.wxapi.WXPayEntryActivity;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
-import com.tencent.mm.opensdk.modelpay.PayReq;
-import com.tencent.mm.opensdk.openapi.IWXAPI;
-import com.tencent.mm.opensdk.openapi.WXAPIFactory;
+import com.tencent.mm.sdk.modelpay.PayReq;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 
 import java.net.ConnectException;
@@ -37,13 +37,11 @@ import java.util.Map;
 
 import butterknife.BindView;
 import cn.pedant.SweetAlert.SweetAlertDialog;
+
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
-
 import static com.cpigeon.cpigeonhelper.utils.CommonUitls.OnWxPayListener.ERR_OK;
 
 /**
@@ -131,7 +129,7 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
         Map<String, Object> postParams = new HashMap<>();
         postParams.put("uid", String.valueOf(AssociationData.getUserId()));
         postParams.put("sid", String.valueOf(sid));
-        postParams.put("type",type);
+        postParams.put("type", type);
         RetrofitHelper
                 .getApi().createServiceOrder(AssociationData.getUserToken(), requestBody, timestamp,
                 CommonUitls.getApiSign(timestamp, postParams))
@@ -269,6 +267,8 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
         CommonUitls.getInstance().removeOnWxPayListener(onWxPayListenerWeakReference);
     }
 
+
+
     @Override
     public void onInputFinish(String result) {
         Logger.e(result);
@@ -293,14 +293,13 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
                     fragment.dismiss();
                     if (objectApiResponse.getErrorCode() == 0) {
                         CommonUitls.showToast(this, "支付成功");
-                        if (RealmUtils.getInstance().existGYTInfo())
-                        {
+                        if (RealmUtils.getInstance().existGYTInfo()) {
                             RealmUtils.getInstance().deleteGYTInfo();
                         }
 
                         finish();
-                    } else if (objectApiResponse.getErrorCode() == 20010){
-                        new SweetAlertDialog(this,SweetAlertDialog.WARNING_TYPE)
+                    } else if (objectApiResponse.getErrorCode() == 20010) {
+                        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
                                 .setTitleText("温馨提示")
                                 .setContentText("您暂未设置支付密码，是否跳转设置？")
                                 .setConfirmText("好的")
@@ -311,7 +310,7 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
                                 .setCancelText("取消")
                                 .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
                                 .show();
-                    }else {
+                    } else {
                         CommonUitls.showToast(this, objectApiResponse.getMsg());
                     }
                 }, throwable -> {
@@ -321,7 +320,7 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
                     } else if (throwable instanceof ConnectException) {
                         CommonUitls.showToast(this, "连接异常，请检查连接");
                     } else if (throwable instanceof RuntimeException) {
-                        CommonUitls.showToast(this, "发生了不可预期的错误："+throwable.getMessage());
+                        CommonUitls.showToast(this, "发生了不可预期的错误：" + throwable.getMessage());
                     }
 
                 });

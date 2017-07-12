@@ -360,7 +360,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
             case R.id.setting://设置
                 startActivity(new Intent(MainActivity.this, SettingActivity.class));
                 break;
-            case R.id.operator_log:
+            case R.id.operator_log://日志查看
                 startActivity(new Intent(MainActivity.this, OperatorActivity.class));
                 break;
 

@@ -1,4 +1,4 @@
-package com.cpigeon.cpigeonhelper.modular.order.fragment;
+package com.cpigeon.cpigeonhelper.ui;
 
 import android.app.Dialog;
 import android.graphics.Color;

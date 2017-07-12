@@ -96,17 +96,17 @@ public class OpeningGeyuntongActivity extends ToolbarBaseActivity {
         mAdapter = new PackageInfoAdapter(null);
         mAdapter.setOnItemChildClickListener((adapter, view, position) -> {
             PackageInfo packageInfo = (PackageInfo) adapter.getData().get(position);
-            new SweetAlertDialog(OpeningGeyuntongActivity.this,SweetAlertDialog.WARNING_TYPE)
-                    .setTitleText("温馨提示")
-                    .setContentText("是否开通"+packageInfo.getPackageName()+"套餐?")
-                    .setConfirmText("确认")
-                    .setConfirmClickListener(sweetAlertDialog -> {
-                        sweetAlertDialog.dismiss();
+//            new SweetAlertDialog(OpeningGeyuntongActivity.this,SweetAlertDialog.WARNING_TYPE)
+//                    .setTitleText("温馨提示")
+//                    .setContentText("是否开通"+packageInfo.getPackageName()+"套餐?")
+//                    .setConfirmText("确认")
+//                    .setConfirmClickListener(sweetAlertDialog -> {
+//                        sweetAlertDialog.dismiss();
                         createWxOrder(packageInfo.getId(),"open");
-                    })
-                    .setCancelText("取消")
-                    .setCancelClickListener(Dialog::dismiss)
-                    .show();
+//                    })
+//                    .setCancelText("取消")
+//                    .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
+//                    .show();
         });
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));

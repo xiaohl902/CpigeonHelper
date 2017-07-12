@@ -294,19 +294,20 @@
             </RelativeLayout>
 
         </android.support.v7.widget.CardView>
-        <ToggleButton
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginBottom="8dp"
-            android:id="@+id/btn_stop"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/border"
-            android:textOff="开始监控"
-            android:textOn="结束监控"
-            />
 
     </LinearLayout>
+    <ToggleButton
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:id="@+id/btn_stop"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/border"
+        android:textOff="开始监控"
+        android:textOn="结束监控"
+        />
+
 
 
 </RelativeLayout>

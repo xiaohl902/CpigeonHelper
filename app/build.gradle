@@ -124,7 +124,7 @@ dependencies {
     compile 'me.shaohui:bottomdialog:1.1.9'
     compile 'org.greenrobot:eventbus:3.0.0'
     compile 'fm.jiecao:jiecaovideoplayer:5.5.4'
-    compile 'com.tencent.mm.opensdk:wechat-sdk-android-with-mta:+'
     compile 'com.github.vipulasri:timelineview:1.0.5'
     compile 'com.qianwen:update-app:3.0.0'
+    compile files('libs/libammsdk.jar')
 }

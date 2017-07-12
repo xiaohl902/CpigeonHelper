@@ -31,7 +31,7 @@ import okhttp3.RequestBody;
 /**
  * 司放地编辑界面
  * Created by Administrator on 2017/6/15.
- */
+ **/
 
 public class FlyingAreaEditActivity extends ToolbarBaseActivity {
     @BindView(R.id.et_flyingarea_place)
@@ -83,6 +83,7 @@ public class FlyingAreaEditActivity extends ToolbarBaseActivity {
         Logger.e(la+lo+place+alias);
 
         etFlyingareaPlace.setText(place);
+        etFlyingareaPlace.setSelection(place.length());
         etFlyingareaLa.setText(String.format("%.6f",la));
         etFlyingareaLo.setText(String.format("%.6f",lo));
         etFlyingareaAlias.setText(alias);

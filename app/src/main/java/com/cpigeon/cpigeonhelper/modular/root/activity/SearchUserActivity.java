@@ -1,30 +1,20 @@
 package com.cpigeon.cpigeonhelper.modular.root.activity;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
-import com.cpigeon.cpigeonhelper.common.network.ApiConstants;
-import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
-import com.cpigeon.cpigeonhelper.modular.root.adapter.RootListAdapter;
 import com.cpigeon.cpigeonhelper.modular.root.adapter.SearchListAdapter;
-import com.cpigeon.cpigeonhelper.modular.root.bean.RootList;
-import com.cpigeon.cpigeonhelper.modular.root.bean.RootManagerList;
-import com.cpigeon.cpigeonhelper.modular.root.bean.RootUserBean;
 import com.cpigeon.cpigeonhelper.modular.root.bean.UserInfoByTelBean;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
-import com.cpigeon.cpigeonhelper.ui.SnackbarUtil;
 import com.cpigeon.cpigeonhelper.ui.searchview.SearchEditText;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
@@ -34,30 +24,21 @@ import com.r0adkll.slidr.Slidr;
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.annotations.NonNull;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 /**
- *
  * Created by Administrator on 2017/5/27.
- *
  */
 
-public class SearchUserActivity extends ToolbarBaseActivity {
-    @BindView(R.id.tv_search)
-    TextView tvSearch;
+public class SearchUserActivity extends ToolbarBaseActivity implements SearchEditText.OnSearchClickListener {
     @BindView(R.id.search_edittext)
     SearchEditText searchEdittext;
     @BindView(R.id.recyclerView)
@@ -68,6 +49,7 @@ public class SearchUserActivity extends ToolbarBaseActivity {
     private long timestamp;
     private Map<String, Object> postParams;
     private String s;
+
     @Override
     protected void swipeBack() {
         Slidr.attach(this);
@@ -80,7 +62,7 @@ public class SearchUserActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this, R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
@@ -89,58 +71,12 @@ public class SearchUserActivity extends ToolbarBaseActivity {
         this.setTitle("添加授权");
         this.setTopLeftButton(R.drawable.ic_back, this::finish);
         this.initRecyclerView();
-
+        searchEdittext.setOnSearchClickListener(this);
     }
 
-
-
-    @OnClick(R.id.tv_search)
-    public void onViewClicked() {
-        if (TextUtils.isEmpty(searchEdittext.getText().toString().trim()))
-        {
-            CommonUitls.showToast(this,"请输入需要授权用户的手机号");
-        }else {
-            clearData();
-            timestamp = System.currentTimeMillis() / 1000;
-            postParams = new HashMap<>();
-            postParams.put("p", searchEdittext.getText().toString().trim());
-            if (!TextUtils.isEmpty(searchEdittext.getText().toString().trim())) {
-
-                RetrofitHelper.getApi()
-                        .getUserInfoByTel(AssociationData.getUserToken(),
-                                searchEdittext.getText().toString().trim(),
-                                timestamp, CommonUitls.getApiSign(timestamp,postParams))
-                        .throttleFirst(10, TimeUnit.MILLISECONDS)
-                        .compose(bindToLifecycle())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(listApiResponse -> {
-                            if (listApiResponse.getErrorCode() == 0 &&listApiResponse.getData()!=null && listApiResponse.getData().size()>0)
-                            {
-                                mAdapter.setNewData(listApiResponse.getData());
-                                finishTask();
-                            }else {
-                                initEmptyView(listApiResponse.getMsg());
-                            }
-                        }, throwable -> {
-                            if (throwable instanceof SocketTimeoutException)
-                            {
-                                initEmptyView("啊偶，连接超时了，都啥年代了还塞网络？");
-                            }else if (throwable instanceof ConnectException){
-                                initEmptyView("啊偶，连接失败了，都啥年代了无网络？");
-                            }else {
-                                initEmptyView("啊偶，发生了不可预期的错误："+throwable.getMessage());
-                            }
-                        });
-            }
-        }
-
-
-    }
 
     private void clearData() {
-        if (postParams!=null)
-        {
+        if (postParams != null) {
             postParams.clear();
         }
 
@@ -157,18 +93,17 @@ public class SearchUserActivity extends ToolbarBaseActivity {
         mAdapter = new SearchListAdapter(null);
         mAdapter.setOnItemClickListener((baseQuickAdapter, view, i) -> {
             UserInfoByTelBean userInfoByTelBean = (UserInfoByTelBean) baseQuickAdapter.getData().get(i);
-            Logger.e("当前用户的uid"+userInfoByTelBean.getUid());
+            Logger.e("当前用户的uid" + userInfoByTelBean.getUid());
             s = TextUtils.isEmpty(userInfoByTelBean.getNickname()) ? userInfoByTelBean.getNickname() : userInfoByTelBean.getNickname();
-            Logger.e("当前用户的昵称"+s);
-            if (userInfoByTelBean.getAuthUid() == AssociationData.getUserId())
-            {
+            Logger.e("当前用户的昵称" + s);
+            if (userInfoByTelBean.getAuthUid() == AssociationData.getUserId()) {
                 Toast.makeText(mContext, "该账户已经是授权账户", Toast.LENGTH_SHORT).show();
-            }else if (userInfoByTelBean.getAuthUid()!=0 && userInfoByTelBean.getAuthUid()!= AssociationData.getUserId()){
+            } else if (userInfoByTelBean.getAuthUid() != 0 && userInfoByTelBean.getAuthUid() != AssociationData.getUserId()) {
                 Toast.makeText(mContext, "当前账户已被其他协会或公棚授权", Toast.LENGTH_SHORT).show();
-            }else {
-                new SweetAlertDialog(this,SweetAlertDialog.NORMAL_TYPE)
+            } else {
+                new SweetAlertDialog(this, SweetAlertDialog.NORMAL_TYPE)
                         .setTitleText("添加用户")
-                        .setContentText("是否添加"+s+"为授权用户?")
+                        .setContentText("是否添加" + s + "为授权用户?")
                         .setConfirmText("我确定")
                         .setConfirmClickListener(sweetAlertDialog -> {
                             sweetAlertDialog.dismissWithAnimation();
@@ -183,7 +118,7 @@ public class SearchUserActivity extends ToolbarBaseActivity {
     }
 
     private void setUserPermission(int auuid) {
-        timestamp = System.currentTimeMillis() /1000;
+        timestamp = System.currentTimeMillis() / 1000;
         postParams.clear();
         RequestBody requestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                 .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
@@ -200,40 +135,38 @@ public class SearchUserActivity extends ToolbarBaseActivity {
         postParams.put("type", "ZGZS");
         RetrofitHelper.getApi()
                 .setAuthUserPermissions(AssociationData.getUserToken(),
-                        requestBody,timestamp,CommonUitls.getApiSign(timestamp,postParams))
+                        requestBody, timestamp, CommonUitls.getApiSign(timestamp, postParams))
                 .compose(bindToLifecycle())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(rootManagerListApiResponse -> {
-                   if (rootManagerListApiResponse.getErrorCode() == 0)
-                   {
-                       new SweetAlertDialog(this,SweetAlertDialog.SUCCESS_TYPE)
-                               .setTitleText("添加成功")
-                               .setContentText("成功添加"+s+"为授权用户")
-                               .setConfirmText("确定")
-                               .setConfirmClickListener(sweetAlertDialog -> {
-                                           sweetAlertDialog.dismissWithAnimation();
-                                           finish();
-                                       }
+                    if (rootManagerListApiResponse.getErrorCode() == 0) {
+                        new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                                .setTitleText("添加成功")
+                                .setContentText("成功添加" + s + "为授权用户")
+                                .setConfirmText("确定")
+                                .setConfirmClickListener(sweetAlertDialog -> {
+                                            sweetAlertDialog.dismissWithAnimation();
+                                            finish();
+                                        }
 
-                               ).show();
-                   }else {
-                       new SweetAlertDialog(this,SweetAlertDialog.ERROR_TYPE)
-                               .setTitleText("添加失败")
-                               .setContentText(rootManagerListApiResponse.getMsg())
-                               .setConfirmText("确定")
-                               .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation
+                                ).show();
+                    } else {
+                        new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                                .setTitleText("添加失败")
+                                .setContentText(rootManagerListApiResponse.getMsg())
+                                .setConfirmText("确定")
+                                .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation
 
-                               ).show();
-                   }
-                },throwable -> {
-                    if (throwable instanceof SocketTimeoutException)
-                    {
-                        CommonUitls.showToast(this,"连接超时了，都啥年代了还塞网络？");
-                    }else if (throwable instanceof ConnectException){
-                        CommonUitls.showToast(this,"连接失败了，都啥年代了无网络？");
-                    }else {
-                        CommonUitls.showToast(this,"发生了不可预期的错误："+throwable.getMessage());
+                                ).show();
+                    }
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "连接超时了，都啥年代了还塞网络？");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "连接失败了，都啥年代了无网络？");
+                    } else {
+                        CommonUitls.showToast(this, "发生了不可预期的错误：" + throwable.getMessage());
                     }
                 });
     }
@@ -252,4 +185,40 @@ public class SearchUserActivity extends ToolbarBaseActivity {
     }
 
 
+    @Override
+    public void onSearchClick(View view, String keyword) {
+        if (TextUtils.isEmpty(keyword)) {
+            CommonUitls.showToast(this, "请输入需要授权用户的手机号");
+        } else {
+            clearData();
+            timestamp = System.currentTimeMillis() / 1000;
+            postParams = new HashMap<>();
+            postParams.put("p", keyword);
+            RetrofitHelper.getApi()
+                    .getUserInfoByTel(AssociationData.getUserToken(),
+                            keyword, timestamp, CommonUitls.getApiSign(timestamp, postParams))
+                    .throttleFirst(10, TimeUnit.MILLISECONDS)
+                    .compose(bindToLifecycle())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(listApiResponse -> {
+                        if (listApiResponse.getErrorCode() == 0 && listApiResponse.getData() != null && listApiResponse.getData().size() > 0) {
+                            mAdapter.setNewData(listApiResponse.getData());
+                            finishTask();
+                        } else {
+                            initEmptyView(listApiResponse.getMsg());
+                        }
+                    }, throwable -> {
+                        if (throwable instanceof SocketTimeoutException) {
+                            initEmptyView("连接超时了，都啥年代了还塞网络？");
+                        } else if (throwable instanceof ConnectException) {
+                            initEmptyView("连接失败了，都啥年代了无网络？");
+                        } else {
+                            initEmptyView("发生了不可预期的错误：" + throwable.getMessage());
+                        }
+                    });
+        }
+
+
+    }
 }

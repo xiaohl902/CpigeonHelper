@@ -66,24 +66,6 @@
         <attr name="cpb_cornerRadius" format="dimension"/>
         <attr name="cpb_paddingProgress" format="dimension"/>
     </declare-styleable>
-    <!--搜索框的主题-->
-    <style name="SearchView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">@drawable/bg_search_edit</item>
-        <item name="android:imeOptions">actionSearch</item>
-        <item name="android:inputType">text</item>
-        <item name="android:drawableLeft">@mipmap/ic_search</item>
-        <item name="android:paddingLeft">8dp</item>
-        <item name="android:paddingRight">8dp</item>
-        <item name="android:singleLine">true</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:textSize">14sp</item>
-        <item name="android:textColorHint">@color/text_color</item>
-        <item name="android:textColor">@color/colorText</item>
-        <item name="android:hint">搜索</item>
-    </style>
-    
     <style name="MyToolBarTheme" parent="TextAppearance.AppCompat.Widget.ActionBar.Title">
         <item name="actionMenuTextColor">@color/colorWhite</item> <!--  敲定颜色-->
         <item name="android:textSize">18sp</item> <!--  搞掂字体大小-->

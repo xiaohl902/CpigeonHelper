@@ -51,7 +51,7 @@
             android:layout_gravity="center_horizontal"
             android:gravity="center" />
 
-        <com.cpigeon.cpigeonhelper.modular.order.fragment.PayPwdView
+        <com.cpigeon.cpigeonhelper.ui.PayPwdView
             android:id="@+id/payPwdView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -61,7 +61,7 @@
     </LinearLayout>
 
 
-    <com.cpigeon.cpigeonhelper.modular.order.fragment.PwdInputMethodView
+    <com.cpigeon.cpigeonhelper.ui.PwdInputMethodView
         android:id="@+id/inputMethodView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

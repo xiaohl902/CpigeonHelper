@@ -34,17 +34,23 @@ public class SearchEditText extends AppCompatEditText implements View.OnFocusCha
     private OnSearchClickListener listener;
 
     private Drawable[] drawables; // 控件的图片资源
-    private Drawable drawableTempDel;// 搜索图标和删除按钮图标
-    private Drawable drawableSearch, drawableDel;
+    private Drawable drawableLeft, drawableDel, drawable; // 搜索图标和删除按钮图标
     private int eventX, eventY; // 记录点击坐标
-    private int mSearchgravityIndex;
     private Rect rect; // 控件区域
 
+    public void setOnSearchClickListener(OnSearchClickListener listener) {
+        this.listener = listener;
+    }
+
+    public interface OnSearchClickListener {
+        void onSearchClick(View view, String keyword);
+    }
 
     public SearchEditText(Context context) {
         this(context, null);
         init();
     }
+
 
     public SearchEditText(Context context, AttributeSet attrs) {
         this(context, attrs, android.R.attr.editTextStyle);
@@ -58,16 +64,10 @@ public class SearchEditText extends AppCompatEditText implements View.OnFocusCha
         init();
     }
 
-    public void setOnSearchClickListener(OnSearchClickListener listener) {
-        this.listener = listener;
-    }
-
     private void initParams(Context context, AttributeSet attrs) {
         TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.SearchEditText);
         if (typedArray != null) {
-            drawableDel = typedArray.getDrawable(R.styleable.SearchEditText_drawableDel);
-            mSearchgravityIndex = typedArray.getInt(R.styleable.SearchEditText_search_gravity, 1);
-
+            drawable = typedArray.getDrawable(R.styleable.SearchEditText_drawableDel);
             typedArray.recycle();
         }
     }
@@ -80,36 +80,24 @@ public class SearchEditText extends AppCompatEditText implements View.OnFocusCha
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (drawables == null) drawables = getCompoundDrawables();
-        if (drawableSearch == null) {
-            drawableSearch = drawables[0];
-        }
-
-        if (Searchgravity.values()[mSearchgravityIndex] == Searchgravity.Center) {
-            if (isIconLeft) { // 如果是默认样式，直接绘制
-                //绘制在左侧
-                if (length() < 1) {
-                    drawableTempDel = null;
-                }
-                this.setCompoundDrawablesWithIntrinsicBounds(drawableSearch, null, drawableTempDel, null);
-                super.onDraw(canvas);
-            } else { // 如果不是默认样式，需要将图标绘制在中间
-                //绘制在中间
-                float textWidth = getPaint().measureText(getHint().toString());
-                int drawablePadding = getCompoundDrawablePadding();
-                int drawableWidth = drawableSearch == null ? 0 : drawableSearch.getIntrinsicWidth();
-                float bodyWidth = textWidth + drawableWidth + drawablePadding;
-                canvas.translate((getWidth() - bodyWidth - getPaddingLeft() - getPaddingRight()) / 2, 0);
-                super.onDraw(canvas);
-            }
-        } else if (Searchgravity.values()[mSearchgravityIndex] == Searchgravity.Left) {
+        if (isIconLeft) { // 如果是默认样式，直接绘制
             if (length() < 1) {
-                drawableTempDel = null;
+                drawableDel = null;
             }
-            this.setCompoundDrawablesWithIntrinsicBounds(drawableSearch, null, drawableTempDel, null);
+            this.setCompoundDrawablesWithIntrinsicBounds(drawableLeft, null, drawableDel, null);
+            super.onDraw(canvas);
+        } else { // 如果不是默认样式，需要将图标绘制在中间
+            if (drawables == null) drawables = getCompoundDrawables();
+            if (drawableLeft == null) drawableLeft = drawables[0];
+            float textWidth = getPaint().measureText(getHint().toString());
+            int drawablePadding = getCompoundDrawablePadding();
+            int drawableWidth = drawableLeft.getIntrinsicWidth();
+            float bodyWidth = textWidth + drawableWidth + drawablePadding;
+            canvas.translate((getWidth() - bodyWidth - getPaddingLeft() - getPaddingRight()) / 2, 0);
             super.onDraw(canvas);
         }
     }
+
 
     @Override
     public void onFocusChange(View v, boolean hasFocus) {
@@ -135,43 +123,31 @@ public class SearchEditText extends AppCompatEditText implements View.OnFocusCha
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-
-        if (event.getAction() == MotionEvent.ACTION_UP) {
-            // 清空edit内容
-
-            if (drawableTempDel != null) {
-                eventX = (int) event.getRawX();
-                eventY = (int) event.getRawY();
-                if (rect == null) rect = new Rect();
-                getGlobalVisibleRect(rect);
-                rect.left = rect.right - drawableTempDel.getIntrinsicWidth() - getPaddingRight();
-                if (rect.contains(eventX, eventY)) {
-                    setText("");
-                    return true;
-                }
+        // 清空edit内容
+        if (drawableDel != null && event.getAction() == MotionEvent.ACTION_UP) {
+            eventX = (int) event.getRawX();
+            eventY = (int) event.getRawY();
+//            Log.i(TAG, "eventX = " + eventX + "; eventY = " + eventY);
+            if (rect == null) rect = new Rect();
+            getGlobalVisibleRect(rect);
+            rect.left = rect.right - drawableDel.getIntrinsicWidth();
+            if (rect.contains(eventX, eventY)) {
+                setText("");
             }
-        }else if(MotionEvent.ACTION_DOWN == event.getAction()) {
-            performClick();
-            clearFocus();
-
         }
-
         return super.onTouchEvent(event);
     }
 
-    @Override
-    public boolean performClick() {
-        return super.performClick();
-    }
 
     @Override
     public void afterTextChanged(Editable arg0) {
         if (this.length() < 1) {
-            drawableTempDel = null;
+            drawableDel = null;
         } else {
-            drawableTempDel = drawableDel;
+            drawableDel = drawable;
         }
     }
+
 
     @Override
     public void beforeTextChanged(CharSequence arg0, int arg1, int arg2,
@@ -181,14 +157,5 @@ public class SearchEditText extends AppCompatEditText implements View.OnFocusCha
     @Override
     public void onTextChanged(CharSequence arg0, int arg1, int arg2,
                               int arg3) {
-    }
-
-    public enum Searchgravity {
-        Left,
-        Center
-    }
-
-    public interface OnSearchClickListener {
-        void onSearchClick(View view, String keyword);
     }
 }

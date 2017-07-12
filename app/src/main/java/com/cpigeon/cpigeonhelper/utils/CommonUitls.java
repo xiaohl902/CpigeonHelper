@@ -19,7 +19,7 @@ import android.widget.Toast;
 
 import com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton;
 import com.orhanobut.logger.Logger;
-import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
+import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
 
 
 import java.io.File;
@@ -492,7 +492,6 @@ public class CommonUitls {
             if (this.onWxPayListenerList == null || onWxPayListenerList.size()==0) return;
             for (OnWxPayListener ref : this.onWxPayListenerList) {
                 if (ref!= null) {
-
                     ref.onPayFinished(wxPayReturnCode);
                 }
             }

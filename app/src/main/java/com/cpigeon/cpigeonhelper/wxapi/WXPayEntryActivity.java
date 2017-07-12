@@ -1,66 +1,47 @@
 package com.cpigeon.cpigeonhelper.wxapi;
 
-//import com.cpigeon.common.AppManager;
-
-import android.content.Intent;
+import android.app.Activity;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.orhanobut.logger.Logger;
-import com.tencent.mm.opensdk.modelbase.BaseReq;
-import com.tencent.mm.opensdk.modelbase.BaseResp;
-import com.tencent.mm.opensdk.openapi.IWXAPI;
-import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
-import com.tencent.mm.opensdk.openapi.WXAPIFactory;
+import com.tencent.mm.sdk.modelbase.BaseReq;
+import com.tencent.mm.sdk.modelbase.BaseResp;
+import com.tencent.mm.sdk.openapi.IWXAPI;
+import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
+import com.tencent.mm.sdk.openapi.WXAPIFactory;
 
 
 /**
- * Created by Administrator on 2017/1/11.
- * 微信支付回调Activity
+ * Created by Administrator on 2017/7/11.
  */
 
-public class WXPayEntryActivity extends AppCompatActivity implements IWXAPIEventHandler {
-
-    //微信开放平台appID
-    public static final String APP_ID = "wxfa9493e635225d92";
+public class WXPayEntryActivity extends Activity implements IWXAPIEventHandler {
 
     private IWXAPI api;
+    public static String APP_ID = "wxfa9493e635225d92";
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         api = WXAPIFactory.createWXAPI(this, APP_ID);
         api.handleIntent(getIntent(), this);
     }
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
-        setIntent(intent);
-        api.handleIntent(intent, this);
-    }
 
     @Override
     public void onReq(BaseReq baseReq) {
-        Logger.d("baseReq = [" + baseReq.toString() + "]");
+        Logger.e("baseReq = [" + baseReq.toString() + "]");
     }
 
-    /**
-     * 得到支付结果回调
-     */
     @Override
     public void onResp(BaseResp baseResp) {
-//        0 支付成功
-//        -1 发生错误 可能的原因：签名错误、未注册APPID、项目设置APPID不正确、注册的APPID与设置的不匹配、其他异常等。
-//        -2 用户取消 发生场景：用户不支付了，点击取消，返回APP。
-        Logger.d("BaseResp{" +
+        Logger.e("BaseResp{" +
                 "errCode=" + baseResp.errCode +
                 ", errStr='" + baseResp.errStr + '\'' +
                 ", transaction='" + baseResp.transaction + '\'' +
                 ", openId='" + baseResp.openId + '\'' +
-                '}');// 支付结果码
+                '}');
         CommonUitls.getInstance().onWxPay(this, baseResp.errCode);
         this.finish();
     }

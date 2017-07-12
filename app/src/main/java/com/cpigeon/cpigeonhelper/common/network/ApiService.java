@@ -309,4 +309,23 @@ public interface ApiService {
     @GET("GAPI/V1/GetUserOperateLogs")
     Observable<ApiResponse<List<OperatorLog>>> getUserOperateLogs(@Header("auth") String token,
                                                                   @QueryMap Map<String,Object> urlParams);
+
+    //获取用户的余额
+    @GET("GAPI/V1/GetUserBalance")
+    Observable<ApiResponse<String>> getUserBalance(@Header("auth") String token,
+                                                   @Query("uid") int uid);
+
+    //余额充值
+    @POST("GAPI/V1/CreateRechargeOrder")
+    Observable<ApiResponse<Order>> createRechargeOrder(@Header("auth") String token,
+                                                @Body RequestBody body,
+                                                @Query("timestamp") long timestamp,
+                                                @Query("sign") String sign);
+
+    //微信支付（余额支付）
+    @POST("GAPI/V1/GetWXPrePayOrderForRecharge")
+    Observable<ApiResponse<PayRequest>> getWXPrePayOrderForRecharge(@Header("auth") String token,
+                                                                    @Body RequestBody body,
+                                                                    @Query("timestamp") long timestamp,
+                                                                    @Query("sign") String sign);
 }

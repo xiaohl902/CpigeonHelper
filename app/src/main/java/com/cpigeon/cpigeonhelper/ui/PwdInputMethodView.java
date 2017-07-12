@@ -1,4 +1,4 @@
-package com.cpigeon.cpigeonhelper.modular.order.fragment;
+package com.cpigeon.cpigeonhelper.ui;
 
 import android.content.Context;
 import android.support.annotation.Nullable;

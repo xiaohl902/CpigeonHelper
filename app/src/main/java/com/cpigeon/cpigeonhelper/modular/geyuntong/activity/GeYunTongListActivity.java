@@ -8,6 +8,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -17,6 +18,7 @@ import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GeYunTongListAdapter;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
 import com.cpigeon.cpigeonhelper.ui.CustomLoadMoreView;
@@ -28,7 +30,9 @@ import com.orhanobut.logger.Logger;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -39,7 +43,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 /**
+ *
  * Created by Administrator on 2017/6/7.
+ *
  */
 
 public class GeYunTongListActivity extends ToolbarBaseActivity implements SearchEditText.OnSearchClickListener, BaseQuickAdapter.RequestLoadMoreListener {
@@ -59,6 +65,8 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
     private int pi = 1;
     boolean canLoadMore = true,isMoreDateLoading = false;
     private int mCurrentCounter = 0;
+    private String key;
+    private List<GeYunTong> geYunTongList = new ArrayList<>();
     @Override
     protected void swipeBack() {
     }
@@ -89,18 +97,22 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
         mSwipeRefreshLayout.post(() -> {
             mSwipeRefreshLayout.setRefreshing(true);
             mIsRefreshing = true;
+            pi = 1;
+            key = null;
             loadData();
         });
 
         mSwipeRefreshLayout.setOnRefreshListener(() -> {
             clearData();
+            pi = 1;
+            key = null;
             loadData();
         });
     }
 
     @Override
     public void initRecyclerView() {
-        mAdapter = new GeYunTongListAdapter(null);
+        mAdapter = new GeYunTongListAdapter(geYunTongList);
         mAdapter.setOnItemClickListener((adapter, view, position) -> {
             GeYunTong geYunTong = (GeYunTong) adapter.getData().get(position);
             if (geYunTong.getStateCode() == 1 && geYunTong.getMuid() != AssociationData.getUserId()) {
@@ -138,7 +150,11 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
         urlParams.put("type", AssociationData.getUserType());
         urlParams.put("ps", String.valueOf(ps));
         urlParams.put("pi",String.valueOf(pi));
-        urlParams.put("key", "");
+        if (!TextUtils.isEmpty(key))
+        {
+            urlParams.put("key", key);
+        }
+
 
         RetrofitHelper.getApi()
                 .getGeYunTongRaceList(AssociationData.getUserToken(), urlParams)
@@ -147,7 +163,7 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(listApiResponse -> {
                     if (listApiResponse.getErrorCode() == 0&&listApiResponse.getData() != null && listApiResponse.getData().size() > 0) {
-                        mAdapter.addData(listApiResponse.getData());
+                        geYunTongList.addAll(listApiResponse.getData());
                         canLoadMore = listApiResponse.getData()!=null && listApiResponse.getData().size() == ps;
                         mCurrentCounter = mAdapter.getData().size();
                         finishTask();
@@ -210,6 +226,10 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
 
     @Override
     public void onSearchClick(View view, String keyword) {
+        if (!TextUtils.isEmpty(keyword)) {
+            search(keyword);
+            searchEdittext.setText(keyword);
+        }
 
     }
 
@@ -226,7 +246,15 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
         }
     }
 
+    public void search(String keyword) {
+        this.key = keyword;
+        clearData();
+        pi = 1;
+        loadData();
+    }
+
     private void clearData() {
         mIsRefreshing = true;
+        geYunTongList.clear();
     }
 }
