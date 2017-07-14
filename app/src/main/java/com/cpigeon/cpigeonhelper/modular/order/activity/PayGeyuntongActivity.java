@@ -222,15 +222,7 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(payReqApiResponse -> {
                     if (payReqApiResponse.getErrorCode() == 0) {
-                        PayReq payReq = new PayReq();
-                        payReq.appId = payReqApiResponse.getData().getAppid();
-                        payReq.partnerId = payReqApiResponse.getData().getPartnerid();
-                        payReq.prepayId = payReqApiResponse.getData().getPrepayid();
-                        payReq.packageValue = payReqApiResponse.getData().getPackageX();
-                        payReq.nonceStr = payReqApiResponse.getData().getNoncestr();
-                        payReq.timeStamp = payReqApiResponse.getData().getTimestamp();
-                        payReq.sign = payReqApiResponse.getData().getSign();
-                        entryWXPay(payReq);
+                        entryWXPay(payReqApiResponse.getData().getWxPayReq());
                     } else {
                         CommonUitls.showToast(this, payReqApiResponse.getMsg());
                     }

@@ -1,6 +1,7 @@
 package com.cpigeon.cpigeonhelper.modular.order.bean;
 
 import com.google.gson.annotations.SerializedName;
+import com.tencent.mm.sdk.modelpay.PayReq;
 
 /**
  * Created by Administrator on 2017/6/28.
@@ -81,6 +82,22 @@ public class PayRequest {
 
     public void setSign(String sign) {
         this.sign = sign;
+    }
+
+    /**
+     * 获取微信支付请求数据
+     * @return
+     */
+    public PayReq getWxPayReq() {
+        PayReq payReq = new PayReq();
+        payReq.appId = getAppid();
+        payReq.partnerId = getPartnerid();
+        payReq.prepayId = getPrepayid();
+        payReq.packageValue = getPackageX();
+        payReq.nonceStr = getNoncestr();
+        payReq.timeStamp = getTimestamp();
+        payReq.sign = getSign();
+        return payReq;
     }
 
 }
