@@ -173,10 +173,6 @@ public class CarPlaybackFragment extends BaseFragment {
         }else {
             return null;
         }
-
-
-
-
     }
 
     @Override

@@ -20,27 +20,27 @@ import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
-import com.cpigeon.cpigeonhelper.modular.order.bean.PayRequest;
 import com.cpigeon.cpigeonhelper.utils.CashierInputFilter;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.cpigeon.cpigeonhelper.wxapi.WXPayEntryActivity;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
-import com.tencent.mm.sdk.modelpay.PayReq;
-import com.tencent.mm.sdk.openapi.IWXAPI;
-import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.tencent.mm.opensdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
-
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+
+import static com.cpigeon.cpigeonhelper.utils.CommonUitls.OnWxPayListener.ERR_OK;
 
 /**
  * Created by Administrator on 2017/7/7.
@@ -62,8 +62,15 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
     @BindView(R.id.btn_ok_income)
     Button btnOkIncome;
     private int currPayway = -1;
-
     private IWXAPI mWxApi = null;
+    private PayReq payReq;
+
+    private CommonUitls.OnWxPayListener onWxPayListenerWeakReference = wxPayReturnCode -> {
+        if (wxPayReturnCode == ERR_OK) {
+            CommonUitls.showToast(BalanceReChargeActivity.this, "支付成功了");
+        } else
+            CommonUitls.showToast(BalanceReChargeActivity.this, "支付失败");
+    };
 
     @Override
     protected void swipeBack() {
@@ -85,6 +92,10 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
     protected void initViews(Bundle savedInstanceState) {
         setTitle("余额充值");
         setTopLeftButton(R.drawable.ic_back, this::finish);
+        if (mWxApi == null) {
+            mWxApi = WXAPIFactory.createWXAPI(mContext, null);
+            mWxApi.registerApp(WXPayEntryActivity.APP_ID);
+        }
         chosePayWayMoney(1);
         etMoneyIncomeNumber.setFilters(new InputFilter[]{new CashierInputFilter()});
         etMoneyIncomeNumber.addTextChangedListener(new TextWatcher() {
@@ -103,8 +114,6 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
 
             }
         });
-        mWxApi = WXAPIFactory.createWXAPI(mContext, WXPayEntryActivity.APP_ID, true);
-        mWxApi.registerApp(WXPayEntryActivity.APP_ID);
     }
 
     /**
@@ -161,24 +170,6 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
                 Map<String, Object> postParams = new HashMap<>();
                 postParams.put("uid", String.valueOf(AssociationData.getUserId()));
                 postParams.put("m", etMoneyIncomeNumber.getText().toString().trim());
-
-
-//                if (mWxApi != null) {
-//                    PayReq payReq=new PayReq();
-//                    payReq.appId = "wxc9d120321bd1180a";
-//                    payReq.partnerId = "1434404202";
-//                    payReq.prepayId = "wx2017071215154874a1255eb50189903129";
-//                    payReq.packageValue ="Sign=WXPay";
-//                    payReq.nonceStr = "d5cfead94f5350c12c322b5b664544c1";
-//                    payReq.timeStamp = "1499843734";
-//                    payReq.sign = "E25CC211B1F2F87A2302E57FA4D614A9";
-//                    boolean result = mWxApi.sendReq(payReq);
-//                    if (!result) {
-//                        CommonUitls.showToast(this, "发起支付失败");
-//                    }
-//                }
-
-
                 RetrofitHelper.getApi()
                         .createRechargeOrder(AssociationData.getUserToken(), mRequestBody, timestamp,
                                 CommonUitls.getApiSign(timestamp, postParams))
@@ -187,6 +178,8 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(orderApiResponse -> {
                             if (orderApiResponse.getErrorCode() == 0) {
+
+                                CommonUitls.getInstance().addOnWxPayListener(onWxPayListenerWeakReference);
                                 //创建充值订单完成，请求服务器进行微信预支付订单的获取
                                 RequestBody mBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                                         .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
@@ -210,11 +203,12 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
                                         .observeOn(AndroidSchedulers.mainThread())
                                         .subscribe(payRequestApiResponse -> {
                                             if (payRequestApiResponse.getErrorCode() == 0) {
-                                                if (mWxApi != null) {
-                                                    boolean result = mWxApi.sendReq(payRequestApiResponse.getData().getWxPayReq());
-                                                    if (!result) {
-                                                        CommonUitls.showToast(this, "支付失败");
+                                                if (mWxApi.isWXAppInstalled()) {
+                                                    if (payReq != null) {
+                                                        entryWXPay(payReq);
+                                                        return;
                                                     }
+                                                    mWxApi.sendReq(payRequestApiResponse.getData().getWxPayReq());
                                                 }
                                             }
                                         }, throwable -> {
@@ -230,4 +224,25 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
         }
     }
 
+    private void entryWXPay(PayReq payReq) {
+        this.payReq = payReq;
+        if (mWxApi != null) {
+            boolean result = mWxApi.sendReq(payReq);
+            if (!result) {
+                CommonUitls.showToast(this, "支付失败");
+            } else {
+                Logger.d("发起微信支付");
+            }
+
+
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mWxApi = null;
+        payReq = null;
+        CommonUitls.getInstance().removeOnWxPayListener(onWxPayListenerWeakReference);
+    }
 }

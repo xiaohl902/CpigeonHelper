@@ -1,7 +1,7 @@
 package com.cpigeon.cpigeonhelper.modular.order.bean;
 
 import com.google.gson.annotations.SerializedName;
-import com.tencent.mm.sdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.modelpay.PayReq;
 
 /**
  * Created by Administrator on 2017/6/28.

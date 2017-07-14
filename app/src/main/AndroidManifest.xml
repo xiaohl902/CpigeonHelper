@@ -143,7 +143,9 @@
             android:name=".modular.usercenter.activity.PayPwdActivity"/>
         <service android:name="com.amap.api.location.APSService"/>
         <service android:name=".mina.CoreService"/>
-        <activity android:name=".modular.order.activity.MyBalanceActivity"/>
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.order.activity.MyBalanceActivity"/>
     </application>
 
 </manifest>

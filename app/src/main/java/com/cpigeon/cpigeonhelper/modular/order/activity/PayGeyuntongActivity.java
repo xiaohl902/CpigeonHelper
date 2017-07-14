@@ -25,9 +25,9 @@ import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
 import com.cpigeon.cpigeonhelper.wxapi.WXPayEntryActivity;
 import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
-import com.tencent.mm.sdk.modelpay.PayReq;
-import com.tencent.mm.sdk.openapi.IWXAPI;
-import com.tencent.mm.sdk.openapi.WXAPIFactory;
+import com.tencent.mm.opensdk.modelpay.PayReq;
+import com.tencent.mm.opensdk.openapi.IWXAPI;
+import com.tencent.mm.opensdk.openapi.WXAPIFactory;
 
 
 import java.net.ConnectException;
@@ -83,8 +83,9 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
     private String type;
     private CommonUitls.OnWxPayListener onWxPayListenerWeakReference = wxPayReturnCode -> {
         if (wxPayReturnCode == ERR_OK)
-            new Handler().postDelayed(this::finish, 500);
-        else
+        {
+            CommonUitls.showToast(PayGeyuntongActivity.this, "支付成功了");
+        }else
             CommonUitls.showToast(PayGeyuntongActivity.this, "支付失败");
     };
 

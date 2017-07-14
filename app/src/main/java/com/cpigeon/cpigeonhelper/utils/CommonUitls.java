@@ -19,7 +19,7 @@ import android.widget.Toast;
 
 import com.cpigeon.cpigeonhelper.ui.button.CircularProgressButton;
 import com.orhanobut.logger.Logger;
-import com.tencent.mm.sdk.openapi.IWXAPIEventHandler;
+import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 
 
 import java.io.File;
@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
@@ -363,12 +364,9 @@ public class CommonUitls {
         ValueAnimator widthAnimation = ValueAnimator.ofInt(1, 100);
         widthAnimation.setDuration(1500);
         widthAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-        widthAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                Integer value = (Integer) animation.getAnimatedValue();
-                button.setProgress(value);
-            }
+        widthAnimation.addUpdateListener(animation -> {
+            Integer value = (Integer) animation.getAnimatedValue();
+            button.setProgress(value);
         });
         widthAnimation.start();
     }
@@ -377,14 +375,11 @@ public class CommonUitls {
         ValueAnimator widthAnimation = ValueAnimator.ofInt(1, 99);
         widthAnimation.setDuration(1500);
         widthAnimation.setInterpolator(new AccelerateDecelerateInterpolator());
-        widthAnimation.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                Integer value = (Integer) animation.getAnimatedValue();
-                button.setProgress(value);
-                if (value == 99) {
-                    button.setProgress(-1);
-                }
+        widthAnimation.addUpdateListener(animation -> {
+            Integer value = (Integer) animation.getAnimatedValue();
+            button.setProgress(value);
+            if (value == 99) {
+                button.setProgress(-1);
             }
         });
         widthAnimation.start();
@@ -446,13 +441,11 @@ public class CommonUitls {
     private void initWxPayListenerListRef() {
         if (this.onWxPayListenerList == null) {
             synchronized (CommonUitls.class) {
-                if (this.onWxPayListenerList == null) {
                     this.onWxPayListenerList = new ArrayList<>();
-                }
             }
         }
         //清理为空的引用
-        Iterator<OnWxPayListener> iterator = onWxPayListenerList.iterator();
+        ListIterator<OnWxPayListener> iterator = onWxPayListenerList.listIterator();
         while (iterator.hasNext()) {
             OnWxPayListener ref = iterator.next();
             if (ref == null)
