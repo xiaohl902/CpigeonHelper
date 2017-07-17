@@ -11,6 +11,7 @@ import android.support.multidex.MultiDex;
 import com.cpigeon.cpigeonhelper.BuildConfig;
 import com.cpigeon.cpigeonhelper.MainActivity;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
+import com.cpigeon.cpigeonhelper.common.network.InitializeService;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.facebook.stetho.Stetho;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -44,21 +45,12 @@ public class MyApp extends Application {
     public void onCreate() {
         super.onCreate();
         mInstance = this;
-        AutoLayoutConifg.getInstance().useDeviceSize();
-        if (!BuildConfig.DEBUG)
-        {
-            Thread.setDefaultUncaughtExceptionHandler(new MyUnCaughtExceptionHandler());
-        }
-        //初始化Bugly
-        initBugly();
-        //初始化Steho调试工具
-        initSteho();
-        //初始化Realm
         initRealm();
+        InitializeService.start(this);
     }
 
     private void initRealm() {
-        Realm.init(mInstance);
+        Realm.init(this.getApplicationContext());
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
                 .name(RealmUtils.DB_NAME)
                 .schemaVersion(1)
@@ -68,17 +60,6 @@ public class MyApp extends Application {
         Realm.setDefaultConfiguration(realmConfiguration);
     }
 
-    private void initSteho() {
-        Stetho.initialize(
-                Stetho.newInitializerBuilder(this)
-                        .enableDumpapp(Stetho.defaultDumperPluginsProvider(this))
-                        .enableWebKitInspector(Stetho.defaultInspectorModulesProvider(this))
-                        .build());
-    }
-
-    private void initBugly() {
-        CrashReport.initCrashReport(getApplicationContext(), "d27405999a", BuildConfig.DEBUG);
-    }
 
     @Override
     public void onLowMemory() {
@@ -110,17 +91,5 @@ public class MyApp extends Application {
             }
         }
         return res;
-    }
-
-    private class MyUnCaughtExceptionHandler implements Thread.UncaughtExceptionHandler{
-
-        @Override
-        public void uncaughtException(Thread thread, Throwable ex) {
-            ex.printStackTrace();
-            Intent intent = new Intent(MyApp.this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-            AppManager.getAppManager().AppExit();
-        }
     }
 }

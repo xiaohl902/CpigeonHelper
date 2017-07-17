@@ -1,13 +1,10 @@
 package com.cpigeon.cpigeonhelper.modular.welcome.activity;
 
 import android.Manifest;
-import android.app.Application;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
 import android.support.v4.content.res.ResourcesCompat;
 import android.view.KeyEvent;
-import android.widget.TextView;
 
 import com.cpigeon.cpigeonhelper.BuildConfig;
 import com.cpigeon.cpigeonhelper.MainActivity;
@@ -20,7 +17,6 @@ import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.orhanobut.logger.Logger;
-import com.r0adkll.slidr.Slidr;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -40,7 +36,9 @@ import me.weyye.hipermission.PermissonItem;
 import static com.cpigeon.cpigeonhelper.common.db.AssociationData.DEV_ID;
 
 /**
+ *
  * Created by Administrator on 2017/5/25.
+ *
  */
 
 public class SplashActivity extends BaseActivity {
@@ -72,9 +70,7 @@ public class SplashActivity extends BaseActivity {
         Observable.timer(1000, TimeUnit.MILLISECONDS)
                 .compose(bindToLifecycle())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(aLong -> {
-                    isPermission();
-                });
+                .subscribe(aLong -> isPermission());
 
     }
 
@@ -137,7 +133,7 @@ public class SplashActivity extends BaseActivity {
         HiPermission.create(SplashActivity.this)
                 .title("~报告圣上~")
                 .permissions(permissonItems)
-                .filterColor(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, getTheme()))//permission icon color
+                .filterColor(ResourcesCompat.getColor(getResources(), R.color.colorPrimary, getTheme()))
                 .msg("我们需要储存空间权限，设备信息权限和位置权限，才能一统天下，如果拒绝，则失去江山")
 
                 .style(R.style.PermissionBlueStyle)

@@ -1,21 +1,24 @@
-package com.cpigeon.cpigeonhelper.modular.flyarea.fragment;
+package com.cpigeon.cpigeonhelper.modular.flyarea.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.cpigeon.cpigeonhelper.R;
-import com.cpigeon.cpigeonhelper.base.BaseFragment;
+import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
-import com.cpigeon.cpigeonhelper.modular.flyarea.activity.FlyingAreaEditActivity;
-import com.cpigeon.cpigeonhelper.modular.flyarea.adapter.FlyingAreaAdapter;
+import com.cpigeon.cpigeonhelper.modular.flyarea.adapter.SimpleFlyingAreaAdapter;
 import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
+import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
+import com.r0adkll.slidr.Slidr;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -23,20 +26,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
-import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 /**
- * Created by Administrator on 2017/6/14.
+ *
+ * Created by Administrator on 2017/7/14.
+ *
  */
 
-public class MyFlyingAreaFragment extends BaseFragment {
-
-    public static MyFlyingAreaFragment newInstance() {
-
-        return new MyFlyingAreaFragment();
-    }
+public class SimpleFlyingAreaActivity  extends ToolbarBaseActivity {
 
     @BindView(R.id.recyclerView)
     RecyclerView mRecyclerView;
@@ -46,58 +45,53 @@ public class MyFlyingAreaFragment extends BaseFragment {
     SwipeRefreshLayout mSwipeRefreshLayout;
 
     private boolean mIsRefreshing = false;
-
-    private FlyingAreaAdapter mAdapter;
+    private SimpleFlyingAreaAdapter mAdapter;
 
     @Override
-    public int getLayoutResId() {
+    protected void swipeBack() {
+        Slidr.attach(this);
+    }
+
+    @Override
+    protected int getContentView() {
         return R.layout.layout_swipwithrecycler;
     }
 
     @Override
-    public void finishCreateView(Bundle state) {
-        isPrepared = true;
-        lazyLoad();
+    protected void setStatusBar() {
+        mColor = ContextCompat.getColor(this, R.color.colorPrimary);
+        StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
     @Override
-    protected void lazyLoad() {
-
-        if (!isPrepared || !isVisible) {
-            return;
-        }
-
+    protected void initViews(Bundle savedInstanceState) {
+        setTitle("选择司放地");
+        setTopLeftButton(R.drawable.ic_back,this::finish);
+        setTopRightButton("添加",R.drawable.ic_add,this::add);
         initRefreshLayout();
         initRecyclerView();
-        isPrepared = false;
     }
 
-    @OnClick(R.id.empty_layout)
-    public void onViewClicked() {
-
+    public void add()
+    {
+        startActivity(new Intent(this,FlyingAreaActivity.class));
     }
-
 
     @Override
-    protected void initRecyclerView() {
-        mAdapter = new FlyingAreaAdapter(null);
+    public void initRecyclerView() {
+        mAdapter = new SimpleFlyingAreaAdapter(null);
         mAdapter.setOnItemClickListener((adapter, view, position) -> {
-            FlyingArea flyingArea = (FlyingArea) adapter.getData().get(position);
-            Intent i = new Intent(getActivity(), FlyingAreaEditActivity.class);
-            i.putExtra("faid",flyingArea.getFaid());
-            i.putExtra("place",flyingArea.getArea());
-            i.putExtra("lo",flyingArea.getLongitude());
-            i.putExtra("la",flyingArea.getLatitude());
-            i.putExtra("alias",flyingArea.getAlias());
-            startActivity(i);
+            FlyingArea flyingarea = (FlyingArea)adapter.getItem(position);
+            EventBus.getDefault().post(flyingarea);
+            this.finish();
         });
-        mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mRecyclerView.setAdapter(mAdapter);
         setRecycleNoScroll();
     }
 
     @Override
-    protected void loadData() {
+    public void loadData() {
         Map<String, Object> urlParams = new HashMap<>();
         urlParams.put("type", "user");
         urlParams.put("pi", "-1");
@@ -127,8 +121,7 @@ public class MyFlyingAreaFragment extends BaseFragment {
                 });
     }
 
-    @Override
-    protected void initRefreshLayout() {
+    public void initRefreshLayout() {
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefreshLayout.post(() -> {
 
@@ -149,8 +142,7 @@ public class MyFlyingAreaFragment extends BaseFragment {
 
     }
 
-    @Override
-    protected void finishTask() {
+    public void finishTask() {
         mSwipeRefreshLayout.setRefreshing(false);
         mIsRefreshing = false;
         hideEmptyView();

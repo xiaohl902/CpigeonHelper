@@ -27,13 +27,15 @@
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="986f6c2abed5bfb255d43c1ec8e70837"/>
-        <activity android:name=".modular.welcome.activity.SplashActivity">
+        <activity
+            android:screenOrientation="portrait"
+            android:theme="@style/SplashTheme"
+            android:name=".modular.welcome.activity.SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -125,6 +127,11 @@
         <activity
             android:windowSoftInputMode="stateHidden"
             android:name=".modular.setting.activity.OperatorActivity"/>
+
+        <activity
+            android:windowSoftInputMode="stateHidden"
+            android:name=".modular.flyarea.activity.SimpleFlyingAreaActivity"/>
+
         <provider
             android:name="android.support.v4.content.FileProvider"
             android:authorities="${applicationId}.provider"
@@ -141,8 +148,16 @@
         <activity
             android:windowSoftInputMode="stateHidden"
             android:name=".modular.usercenter.activity.PayPwdActivity"/>
-        <service android:name="com.amap.api.location.APSService"/>
-        <service android:name=".mina.CoreService"/>
+        <service
+            android:name="com.amap.api.location.APSService"/>
+        <service
+            android:name=".mina.CoreService"/>
+        <service
+            android:exported="true"
+            android:name=".common.network.InitializeService"/>
+        <service
+            android:exported="true"
+            android:name=".common.network.SingleLoginService"/>
         <activity
             android:windowSoftInputMode="stateHidden"
             android:name=".modular.order.activity.MyBalanceActivity"/>

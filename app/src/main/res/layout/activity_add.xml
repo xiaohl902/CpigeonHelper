@@ -39,6 +39,7 @@
         android:layout_height="1dp"/>
 
     <LinearLayout
+        android:id="@+id/ll_chose_flyingarea"
         android:background="@color/colorWhite"
         android:padding="16dp"
         android:orientation="horizontal"
@@ -51,20 +52,21 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             />
-        <EditText
-            android:background="@null"
+
+        <TextView
             android:id="@+id/tv_geyuntong_place"
-            android:layout_marginRight="8dp"
-            android:gravity="right"
-            android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            />
+            android:layout_marginRight="8dp"
+            android:layout_weight="1"
+            android:gravity="right"
+            android:textSize="@dimen/sp_16" />
 
         <android.support.v7.widget.AppCompatImageView
+            android:layout_gravity="center_vertical"
             app:srcCompat="@drawable/ic_start"
-            android:layout_width="16dp"
-            android:layout_height="16dp" />
+            android:layout_width="20dp"
+            android:layout_height="20dp" />
 
     </LinearLayout>
     <View
@@ -86,12 +88,11 @@
            android:layout_height="wrap_content"
             />
 
-        <EditText
-            android:inputType="numberDecimal"
+        <TextView
+            android:textSize="@dimen/sp_16"
             android:id="@+id/tv_latitude"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@null"
             android:gravity="right" />
 
     </LinearLayout>
@@ -115,13 +116,12 @@
             android:text="司放地经度："
             android:textSize="@dimen/sp_16" />
 
-        <EditText
-            android:inputType="numberDecimal"
+        <TextView
+            android:textSize="@dimen/sp_16"
             android:id="@+id/tv_longitude"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="right"
-            android:background="@null" />
+            android:gravity="right"/>
 
     </LinearLayout>
 

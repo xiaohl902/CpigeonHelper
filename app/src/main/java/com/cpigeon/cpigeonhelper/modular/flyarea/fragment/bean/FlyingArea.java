@@ -1,10 +1,15 @@
 package com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean;
 
+import io.realm.RealmObject;
+
 /**
+ *
  * Created by Administrator on 2017/6/14.
+ *
+ *
  */
 
-public class FlyingArea {
+public class FlyingArea extends RealmObject{
 
 
     /**

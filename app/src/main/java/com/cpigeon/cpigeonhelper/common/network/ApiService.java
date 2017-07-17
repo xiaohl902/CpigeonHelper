@@ -328,4 +328,9 @@ public interface ApiService {
                                                                     @Body RequestBody body,
                                                                     @Query("timestamp") long timestamp,
                                                                     @Query("sign") String sign);
+
+    //单点登录
+    @POST("GAPI/V1/SingleLoginCheck")
+    Observable<ApiResponse<DeviceBean>> singleLoginCheck(@Header("auth") String token);
+
 }

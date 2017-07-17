@@ -7,16 +7,24 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.modular.flyarea.activity.SimpleFlyingAreaActivity;
+import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.utils.AppManager;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
 import com.r0adkll.slidr.Slidr;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
@@ -33,23 +41,30 @@ import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
 
 /**
+ *
  * Created by Administrator on 2017/6/7.
+ *
  */
 
 public class AddGeyuntongActivity extends ToolbarBaseActivity {
     @BindView(R.id.tv_geyuntong_name)
     EditText tvGeyuntongName;
     @BindView(R.id.tv_geyuntong_place)
-    EditText tvGeyuntongPlace;
+    TextView tvGeyuntongPlace;
     @BindView(R.id.tv_latitude)
-    EditText tvLatitude;
+    TextView tvLatitude;
     @BindView(R.id.tv_longitude)
-    EditText tvLongitude;
+    TextView tvLongitude;
+
     @BindView(R.id.btn_delete_race)
     Button btnDeleteRace;
+
+    @BindView(R.id.ll_chose_flyingarea)
+    LinearLayout llChoseFlyingarea;
     private long timestamp;
     private int faid = 0;
     private GeYunTong geYunTong;
+    private SweetAlertDialog mSweetAlertDialog = null;
 
     public void setGeYunTong(GeYunTong geYunTong) {
         this.geYunTong = geYunTong;
@@ -67,16 +82,16 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
 
     @Override
     protected void setStatusBar() {
-        mColor = ContextCompat.getColor(this,R.color.colorPrimary);
+        mColor = ContextCompat.getColor(this, R.color.colorPrimary);
         StatusBarUtil.setColorForSwipeBack(this, mColor, 0);
     }
 
     @Override
     protected void initViews(Bundle savedInstanceState) {
+        EventBus.getDefault().register(this);
         Intent intent = getIntent();
         Bundle bundle = intent.getExtras();
         if (bundle != null) {
-
             geYunTong = bundle.getParcelable("geyuntong");
             setGeYunTong(geYunTong);
             setTitle("修改比赛");
@@ -85,7 +100,7 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
             tvGeyuntongName.setText(geYunTong.getRaceName());
             tvGeyuntongPlace.setText(geYunTong.getFlyingArea());
             tvLongitude.setText(String.valueOf(geYunTong.getLongitude()));
-            tvLatitude.setText(String.valueOf(geYunTong.getLatitude()));
+            tvLatitude.setText (String.valueOf(geYunTong.getLatitude()));
             btnDeleteRace.setVisibility(View.VISIBLE);
         } else {
             setTitle("添加比赛");
@@ -166,6 +181,11 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
                     .setConfirmText("知道了")
                     .show();
         } else {
+            if (mSweetAlertDialog == null) {
+                mSweetAlertDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+                mSweetAlertDialog.setTitleText("正在拼命加载..");
+                mSweetAlertDialog.show();
+            }
             timestamp = System.currentTimeMillis() / 1000;
             RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
                     .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
@@ -193,6 +213,7 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(geYunTongApiResponse -> {
+                        mSweetAlertDialog.dismissWithAnimation();
                         if (geYunTongApiResponse.getErrorCode() == 0) {
                             new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
                                     .setTitleText("添加成功")
@@ -209,6 +230,7 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
                                     .show();
                         }
                     }, throwable -> {
+                        mSweetAlertDialog.dismissWithAnimation();
                         if (throwable instanceof SocketTimeoutException) {
                             CommonUitls.showToast(this, "添加失败，请检查网络");
                         } else if (throwable instanceof ConnectException) {
@@ -221,6 +243,20 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
         }
 
 
+    }
+
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEvent(FlyingArea flyingArea){
+        tvLatitude.setText(String.valueOf(flyingArea.getLatitude()));
+        tvLongitude.setText(String.valueOf(flyingArea.getLongitude()));
+        tvGeyuntongPlace.setText(String.valueOf(flyingArea.getArea()));
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        EventBus.getDefault().unregister(this);
     }
 
     /**
@@ -292,4 +328,9 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
         }
     }
 
+
+    @OnClick(R.id.ll_chose_flyingarea)
+    public void onViewClicked() {
+        startActivity(new Intent(this, SimpleFlyingAreaActivity.class));
+    }
 }

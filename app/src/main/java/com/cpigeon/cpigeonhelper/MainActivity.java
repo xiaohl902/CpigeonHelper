@@ -30,6 +30,7 @@ import com.cpigeon.cpigeonhelper.base.MyApp;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.common.network.SingleLoginService;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.GeYunTongListActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.MyGYTActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.adapter.GeYunTongListAdapter;
@@ -133,6 +134,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         loadRace();
         loadGTYServer();
         loadTopNews();
+//        SingleLoginService.start(mContext);
     }
 
     private void loadGTYServer() {

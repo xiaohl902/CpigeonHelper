@@ -422,15 +422,20 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     public void sendMsg(String msg) {
         String s = EncryptionTool.encryptAES(AssociationData.getUserToken(), KEY_SERVER_PWD);
         String sign = EncryptionHeader(s) + s;
-        String content = EncryptionHeader(msg) + msg;
+        String content = EncryptionContent(msg) + msg;
         IoBuffer buffer = IoBuffer.allocate(100000);
         buffer.put(sign.getBytes());
         buffer.put(content.getBytes());
         SessionManager.getInstance().writeToServer(buffer);
 
+
     }
 
     public String EncryptionHeader(String msg) {
+        return "[len=" + msg.length() + "&typ=1&sign=" + EncryptionTool.MD5(
+                "len=" + msg.length() + "&typ=1&" + msg + "&soiDuo3inKjSdi") + "]";
+    }
+    public String EncryptionContent(String msg) {
         return "[len=" + msg.length() + "&typ=2&sign=" + EncryptionTool.MD5(
                 "len=" + msg.length() + "&typ=2&" + msg + "&soiDuo3inKjSdi") + "]";
     }

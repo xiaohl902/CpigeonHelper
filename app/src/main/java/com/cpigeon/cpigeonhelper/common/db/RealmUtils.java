@@ -2,6 +2,7 @@ package com.cpigeon.cpigeonhelper.common.db;
 
 
 import com.cpigeon.cpigeonhelper.base.MyApp;
+import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.MyLocation;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
@@ -211,5 +212,20 @@ public class RealmUtils {
     public RealmResults<OrgInfo> queryOrgInfo(int uid) {
         return getRealm().where(OrgInfo.class).equalTo("uid",uid).findAll();
     }
+
+    ///////////////////////////////////////////////////////////////////////////
+    // 
+    ///////////////////////////////////////////////////////////////////////////
+
+    /**
+     * 插入司放地信息
+     */
+    public void insertFlyingArea(FlyingArea flyingArea) {
+        getRealm().beginTransaction();
+        getRealm().copyToRealmOrUpdate(flyingArea);
+        getRealm().commitTransaction();
+    }
+    
+    
 
 }
