@@ -12,7 +12,9 @@ import android.widget.TextView;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
+import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.modular.xiehui.bean.OrgInfo;
 import com.cpigeon.cpigeonhelper.modular.xiehui.fragment.MyDialogFragment;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
@@ -26,8 +28,10 @@ import butterknife.BindView;
 import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+import io.realm.RealmResults;
 
 /**
+ * 协会信息
  * Created by Administrator on 2017/5/31.
  */
 
@@ -84,44 +88,70 @@ public class XieHuiInfoActivity extends ToolbarBaseActivity {
 
     @Override
     public void loadData() {
-        RetrofitHelper.getApi()
-                .getOrgInfo(AssociationData.getUserToken(), AssociationData.getUserId())
-                .compose(bindToLifecycle())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(orgInfoApiResponse -> {
-                    if (orgInfoApiResponse.getErrorCode() == 0) {
-                        tvXiehuiName.setText(orgInfoApiResponse.getData().getName());
 
-                        tvXiehuiAddress.setText(orgInfoApiResponse.getData().getAddr());
+        if (RealmUtils.getInstance().queryOrgInfo(AssociationData.getUserId())!=null)
+        {
+            RealmResults<OrgInfo> orgInfos = RealmUtils.getInstance().queryOrgInfo(AssociationData.getUserId());
+            tvXiehuiName.setText(orgInfos.get(0).getName());
 
-                        tvXiehuiShotname.setText(orgInfoApiResponse.getData().getShortname());
+            tvXiehuiAddress.setText(orgInfos.get(0).getAddr());
 
-                        tvXiehuiUser.setText(orgInfoApiResponse.getData().getContacts());
+            tvXiehuiShotname.setText(orgInfos.get(0).getShortname());
 
-                        tvXiehuiTel.setText(orgInfoApiResponse.getData().getPhone());
+            tvXiehuiUser.setText(orgInfos.get(0).getContacts());
 
-                        tvXiehuiMail.setText(orgInfoApiResponse.getData().getEmail());
+            tvXiehuiTel.setText(orgInfos.get(0).getPhone());
 
-                        tvXiehuiYuming.setText(orgInfoApiResponse.getData().getDomain());
+            tvXiehuiMail.setText(orgInfos.get(0).getEmail());
 
-                        tvXiehuiRegistertime.setText(orgInfoApiResponse.getData().getRegistTime());
+            tvXiehuiYuming.setText(orgInfos.get(0).getDomain());
 
-                        tvXiehuiCreatetime.setText(orgInfoApiResponse.getData().getSetupTime());
+            tvXiehuiRegistertime.setText(orgInfos.get(0).getRegistTime());
 
-                        tvXiehuiEndtime.setText(orgInfoApiResponse.getData().getExpireTime());
-                    } else {
-                        CommonUitls.showToast(this, orgInfoApiResponse.getMsg());
-                    }
-                }, throwable -> {
-                    if (throwable instanceof SocketTimeoutException) {
-                        CommonUitls.showToast(this, "获取失败，连接超时");
-                    } else if (throwable instanceof ConnectException) {
-                        CommonUitls.showToast(this, "获取失败，连接异常");
-                    } else if (throwable instanceof RuntimeException) {
-                        CommonUitls.showToast(this, "获取失败");
-                    }
-                });
+            tvXiehuiCreatetime.setText(orgInfos.get(0).getSetupTime());
+
+            tvXiehuiEndtime.setText(orgInfos.get(0).getExpireTime());
+        }else{
+            RetrofitHelper.getApi()
+                    .getOrgInfo(AssociationData.getUserToken(), AssociationData.getUserId())
+                    .compose(bindToLifecycle())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(orgInfoApiResponse -> {
+                        if (orgInfoApiResponse.getErrorCode() == 0) {
+                            tvXiehuiName.setText(orgInfoApiResponse.getData().getName());
+
+                            tvXiehuiAddress.setText(orgInfoApiResponse.getData().getAddr());
+
+                            tvXiehuiShotname.setText(orgInfoApiResponse.getData().getShortname());
+
+                            tvXiehuiUser.setText(orgInfoApiResponse.getData().getContacts());
+
+                            tvXiehuiTel.setText(orgInfoApiResponse.getData().getPhone());
+
+                            tvXiehuiMail.setText(orgInfoApiResponse.getData().getEmail());
+
+                            tvXiehuiYuming.setText(orgInfoApiResponse.getData().getDomain());
+
+                            tvXiehuiRegistertime.setText(orgInfoApiResponse.getData().getRegistTime());
+
+                            tvXiehuiCreatetime.setText(orgInfoApiResponse.getData().getSetupTime());
+
+                            tvXiehuiEndtime.setText(orgInfoApiResponse.getData().getExpireTime());
+                        } else {
+                            CommonUitls.showToast(this, orgInfoApiResponse.getMsg());
+                        }
+                    }, throwable -> {
+                        if (throwable instanceof SocketTimeoutException) {
+                            CommonUitls.showToast(this, "获取失败，连接超时");
+                        } else if (throwable instanceof ConnectException) {
+                            CommonUitls.showToast(this, "获取失败，连接异常");
+                        } else if (throwable instanceof RuntimeException) {
+                            CommonUitls.showToast(this, "获取失败");
+                        }
+                    });
+        }
+
     }
 
 
@@ -203,6 +233,8 @@ public class XieHuiInfoActivity extends ToolbarBaseActivity {
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(orgInfoApiResponse -> {
                         if (orgInfoApiResponse.getErrorCode() == 0) {
+                            RealmUtils.getInstance().deleteXieHuiInfo();
+                            RealmUtils.getInstance().insertXieHuiInfo(orgInfoApiResponse.getData());
                             CommonUitls.showToast(this, "修改成功");
                             this.finish();
                         } else {

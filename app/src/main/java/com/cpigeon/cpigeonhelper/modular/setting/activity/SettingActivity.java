@@ -6,14 +6,17 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.Button;
 import android.widget.RelativeLayout;
+import android.widget.TextView;
 
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.usercenter.activity.LoginActivity;
+import com.cpigeon.cpigeonhelper.utils.CacheUtils;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
+import com.orhanobut.logger.Logger;
 import com.r0adkll.slidr.Slidr;
 
 import butterknife.BindView;
@@ -22,7 +25,9 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 /**
+ *
  * Created by Administrator on 2017/7/4.
+ *
  */
 
 public class SettingActivity extends ToolbarBaseActivity {
@@ -36,6 +41,8 @@ public class SettingActivity extends ToolbarBaseActivity {
     RelativeLayout llAppPingjia;
     @BindView(R.id.btn_outlogin)
     Button btnOutlogin;
+    @BindView(R.id.tv_cache_size)
+    TextView mCacheSize;
 
     @Override
     protected void swipeBack() {
@@ -57,6 +64,8 @@ public class SettingActivity extends ToolbarBaseActivity {
     protected void initViews(Bundle savedInstanceState) {
         setTitle("设置");
         setTopLeftButton(R.drawable.ic_back,this::finish);
+        mCacheSize.setText(CacheUtils.getInstance("HttpCache").getCacheSize()/1024/1024+"MB");
+        Logger.e("缓存数据大小:"+CacheUtils.getInstance("HttpCache").getCacheSize());
     }
 
     @OnClick({R.id.rl_clear_cache, R.id.ll_check_update, R.id.ll_about_us, R.id.ll_app_pingjia, R.id.btn_outlogin})

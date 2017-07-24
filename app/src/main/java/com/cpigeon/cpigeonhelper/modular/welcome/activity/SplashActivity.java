@@ -140,7 +140,7 @@ public class SplashActivity extends BaseActivity {
                 .checkMutiPermission(new PermissionCallback() {
                     @Override
                     public void onClose() {
-                        AppManager.getAppManager().AppExit();
+                        AppManager.getAppManager().AppExit(mContext);
                     }
 
                     @Override

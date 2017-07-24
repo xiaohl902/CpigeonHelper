@@ -67,6 +67,7 @@
             android:windowSoftInputMode="stateHidden"
             android:name=".modular.xiehui.activity.XieHuiInfoActivity"/>
         <activity
+            android:launchMode="singleTop"
             android:windowSoftInputMode="stateHidden"
             android:name=".modular.geyuntong.activity.ACarServiceActivity"/>
         <activity
@@ -131,6 +132,8 @@
         <activity
             android:windowSoftInputMode="stateHidden"
             android:name=".modular.flyarea.activity.SimpleFlyingAreaActivity"/>
+
+        <activity android:name=".modular.setting.activity.WebViewActivity"/>
 
         <provider
             android:name="android.support.v4.content.FileProvider"

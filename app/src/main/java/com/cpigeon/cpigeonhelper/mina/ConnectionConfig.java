@@ -34,38 +34,38 @@ public class ConnectionConfig {
         return connectionTimeout;
     }
 
-    public static class Builder{
+    public static class Builder {
         private Context context;
-        private String ip = "192.168.0.5";
+        private String ip = "221.236.20.76";
         private int port = 5555;
         private int readBufferSize = 1024;
         private long connectionTimeout = 10000;
 
-        public Builder(Context context){
+        public Builder(Context context) {
             this.context = context;
         }
 
-        public Builder setIp(String ip){
+        public Builder setIp(String ip) {
             this.ip = ip;
             return this;
         }
 
-        public Builder setPort(int port){
+        public Builder setPort(int port) {
             this.port = port;
             return this;
         }
 
-        public Builder setReadBufferSize(int readBufferSize){
+        public Builder setReadBufferSize(int readBufferSize) {
             this.readBufferSize = readBufferSize;
             return this;
         }
 
-        public Builder setConnectionTimeout(long connectionTimeout){
+        public Builder setConnectionTimeout(long connectionTimeout) {
             this.connectionTimeout = connectionTimeout;
             return this;
         }
 
-        private void applyConfig(ConnectionConfig config){
+        private void applyConfig(ConnectionConfig config) {
 
             config.context = this.context;
             config.ip = this.ip;
@@ -74,7 +74,7 @@ public class ConnectionConfig {
             config.connectionTimeout = this.connectionTimeout;
         }
 
-        public ConnectionConfig builder(){
+        public ConnectionConfig builder() {
             ConnectionConfig config = new ConnectionConfig();
             applyConfig(config);
             return config;

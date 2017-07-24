@@ -1,6 +1,5 @@
 package com.cpigeon.cpigeonhelper.modular.order.activity;
 
-import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -8,32 +7,25 @@ import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Toast;
 
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.order.adapter.PackageInfoAdapter;
 import com.cpigeon.cpigeonhelper.modular.order.bean.PackageInfo;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
-import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
-import com.orhanobut.logger.Logger;
-import com.r0adkll.slidr.Slidr;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
-import java.util.List;
 
 import butterknife.BindView;
-import butterknife.ButterKnife;
-import butterknife.OnClick;
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 
 /**
+ * 开通鸽运通的界面
  * Created by Administrator on 2017/5/26.
  */
 
@@ -46,7 +38,6 @@ public class OpeningGeyuntongActivity extends ToolbarBaseActivity {
     @BindView(R.id.swipe_refresh_layout)
     SwipeRefreshLayout mSwipeRefreshLayout;
     private PackageInfoAdapter mAdapter;
-    private boolean mIsRefreshing = false;
     @Override
     protected void swipeBack() {
     }
@@ -96,17 +87,17 @@ public class OpeningGeyuntongActivity extends ToolbarBaseActivity {
         mAdapter = new PackageInfoAdapter(null);
         mAdapter.setOnItemChildClickListener((adapter, view, position) -> {
             PackageInfo packageInfo = (PackageInfo) adapter.getData().get(position);
-//            new SweetAlertDialog(OpeningGeyuntongActivity.this,SweetAlertDialog.WARNING_TYPE)
-//                    .setTitleText("温馨提示")
-//                    .setContentText("是否开通"+packageInfo.getPackageName()+"套餐?")
-//                    .setConfirmText("确认")
-//                    .setConfirmClickListener(sweetAlertDialog -> {
-//                        sweetAlertDialog.dismiss();
+            new SweetAlertDialog(OpeningGeyuntongActivity.this,SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("温馨提示")
+                    .setContentText("是否开通"+packageInfo.getPackageName()+"套餐?")
+                    .setConfirmText("确认")
+                    .setConfirmClickListener(sweetAlertDialog -> {
+                        sweetAlertDialog.dismiss();
                         createWxOrder(packageInfo.getId(),"open");
-//                    })
-//                    .setCancelText("取消")
-//                    .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
-//                    .show();
+                    })
+                    .setCancelText("取消")
+                    .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
+                    .show();
         });
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -123,19 +114,14 @@ public class OpeningGeyuntongActivity extends ToolbarBaseActivity {
         mSwipeRefreshLayout.setColorSchemeResources(R.color.colorPrimary);
         mSwipeRefreshLayout.post(() -> {
             mSwipeRefreshLayout.setRefreshing(true);
-            mIsRefreshing = true;
             loadData();
         });
 
-        mSwipeRefreshLayout.setOnRefreshListener(() -> {
-            mIsRefreshing = true;
-            loadData();
-        });
+        mSwipeRefreshLayout.setOnRefreshListener(this::loadData);
     }
     @Override
     public void finishTask() {
         mSwipeRefreshLayout.setRefreshing(false);
-        mIsRefreshing = false;
         hideEmptyView();
         mAdapter.notifyDataSetChanged();
     }

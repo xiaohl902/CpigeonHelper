@@ -142,7 +142,7 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
                         {
                             if (permission.isEnable())
                             {
-                                stringBuilder.append(permission.getId());
+                                stringBuilder.append(permission.getId()+",");
                             }
                         }
 
@@ -191,16 +191,14 @@ public class RootManagerActivity extends ToolbarBaseActivity implements Compound
     public void initRecyclerView() {
         mAdapter = new PermissionAdapter(null);
         mAdapter.setmOnCheckedChangeListener((buttonView, isChecked) -> {
+            Logger.e(stringBuilder.toString());
             int id = ((UserPermissions.PermissionsBean) buttonView.getTag()).getId();
-            int index = stringBuilder.indexOf("," + String.valueOf(id) + ",");
-            if (index > -1) {
-                if (!isChecked) {
-                    stringBuilder.delete(index + 1, index + 2 + String.valueOf(id).length());
-                }
-            } else {
-                if (isChecked) {
-                    stringBuilder.append(String.valueOf(id) + ",");
-                }
+            int index = stringBuilder.indexOf("," + String.valueOf(id) + ",");//
+            if (index > -1){
+                stringBuilder.delete(index + 1, index + 2 + String.valueOf(id).length());
+            }
+            if (isChecked){
+                stringBuilder.append(String.valueOf(id) + ",");
             }
             Logger.e(stringBuilder.toString());
             Logger.e(stringBuilder.toString().substring(1, stringBuilder.length() > 2 ? stringBuilder.length() - 1 : stringBuilder.length()));

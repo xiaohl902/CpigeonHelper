@@ -1,10 +1,12 @@
 package com.cpigeon.cpigeonhelper.modular.order.bean;
 
+import java.io.Serializable;
+
 /**
  * Created by Administrator on 2017/6/20.
  */
 
-public class OrderList {
+public class OrderList implements Serializable{
 
     /**
      * id : 4198

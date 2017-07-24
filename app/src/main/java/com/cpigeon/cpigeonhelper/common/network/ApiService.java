@@ -6,6 +6,7 @@ import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.ImgTag;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.LocationInfoReports;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.RaceImageOrVideo;
+import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.StatisticalData;
 import com.cpigeon.cpigeonhelper.modular.home.bean.Ad;
 import com.cpigeon.cpigeonhelper.modular.order.bean.Order;
 import com.cpigeon.cpigeonhelper.modular.order.bean.OrderList;
@@ -256,11 +257,10 @@ public interface ApiService {
                                                     @Query("sign") String sign);
 
     //获取监控定位数据
-    @POST("CHAPI/V1/GetGYTLocationInfoReports")
-    Observable<ApiResponse<List<LocationInfoReports>>> getGeYunTongLocationInfoReports(@Header("auth") String token,
-                                                                                       @Body RequestBody body,
-                                                                                       @Query("timestamp") long timestamp,
-                                                                                       @Query("sign") String sign);
+    @GET("CHAPI/V1/GetGYTLocationInfoReports")
+    Observable<ApiResponse<List<LocationInfoReports>>> getGeYunTongLocationInfoReports(
+
+            @Header("auth") String token,@QueryMap Map<String,Object> urlParams);
 
 
     //图片视频的上传
@@ -332,5 +332,10 @@ public interface ApiService {
     //单点登录
     @POST("GAPI/V1/SingleLoginCheck")
     Observable<ApiResponse<DeviceBean>> singleLoginCheck(@Header("auth") String token);
+
+    //获取监控信息
+    @GET("CHAPI/V1/GetGYTStatisticalData")
+    Observable<ApiResponse<StatisticalData>> getGYTStatisticalData(@Header("auth") String token,
+                                                                   @QueryMap Map<String,Object> urlParams);
 
 }

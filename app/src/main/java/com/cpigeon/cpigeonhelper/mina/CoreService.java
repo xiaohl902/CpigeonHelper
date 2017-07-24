@@ -17,7 +17,7 @@ public class CoreService extends Service {
     @Override
     public void onCreate() {
         ConnectionConfig config = new ConnectionConfig.Builder(getApplicationContext())
-                .setIp("192.168.0.5")//连接的IP地址
+                .setIp("221.236.20.76")//连接的IP地址
                 .setPort(5555)//连接的端口号
                 .setReadBufferSize(1024)
                 .setConnectionTimeout(10000).builder();

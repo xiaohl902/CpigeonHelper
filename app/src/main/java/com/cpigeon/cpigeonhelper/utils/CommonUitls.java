@@ -25,9 +25,12 @@ import com.tencent.mm.opensdk.openapi.IWXAPIEventHandler;
 import java.io.File;
 import java.math.RoundingMode;
 import java.net.NetworkInterface;
+import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -390,7 +393,7 @@ public class CommonUitls {
         double temp = (gpsLocationValue - du) * 60;//需要转换的部分（分）
         int fen = (int) temp;
         temp = (temp - fen) * 60;//秒
-        return doubleformat(du + (double) fen / 100 + temp / 10000);
+        return doubleformat(du + (double) fen / 100 + temp / 10000,6);
     }
     public static double Aj2GPSLocation(double ajLocationValue)
     {
@@ -418,12 +421,12 @@ public class CommonUitls {
 
     }
 
-    public static String doubleformat(double d) {
+    public static String doubleformat(double d,int cout) {
         NumberFormat nf = NumberFormat.getNumberInstance();
 
 
         // 保留两位小数
-        nf.setMaximumFractionDigits(6);
+        nf.setMaximumFractionDigits(cout);
 
 
         // 如果不需要四舍五入，可以使用RoundingMode.DOWN
@@ -432,6 +435,7 @@ public class CommonUitls {
 
         return nf.format(d);
     }
+
 
 
 
@@ -476,6 +480,26 @@ public class CommonUitls {
         }
     }
 
+    public static int compare_date(String DATE1, String DATE2) {
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            Date dt1 = df.parse(DATE1);
+            Date dt2 = df.parse(DATE2);
+            if (dt1.getTime() > dt2.getTime()) {
+                System.out.println("dt1 在dt2前");
+                return 1;
+            } else if (dt1.getTime() < dt2.getTime()) {
+                System.out.println("dt1在dt2后");
+                return -1;
+            } else {
+                return 0;
+            }
+        } catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        return 0;
+    }
+
     /**
      * 触发微信回调
      *
@@ -508,6 +532,35 @@ public class CommonUitls {
         void onPayFinished(int wxPayReturnCode);
     }
 
+
+    private static double EARTH_RADIUS = 6378.137;
+
+    private static double rad(double d) {
+        return d * Math.PI / 180.0;
+    }
+
+    /**
+     * 通过经纬度获取距离(单位：米)
+     * @param lat1
+     * @param lng1
+     * @param lat2
+     * @param lng2
+     * @return
+     */
+    public static double getDistance(double lat1, double lng1, double lat2,
+                                     double lng2) {
+        double radLat1 = rad(lat1);
+        double radLat2 = rad(lat2);
+        double a = radLat1 - radLat2;
+        double b = rad(lng1) - rad(lng2);
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2)
+                + Math.cos(radLat1) * Math.cos(radLat2)
+                * Math.pow(Math.sin(b / 2), 2)));
+        s = s * EARTH_RADIUS;
+        s = Math.round(s * 10000d) / 10000d;
+        s = s*1000;
+        return s;
+    }
 }
 
 

@@ -140,7 +140,6 @@
                     android:layout_gravity="center_horizontal"
                     android:textColor="@color/colorPrimary"
                     android:textSize="20sp"
-                    android:text="￥300.00"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
                 <TextView

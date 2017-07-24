@@ -86,10 +86,16 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
     protected void initViews(Bundle savedInstanceState) {
         setTitle("鸽运通");
         setTopLeftButton(R.drawable.ic_back, this::finish);
+        setTopRightButton("编辑",this::showDeletePopupWindow);
         initRefreshLayout();
         initRecyclerView();
         searchEdittext.setOnSearchClickListener(this);
     }
+
+    private void showDeletePopupWindow(){
+
+    }
+
 
     @Override
     public void initRefreshLayout() {
@@ -137,7 +143,6 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
         mAdapter.setLoadMoreView(new CustomLoadMoreView());
         mAdapter.setOnLoadMoreListener(this, mRecyclerView);
         mAdapter.openLoadAnimation(BaseQuickAdapter.ALPHAIN);
-        mRecyclerView.addItemDecoration(new MyDecoration(this, MyDecoration.VERTICAL_LIST));
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter.setEnableLoadMore(true);
@@ -164,11 +169,13 @@ public class GeYunTongListActivity extends ToolbarBaseActivity implements Search
                 .subscribe(listApiResponse -> {
                     if (listApiResponse.getErrorCode() == 0&&listApiResponse.getData() != null && listApiResponse.getData().size() > 0) {
                         geYunTongList.addAll(listApiResponse.getData());
-                        canLoadMore = listApiResponse.getData()!=null && listApiResponse.getData().size() == ps;
+                        canLoadMore =
+
+                                listApiResponse.getData()!=null && listApiResponse.getData().size() == ps;
                         mCurrentCounter = mAdapter.getData().size();
                         finishTask();
                     } else if (listApiResponse.getErrorCode() == 0 &&listApiResponse.getData().size() == 0){
-                        initEmptyView("暂时比赛信息");
+                        initEmptyView("暂无比赛信息");
                     }else {
                         initEmptyView(listApiResponse.getMsg());
                     }

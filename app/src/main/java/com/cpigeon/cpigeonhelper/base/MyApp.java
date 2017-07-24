@@ -2,20 +2,13 @@ package com.cpigeon.cpigeonhelper.base;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Build;
 import android.support.multidex.MultiDex;
 
-import com.cpigeon.cpigeonhelper.BuildConfig;
-import com.cpigeon.cpigeonhelper.MainActivity;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.common.network.InitializeService;
-import com.cpigeon.cpigeonhelper.utils.AppManager;
-import com.facebook.stetho.Stetho;
-import com.tencent.bugly.crashreport.CrashReport;
-import com.zhy.autolayout.config.AutoLayoutConifg;
 
 import io.realm.Realm;
 import io.realm.RealmConfiguration;

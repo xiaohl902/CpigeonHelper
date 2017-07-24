@@ -302,7 +302,7 @@ public class LoginActivity extends BaseActivity {
 
     @Override
     public void onBackPressed() {
-        AppManager.getAppManager().AppExit();
+        AppManager.getAppManager().AppExit(mContext);
     }
 
 

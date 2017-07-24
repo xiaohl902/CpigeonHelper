@@ -206,7 +206,7 @@ public class SearchUserActivity extends ToolbarBaseActivity implements SearchEdi
                             mAdapter.setNewData(listApiResponse.getData());
                             finishTask();
                         } else {
-                            initEmptyView(listApiResponse.getMsg());
+                            initEmptyView("暂无此用户");
                         }
                     }, throwable -> {
                         if (throwable instanceof SocketTimeoutException) {

@@ -1,6 +1,7 @@
 package com.cpigeon.cpigeonhelper.utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Process;
 import android.support.v7.app.AppCompatActivity;
 
@@ -17,27 +18,25 @@ import java.util.Stack;
 
 public class AppManager {
 
-    private Stack<WeakReference<AppCompatActivity>> mWeakReferences;
+    /**
+     * Activity栈
+     */
+    private Stack<WeakReference<AppCompatActivity>> mActivityStack;
 
-    private volatile static AppManager mInstance;
-
-    private AppManager() {
+    private enum MyEnumSingleton{
+        INSTANCE;
+        private AppManager appManager;
+        MyEnumSingleton(){
+            appManager = new AppManager();
+        }
+        public AppManager getAppManager(){
+            return appManager;
+        }
 
     }
 
-    /**
-     * 单一实例
-     */
-    public static AppManager getAppManager() {
-        if (mInstance == null) {
-            synchronized (AppManager.class) {
-                if (mInstance == null) {
-                    mInstance = new AppManager();
-                }
-            }
-
-        }
-        return mInstance;
+    public static AppManager getAppManager(){
+        return MyEnumSingleton.INSTANCE.getAppManager();
     }
 
     /***
@@ -46,7 +45,7 @@ public class AppManager {
      * @return Activity的数
      */
     public int stackSize() {
-        return mWeakReferences.size();
+        return mActivityStack.size();
     }
 
     /***
@@ -55,22 +54,22 @@ public class AppManager {
      * @return Activity栈
      */
     public Stack<WeakReference<AppCompatActivity>> getStack() {
-        return mWeakReferences;
+        return mActivityStack;
     }
 
     /**
      * 添加Activity到堆栈
      */
     public void addActivity(WeakReference<AppCompatActivity> activity) {
-        if (mWeakReferences == null) {
-            mWeakReferences = new Stack<>();
+        if (mActivityStack == null) {
+            mActivityStack = new Stack<>();
         }
-        mWeakReferences.add(activity);
+        mActivityStack.add(activity);
     }
 
-    public void removeActivity(WeakReference<AppCompatActivity> activity) {
-        if (mWeakReferences != null) {
-            mWeakReferences.remove(activity);
+    public void removeActivity(WeakReference<AppCompatActivity> activity){
+        if(mActivityStack!=null){
+            mActivityStack.remove(activity);
         }
     }
 
@@ -80,7 +79,7 @@ public class AppManager {
      * @return Activity
      */
     public Activity getTopActivity() {
-        AppCompatActivity activity = mWeakReferences.lastElement().get();
+        AppCompatActivity activity = mActivityStack.lastElement().get();
         return activity;
     }
 
@@ -90,9 +89,9 @@ public class AppManager {
      * @param cls
      * @return Activity
      */
-    public AppCompatActivity getActivityByClass(Class<?> cls) {
+    public Activity getActivityByClass(Class<?> cls) {
         AppCompatActivity return_activity = null;
-        for (WeakReference<AppCompatActivity> activity : mWeakReferences) {
+        for (WeakReference<AppCompatActivity> activity : mActivityStack) {
             if (activity.get().getClass().equals(cls)) {
                 return_activity = activity.get();
                 break;
@@ -106,7 +105,7 @@ public class AppManager {
      */
     public void killTopActivity() {
         try {
-            WeakReference<AppCompatActivity> activity = mWeakReferences.lastElement();
+            WeakReference<AppCompatActivity> activity = mActivityStack.lastElement();
             killActivity(activity);
         } catch (Exception e) {
             Logger.e(e.getMessage());
@@ -120,10 +119,10 @@ public class AppManager {
      */
     public void killActivity(WeakReference<AppCompatActivity> activity) {
         try {
-            ListIterator<WeakReference<AppCompatActivity>> iterator = mWeakReferences.listIterator();
+            Iterator<WeakReference<AppCompatActivity>> iterator = mActivityStack.iterator();
             while (iterator.hasNext()) {
                 WeakReference<AppCompatActivity> stackActivity = iterator.next();
-                if (stackActivity.get() == null) {
+                if(stackActivity.get()==null){
                     iterator.remove();
                     continue;
                 }
@@ -133,26 +132,71 @@ public class AppManager {
                     break;
                 }
             }
+//            if (activity != null) {
+//                mActivityStack.remove(activity);
+//                activity.finish();
+//                activity = null;
+//            }
         } catch (Exception e) {
             Logger.e(e.getMessage());
         }
     }
 
-    /**
-     * 结束除了当前Activity以外的所有Activity
-     * @param cls
+    /***
+     * 方法说明：去除所有的activity 到登录界面
+     *
+     * @author 王文勤
+     * 2015年8月11日下午12:05:41
      */
     public void killAllToLoginActivity(Class<?> cls) {
         try {
 
-            ListIterator<WeakReference<AppCompatActivity>> listIterator = mWeakReferences.listIterator();
+            ListIterator<WeakReference<AppCompatActivity>> listIterator = mActivityStack.listIterator();
             while (listIterator.hasNext()) {
                 Activity activity = listIterator.next().get();
                 if (activity != null && cls != activity.getClass()) {
+                    listIterator.remove();
                     activity.finish();
                 }
-                listIterator.remove();
             }
+
+//            for (int i = 0, size = mActivityStack.size(); i < size; i++) {
+//                if (null != mActivityStack.get(i) && cls != mActivityStack.get(i).getClass()) {
+//                    killActivity(mActivityStack.get(i));
+//                    i -= 1;
+//                }
+//                size = mActivityStack.size();
+//            }
+        } catch (Exception e) {
+            Logger.e(e.getMessage());
+        }
+    }
+
+
+    /***
+     * 方法说明：去除所有的activity 到登录界面
+     *
+     * @author 王文勤
+     * 2015年8月11日下午12:05:41
+     */
+    public void killAllToLoginActivity() {
+        try {
+            ListIterator<WeakReference<AppCompatActivity>> listIterator = mActivityStack.listIterator();
+            while (listIterator.hasNext()) {
+                Activity activity = listIterator.next().get();
+                if (activity != null) {
+                    listIterator.remove();
+                    activity.finish();
+                }
+            }
+
+//            for (int i = 0, size = mActivityStack.size(); i < size; i++) {
+//                if (null != mActivityStack.get(i)) {
+//                    killActivity(mActivityStack.get(i));
+//                    i -= 1;
+//                }
+//                size = mActivityStack.size();
+//            }
         } catch (Exception e) {
             Logger.e(e.getMessage());
         }
@@ -166,18 +210,19 @@ public class AppManager {
     public void killActivity(Class<?> cls) {
         try {
 
-            ListIterator<WeakReference<AppCompatActivity>> listIterator = mWeakReferences.listIterator();
+            ListIterator<WeakReference<AppCompatActivity>> listIterator = mActivityStack.listIterator();
             while (listIterator.hasNext()) {
-                WeakReference<AppCompatActivity> stackActivity = listIterator.next();
-                if (stackActivity == null) {
+                Activity activity = listIterator.next().get();
+                if (activity == null) {
                     listIterator.remove();
                     continue;
                 }
-                if (stackActivity.getClass() == cls) {
+//                if (activity.getClass().getName().equals(cls.getName())) {
+                if (activity.getClass() == cls) {
                     listIterator.remove();
-
-                    stackActivity.get().finish();
-
+                    if (activity != null) {
+                        activity.finish();
+                    }
                     break;
                 }
             }
@@ -191,7 +236,7 @@ public class AppManager {
      */
     public void killAllActivity() {
         try {
-            ListIterator<WeakReference<AppCompatActivity>> listIterator = mWeakReferences.listIterator();
+            ListIterator<WeakReference<AppCompatActivity>> listIterator = mActivityStack.listIterator();
             while (listIterator.hasNext()) {
                 Activity activity = listIterator.next().get();
                 if (activity != null) {
@@ -199,6 +244,12 @@ public class AppManager {
                 }
                 listIterator.remove();
             }
+//			for (int i = 0, size = mActivityStack.size(); i < size; i++) {
+//				if (null != mActivityStack.get(i)) {
+//					mActivityStack.get(i).finish();
+//				}
+//			}
+//            mActivityStack.clear();
         } catch (Exception e) {
             Logger.e(e.getMessage());
         }
@@ -208,12 +259,14 @@ public class AppManager {
      * 退出应用程序
      */
     @SuppressWarnings("deprecation")
-    public void AppExit() {
+    public void AppExit(Context context) {
         try {
             killAllActivity();
+//            ActivityManager activityMgr = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+//            activityMgr.restartPackage(context.getPackageName());
+//            System.exit(0);
             Process.killProcess(Process.myPid());
         } catch (Exception e) {
-            Logger.e(e.getMessage());
         }
     }
 }

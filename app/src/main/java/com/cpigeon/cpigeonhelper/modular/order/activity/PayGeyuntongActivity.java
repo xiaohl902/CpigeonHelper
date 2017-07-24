@@ -3,6 +3,7 @@ package com.cpigeon.cpigeonhelper.modular.order.activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
+import com.cpigeon.cpigeonhelper.modular.order.bean.OrderList;
 import com.cpigeon.cpigeonhelper.modular.order.bean.PayRequest;
 import com.cpigeon.cpigeonhelper.ui.PayFragment;
 import com.cpigeon.cpigeonhelper.ui.PayPwdView;
@@ -42,9 +44,11 @@ import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
 import okhttp3.RequestBody;
+
 import static com.cpigeon.cpigeonhelper.utils.CommonUitls.OnWxPayListener.ERR_OK;
 
 /**
+ * 支付界面
  * Created by Administrator on 2017/5/27.
  */
 
@@ -81,12 +85,26 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
     private PayFragment fragment;
     private String price;
     private String type;
+    private OrderList orderList;
     private CommonUitls.OnWxPayListener onWxPayListenerWeakReference = wxPayReturnCode -> {
-        if (wxPayReturnCode == ERR_OK)
-        {
-            CommonUitls.showToast(PayGeyuntongActivity.this, "支付成功了");
-        }else
-            CommonUitls.showToast(PayGeyuntongActivity.this, "支付失败");
+        if (wxPayReturnCode == ERR_OK) {
+            if (RealmUtils.getInstance().existGYTInfo()) {
+                RealmUtils.getInstance().deleteGYTInfo();
+            }
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("支付成功")
+                    .setConfirmText("好的")
+                    .setConfirmClickListener(sweetAlertDialog -> {
+                        sweetAlertDialog.dismissWithAnimation();
+                        finish();
+                    })
+                    .show();
+
+        } else
+            new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                    .setTitleText("支付失败")
+                    .setConfirmText("好的")
+                    .show();
     };
 
     @Override
@@ -109,13 +127,24 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
         setTitle("订单支付");
         setTopLeftButton(R.drawable.ic_back, this::finish);
         Intent intent = getIntent();
-        sid = intent.getIntExtra("sid", 0);
-        type = intent.getStringExtra("type");
+        if (intent != null && intent.getIntExtra("sid", 0) != 0 && !TextUtils.isEmpty(intent.getStringExtra("type"))) {
+            sid = intent.getIntExtra("sid", 0);
+            type = intent.getStringExtra("type");
+            loadData();
+        } else if (intent != null && intent.getSerializableExtra("orderList") != null) {
+            orderList = (OrderList) intent.getSerializableExtra("orderList");
+            orderid = orderList.getId();
+            tvOrderNumberContent.setText(orderList.getNumber());
+            tvOrderNameContent.setText(orderList.getItem());
+            tvOrderTimeContent.setText(orderList.getTime());
+            tvOrderPriceContent.setText(String.format("%.2f元", orderList.getPrice()));
+            price = String.format("%.2f元", orderList.getPrice());
+        }
         if (mWxApi == null) {
             mWxApi = WXAPIFactory.createWXAPI(mContext, null);
             mWxApi.registerApp(WXPayEntryActivity.APP_ID);
         }
-        loadData();
+        CommonUitls.getInstance().addOnWxPayListener(onWxPayListenerWeakReference);
         loadPayWay();
     }
 
@@ -145,7 +174,6 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
                         tvOrderTimeContent.setText(orderApiResponse.getData().getTime());
                         tvOrderPriceContent.setText(String.format("%.2f元", orderApiResponse.getData().getPrice()));
                         price = String.format("%.2f元", orderApiResponse.getData().getPrice());
-                        CommonUitls.getInstance().addOnWxPayListener(onWxPayListenerWeakReference);
                     } else {
                         CommonUitls.showToast(this, orderApiResponse.getMsg());
                     }
@@ -261,7 +289,6 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
     }
 
 
-
     @Override
     public void onInputFinish(String result) {
         Logger.e(result);
@@ -289,7 +316,6 @@ public class PayGeyuntongActivity extends ToolbarBaseActivity implements PayPwdV
                         if (RealmUtils.getInstance().existGYTInfo()) {
                             RealmUtils.getInstance().deleteGYTInfo();
                         }
-
                         finish();
                     } else if (objectApiResponse.getErrorCode() == 20010) {
                         new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)

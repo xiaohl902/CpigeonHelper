@@ -30,7 +30,6 @@
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:minHeight="25dp"
-            android:text="公告：鸽运通快没钱了，快去续费，快去续费，快去续费，快去续费，快去续费"
             android:textColor="@color/colorAnnotation"
             android:textSize="16sp" />
     </LinearLayout>
@@ -40,7 +39,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
     <android.support.v7.widget.RecyclerView
-        android:padding="8dp"
         android:id="@+id/recyclerView"
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -1,316 +1,312 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorViewBackground">
+    android:background="@color/colorViewBackground"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/ll_xiehui_name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="协会名称"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <TextView
+            android:id="@+id/tv_xiehui_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-        <LinearLayout
-            android:id="@+id/ll_xiehui_name"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="协会简称"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <EditText
+            android:id="@+id/tv_xiehui_shotname"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="协会名称"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-            <TextView
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:id="@+id/tv_xiehui_name"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:gravity="right" />
-        </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="协会简称"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-            <EditText
-                android:focusableInTouchMode="false"
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:cursorVisible="false"
-                android:id="@+id/tv_xiehui_shotname"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@null"
-                android:gravity="right" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="二级域名"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-
-            <EditText
-                android:focusableInTouchMode="false"
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:cursorVisible="false"
-                android:id="@+id/tv_xiehui_yuming"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@null"
-                android:gravity="right" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="联系人"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-
-            <EditText
-                android:focusableInTouchMode="false"
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:cursorVisible="false"
-                android:id="@+id/tv_xiehui_user"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@null"
-                android:gravity="right" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="联系电话"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-
-            <EditText
-                android:focusableInTouchMode="false"
-                android:id="@+id/tv_xiehui_tel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@null"
-                android:cursorVisible="false"
-                android:ellipsize="end"
-                android:gravity="right"
-                android:maxLines="1"
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="邮箱"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-
-            <EditText
-                android:focusableInTouchMode="false"
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16"
-                android:id="@+id/tv_xiehui_mail"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@null"
-                android:cursorVisible="false"
-                android:ellipsize="end"
-                android:gravity="right"
-                android:maxLines="1" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="详细地址"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-
-            <EditText
-                android:focusableInTouchMode="false"
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:cursorVisible="false"
-                android:id="@+id/tv_xiehui_address"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:background="@null"
-                android:gravity="right" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="注册时间"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-
-            <TextView
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16"
-                android:ellipsize="end"
-                android:maxLines="1"
-                android:id="@+id/tv_xiehui_registertime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:gravity="right" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-
-        <LinearLayout
-            android:id="@+id/ll_xiehui_createtime"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="建立时间"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-
-            <TextView
-                android:textColor="@color/colorDarkGrey"
-                android:textSize="@dimen/sp_16"
-                android:id="@+id/tv_xiehui_createtime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:gravity="right" />
-        </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:text="到期时间"
-                android:textColor="@color/colorText"
-                android:textSize="@dimen/sp_16" />
-
-            <TextView
-                android:textColor="@color/colorDarkGrey"
-                android:id="@+id/tv_xiehui_endtime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                android:gravity="right"
-                android:textSize="@dimen/sp_16" />
-        </LinearLayout>
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/dp_1"
-            android:background="@color/colorLayoutSplitLineGray" />
+            android:layout_margin="16dp"
+            android:background="@null"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
     </LinearLayout>
-</android.support.v4.widget.NestedScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="二级域名"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <EditText
+            android:id="@+id/tv_xiehui_yuming"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@null"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="联系人"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <EditText
+            android:id="@+id/tv_xiehui_user"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@null"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="联系电话"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <EditText
+            android:id="@+id/tv_xiehui_tel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@null"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="邮箱"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <EditText
+            android:id="@+id/tv_xiehui_mail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@null"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="详细地址"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <EditText
+            android:id="@+id/tv_xiehui_address"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:background="@null"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="注册时间"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <TextView
+            android:id="@+id/tv_xiehui_registertime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:ellipsize="end"
+            android:gravity="right"
+            android:maxLines="1"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <LinearLayout
+        android:id="@+id/ll_xiehui_createtime"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="建立时间"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <TextView
+            android:id="@+id/tv_xiehui_createtime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:gravity="right"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="到期时间"
+            android:textColor="@color/colorText"
+            android:textSize="@dimen/sp_16" />
+
+        <TextView
+            android:id="@+id/tv_xiehui_endtime"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:gravity="right"
+            android:textColor="@color/colorDarkGrey"
+            android:textSize="@dimen/sp_16" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/dp_1"
+        android:background="@color/colorLayoutSplitLineGray" />
+</LinearLayout>

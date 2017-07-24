@@ -1,5 +1,6 @@
 package com.cpigeon.cpigeonhelper.modular.order.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
@@ -14,6 +15,7 @@ import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.order.adapter.OrderListAdapter;
+import com.cpigeon.cpigeonhelper.modular.order.bean.OrderList;
 import com.cpigeon.cpigeonhelper.ui.CustomEmptyView;
 import com.cpigeon.cpigeonhelper.ui.CustomLoadMoreView;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
@@ -93,6 +95,15 @@ public class OrderListActivity extends ToolbarBaseActivity implements BaseQuickA
         mAdapter = new OrderListAdapter(null);
         mAdapter.setLoadMoreView(new CustomLoadMoreView());
         mAdapter.setOnLoadMoreListener(this, mRecyclerView);
+        mAdapter.setOnItemClickListener((adapter, view, position) -> {
+            OrderList orderList = (OrderList)adapter.getItem(position);
+            if (orderList.getStatusname().equals("待支付"))
+            {
+                Intent intent = new Intent(OrderListActivity.this,PayGeyuntongActivity.class);
+                intent.putExtra("orderList",orderList);
+                startActivity(intent);
+            }
+        });
         mAdapter.openLoadAnimation(BaseQuickAdapter.ALPHAIN);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));

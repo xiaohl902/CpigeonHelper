@@ -16,7 +16,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:text="9999KM"
             android:textColor="@color/colorWhite"
             android:textSize="22sp"
             android:textStyle="bold" />
@@ -136,10 +135,10 @@
                 android:gravity="center_horizontal"
                 android:orientation="vertical">
 
-                <ImageView
+                <android.support.v7.widget.AppCompatImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:src="@mipmap/ic_help" />
+                    app:srcCompat="@mipmap/ic_help" />
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -179,7 +178,6 @@
                 <TextView
                     android:id="@+id/tv_top_speed"
                     android:gravity="center"
-                    android:text="92Km/h"
                     android:textSize="16sp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
@@ -200,7 +198,6 @@
                     android:layout_height="wrap_content" />
                 <TextView
                     android:id="@+id/tv_avarge_speed"
-                    android:text="92Km/h"
                     android:textSize="16sp"
                     android:gravity="center"
                     android:layout_width="match_parent"
@@ -223,7 +220,6 @@
                 <TextView
                     android:id="@+id/tv_totalrace"
                     android:gravity="center"
-                    android:text="0场"
                     android:textSize="16sp"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />

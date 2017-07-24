@@ -7,10 +7,11 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.widget.AppCompatImageView;
 import android.support.v7.widget.CardView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import android.widget.ToggleButton;
+import android.widget.Toast;
 
 import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
@@ -18,10 +19,13 @@ import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.amap.api.maps.AMap;
 import com.amap.api.maps.AMapUtils;
+import com.amap.api.maps.CameraUpdateFactory;
 import com.amap.api.maps.LocationSource;
 import com.amap.api.maps.TextureMapView;
 import com.amap.api.maps.model.BitmapDescriptorFactory;
 import com.amap.api.maps.model.LatLng;
+import com.amap.api.maps.model.Marker;
+import com.amap.api.maps.model.MarkerOptions;
 import com.amap.api.maps.model.Polyline;
 import com.amap.api.maps.model.PolylineOptions;
 import com.amap.api.services.weather.LocalWeatherForecastResult;
@@ -43,17 +47,18 @@ import com.cpigeon.cpigeonhelper.mina.SessionManager;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.ACarServiceActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GeYunTong;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.MyLocation;
-import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.PathRecord;
-import com.cpigeon.cpigeonhelper.ui.Util;
+
 import com.cpigeon.cpigeonhelper.ui.ViewExpandAnimation;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.EncryptionTool;
+import com.cpigeon.cpigeonhelper.utils.Util;
 import com.orhanobut.logger.Logger;
 
 import org.apache.mina.core.buffer.IoBuffer;
 
 import java.net.ConnectException;
 import java.net.SocketTimeoutException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -73,7 +78,9 @@ import static com.cpigeon.cpigeonhelper.utils.CommonUitls.KEY_SERVER_PWD;
 
 
 /**
+ *
  * Created by Administrator on 2017/5/31.
+ *
  */
 
 public class CarServiceFragment extends BaseFragment implements LocationSource, AMapLocationListener, WeatherSearch.OnWeatherSearchListener, TraceListener {
@@ -93,14 +100,16 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     TextView tvWeather;
     @BindView(R.id.tv_now_weather)
     TextView tvNowWeather;
-    @BindView(R.id.btn_stop)
-    ToggleButton mToggleButton;
-    @BindView(R.id.iv_expand_details )
+    @BindView(R.id.tv_race_status)
+    TextView tvRaceStatus;
+    @BindView(R.id.iv_expand_details)
     AppCompatImageView ivExpandDetails;
     @BindView(R.id.cardView_details_expand)
     CardView cardViewDetailsExpand;
     @BindView(R.id.cardView_details)
     CardView cardViewDetails;
+    @BindView(R.id.cardView_start_race)
+    CardView cardViewStartRace;
     ///////////////////////////////////////////////////////////////////////////
     // 高德地图相关
     ///////////////////////////////////////////////////////////////////////////
@@ -112,21 +121,17 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     private TraceOverlay mTraceoverlay;
     private List<TraceLocation> mTracelocationlist = new ArrayList<>();
     private List<TraceOverlay> mOverlayList = new ArrayList<>();
-    private PathRecord record;
     private int mDistance = 0;
-    private int i = 1;
     private AMap aMap;
     private int ift;
-    private LatLng mylocation;
-    private MyLocation mMyLocation = new MyLocation();
-    private AMapLocation  aMapLocation;
+    private AMapLocation aMapLocation;
     private WeatherSearchQuery mquery;
     private WeatherSearch mweathersearch;
     private LocalWeatherLive weatherlive;
     private OnLocationChangedListener mListener;
     private AMapLocationClient mLocationClient;
     private AMapLocationClientOption mLocationOption;
-
+    private int tracesize = 30;
     public static CarServiceFragment newInstance() {
 
         return new CarServiceFragment();
@@ -136,16 +141,21 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     public int getLayoutResId() {
         return R.layout.fragment_car_service;
     }
+
     @Override
     public void finishCreateView(Bundle state) {
         cardViewDetails.setVisibility(View.GONE);
         mMapView.onCreate(state);
+        if (!TextUtils.isEmpty(geYunTong.getFlyingArea()))
+        {
+            tvSifangLocation.setText(geYunTong.getLatitude()+"/"+geYunTong.getLongitude());
+        }
         switch (geYunTong.getStateCode()) {
             case 0:
-                mToggleButton.setChecked(false);//表示还未开启监控
+                tvRaceStatus.setText("开启监控");//表示还未开启监控
                 break;
             case 1:
-                mToggleButton.setChecked(true);//表示已经开始监控了
+                tvRaceStatus.setText("结束监控");//表示已经开始监控了
                 initMap();
                 initpolyline();
                 break;
@@ -157,8 +167,8 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
 
     private void initpolyline() {
         mPolyoptions = new PolylineOptions();
-        mPolyoptions.width(40);
-        mPolyoptions.setCustomTexture(BitmapDescriptorFactory.fromResource(R.drawable.grasp_trace_line));
+        mPolyoptions.width(10f);
+        mPolyoptions.color(Color.GRAY);
     }
 
     private void initMap() {
@@ -167,23 +177,16 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
             aMap = mMapView.getMap();
             setUpMap();
         }
-        if (mToggleButton.isChecked()) {
-            aMap.clear(true);
-            if (record != null) {
-                record = null;
-            }
-            record = new PathRecord();
-            mStartTime = System.currentTimeMillis();
-            record.setmDate(getcueDate(mStartTime));
-        } else {
-            mMapView.onDestroy();
-        }
+        aMap.clear(true);
+        mStartTime = System.currentTimeMillis();
         mTraceoverlay = new TraceOverlay(aMap);
     }
 
     private void setUpMap() {
-        aMap.setLocationSource(this);
-        aMap.setMyLocationEnabled(true);
+        aMap.setLocationSource(this);// 设置定位监听
+        aMap.getUiSettings().setMyLocationButtonEnabled(true);// 设置默认定位按钮是否显示
+        aMap.setMyLocationEnabled(true);// 设置为true表示显示定位层并可触发定位，false表示隐藏定位层并不可触发定位，默认是false
+        // 设置定位的类型为定位模式 ，可以由定位、跟随或地图根据面向方向旋转几种
         aMap.setMyLocationType(AMap.LOCATION_TYPE_LOCATE);
     }
 
@@ -191,6 +194,19 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         geYunTong = ((ACarServiceActivity) activity).getGeYunTong();
+    }
+
+    /**
+     * 最后获取总距离
+     *
+     * @return
+     */
+    private int getTotalDistance() {
+        int distance = 0;
+        for (TraceOverlay to : mOverlayList) {
+            distance = distance + to.getDistance();
+        }
+        return distance;
     }
 
     /**
@@ -217,11 +233,10 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(objectApiResponse -> {
                     if (objectApiResponse.getErrorCode() == 0) {
-
                         initMap();
                         initpolyline();
                     } else {
-                        mToggleButton.setChecked(false);
+                        tvRaceStatus.setText("开始监控");
                         new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
                                 .setTitleText("错误提示")
                                 .setContentText(objectApiResponse.getMsg())
@@ -243,10 +258,12 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
      * 停止鸽车监控
      */
     private void stopRaceMonitor() {
-        if (mMapView != null) {
-            mMapView.onDestroy();
-            aMap.clear();
-        }
+        mEndTime = System.currentTimeMillis();
+        mOverlayList.add(mTraceoverlay);
+        DecimalFormat decimalFormat = new DecimalFormat("0.0");
+        Logger.e(
+                decimalFormat.format(getTotalDistance() / 1000d) + "KM");
+        LBSTraceClient mTraceClient = new LBSTraceClient(getApplicationContext());
         new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
                 .setTitleText("温馨提示")
                 .setContentText("是否将当前时间设为司放时间？")
@@ -266,6 +283,9 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
 
     }
 
+    /**
+     * 结束监控
+     */
     public void stopRace() {
         getActivity().stopService(new Intent(getActivity(), CoreService.class));
         RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
@@ -308,7 +328,18 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
                 });
     }
 
+    @SuppressLint("SimpleDateFormat")
+    private String getcueDate(long time) {
+        SimpleDateFormat formatter = new SimpleDateFormat(
+                "yyyy-MM-dd  HH:mm:ss ");
+        Date curDate = new Date(time);
+        String date = formatter.format(curDate);
+        return date;
+    }
 
+    /**
+     * 实时轨迹画线
+     */
     private void redrawline() {
         if (mPolyoptions.getPoints().size() > 1) {
             if (mpolyline != null) {
@@ -326,15 +357,6 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         TraceLocation lastlocation = mTracelocationlist.get(mTracelocationlist.size() - 1);
         mTracelocationlist.clear();
         mTracelocationlist.add(lastlocation);
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    private String getcueDate(long time) {
-        SimpleDateFormat formatter = new SimpleDateFormat(
-                "yyyy-MM-dd  HH:mm:ss ");
-        Date curDate = new Date(time);
-        String date = formatter.format(curDate);
-        return date;
     }
 
     @Override
@@ -355,7 +377,7 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
                 mTraceoverlay.add(linepoints);
                 mDistance += distance;
                 mTraceoverlay.setDistance(mTraceoverlay.getDistance() + distance);
-                tvMileage.setText(mDistance+"");
+                tvMileage.setText(mDistance*0.001+"");
             }
         } else if (lineID == 2) {
             if (linepoints != null && linepoints.size() > 0) {
@@ -388,28 +410,18 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
     public void onWeatherLiveSearched(LocalWeatherLiveResult localWeatherLiveResult, int code) {
         if (code == 1000) {
             if (localWeatherLiveResult != null && localWeatherLiveResult.getLiveResult() != null) {
+
                 weatherlive = localWeatherLiveResult.getLiveResult();
-                mMyLocation.setId(i);
-                i++;
-                mMyLocation.setRaceid(geYunTong.getId());
-                mMyLocation.setLatitude(aMapLocation.getLatitude());
-                mMyLocation.setLongitude(aMapLocation.getLongitude());
-                mMyLocation.setGetReportTime(weatherlive.getReportTime());
-                mMyLocation.setHumidity(weatherlive.getHumidity());
-                mMyLocation.setTemperature(weatherlive.getTemperature());
-                mMyLocation.setWindDirection(weatherlive.getWindDirection());
-                mMyLocation.setWeather(weatherlive.getWeather());
-                Logger.e("天气" + weatherlive.getWeather());
-                RealmUtils.getInstance().insertLocation(mMyLocation);
-                Logger.e("code run there");
+                tvNowWeather.setText( weatherlive.getWeather());
                 sendMsg(aMapLocation.getLatitude() + "|" + aMapLocation.getLongitude() + "|" +
-                        3.00 + "|" + System.currentTimeMillis() / 1000 + "|" +
+                        aMapLocation.getSpeed()*3.6 + "|" + System.currentTimeMillis() / 1000 + "|" +
                         weatherlive.getWeather() + "|" + weatherlive.getWindDirection() + "|" +
                         weatherlive.getWindPower() + "|" + weatherlive.getReportTime() + "|" +
                         weatherlive.getTemperature());
             }
         }
     }
+
 
     @Override
     public void onWeatherForecastSearched(LocalWeatherForecastResult localWeatherForecastResult, int i) {
@@ -427,38 +439,34 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         buffer.put(sign.getBytes());
         buffer.put(content.getBytes());
         SessionManager.getInstance().writeToServer(buffer);
-
-
     }
 
     public String EncryptionHeader(String msg) {
         return "[len=" + msg.length() + "&typ=1&sign=" + EncryptionTool.MD5(
                 "len=" + msg.length() + "&typ=1&" + msg + "&soiDuo3inKjSdi") + "]";
     }
+
     public String EncryptionContent(String msg) {
         return "[len=" + msg.length() + "&typ=2&sign=" + EncryptionTool.MD5(
                 "len=" + msg.length() + "&typ=2&" + msg + "&soiDuo3inKjSdi") + "]";
     }
 
-    @OnClick({R.id.btn_stop, R.id.iv_expand_details,R.id.cardView_details_expand})
+    @OnClick({R.id.cardView_start_race, R.id.iv_expand_details, R.id.cardView_details_expand})
     public void onViewClicked(View view) {
         switch (view.getId()) {
-            case R.id.btn_stop:
-                if (mToggleButton.isChecked()) {
+            case R.id.cardView_start_race:
+                if (tvRaceStatus.getText().toString().trim().equals("开启监控")) {
                     new SweetAlertDialog(getActivity(), SweetAlertDialog.WARNING_TYPE)
                             .setTitleText("温馨提示")
                             .setContentText("确认立即开启鸽车监控？")
                             .setConfirmText("确认")
                             .setConfirmClickListener(sweetAlertDialog -> {
                                 sweetAlertDialog.dismissWithAnimation();
-                                mStartTime = System.currentTimeMillis() / 1000;
+                                tvRaceStatus.setText("结束监控");
                                 startRaceMonitor();
                             })
                             .setCancelText("取消")
-                            .setCancelClickListener(sweetAlertDialog -> {
-                                sweetAlertDialog.dismissWithAnimation();
-                                mToggleButton.setChecked(false);
-                            })
+                            .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
                             .show();
                 } else {
                     new SweetAlertDialog(getActivity(), SweetAlertDialog.ERROR_TYPE)
@@ -467,14 +475,11 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
                             .setConfirmText("确认")
                             .setConfirmClickListener(sweetAlertDialog -> {
                                 sweetAlertDialog.dismissWithAnimation();
-                                mEndTime = System.currentTimeMillis() / 1000;
+                                tvRaceStatus.setText("开始监控");
                                 stopRaceMonitor();
                             })
                             .setCancelText("取消")
-                            .setCancelClickListener(sweetAlertDialog -> {
-                                sweetAlertDialog.dismissWithAnimation();
-                                mToggleButton.setChecked(true);
-                            })
+                            .setCancelClickListener(SweetAlertDialog::dismissWithAnimation)
                             .show();
                 }
                 break;
@@ -487,7 +492,9 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         }
     }
 
-
+    /**
+     * 展开详细信息
+     */
     public void expandinfo() {
         if (cardViewDetails.getVisibility() == View.VISIBLE) {
             cardViewDetails.setVisibility(View.GONE);
@@ -500,31 +507,38 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         cardViewDetails.startAnimation(expandAnimation);
     }
 
-
+    /**
+     * 启动定位
+     *
+     * @param onLocationChangedListener
+     */
     @Override
     public void activate(OnLocationChangedListener onLocationChangedListener) {
         mListener = onLocationChangedListener;
         if (mLocationClient == null) {
-            //初始化定位
             mLocationClient = new AMapLocationClient(getActivity());
-            //初始化定位参数
             mLocationOption = new AMapLocationClientOption();
-            //设置定位回调监听
+            // 设置定位监听
             mLocationClient.setLocationListener(this);
-            //设置为高精度定位模式
+            // 设置为高精度定位模式
             mLocationOption.setLocationMode(AMapLocationClientOption.AMapLocationMode.Hight_Accuracy);
-            //定位时间的间隔
-            mLocationOption.setInterval(2000);
-            //设置定位参数
+
+            mLocationOption.setInterval(4000);
+
+            // 设置定位参数
             mLocationClient.setLocationOption(mLocationOption);
             // 此方法为每隔固定时间会发起一次定位请求，为了减少电量消耗或网络流量消耗，
             // 注意设置合适的定位时间的间隔（最小间隔支持为2000ms），并且在合适时间调用stopLocation()方法来取消定位请求
             // 在定位结束后，在合适的生命周期调用onDestroy()方法
             // 在单次定位情况下，定位无论成功与否，都无需调用stopLocation()方法移除请求，定位sdk内部会移除
-            mLocationClient.startLocation();//启动定位
+            mLocationClient.startLocation();
+
         }
     }
 
+    /**
+     * 定位被取消
+     */
     @Override
     public void deactivate() {
         mListener = null;
@@ -536,35 +550,45 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         mLocationClient = null;
     }
 
+    /**
+     * 定位之后的回调
+     *
+     * @param aMapLocation
+     */
     @Override
     public void onLocationChanged(AMapLocation aMapLocation) {
-        if (mListener != null&&aMapLocation != null) {
+        if (mListener != null && aMapLocation != null) {
             if (aMapLocation.getErrorCode() == 0) {
                 this.aMapLocation = aMapLocation;
                 mListener.onLocationChanged(aMapLocation);// 显示系统小蓝点
-                mylocation = new LatLng(aMapLocation.getLatitude(),
+
+                LatLng mylocation = new LatLng(aMapLocation.getLatitude(),
                         aMapLocation.getLongitude());
-                record.addpoint(aMapLocation);
-                mPolyoptions.add(mylocation);
-                mTracelocationlist.add(Util.parseTraceLocation(aMapLocation));
-                redrawline();
-                int tracesize = 30;
-                if (mTracelocationlist.size() > tracesize - 1) {
-                    trace();
+                aMap.moveCamera(CameraUpdateFactory.changeLatLng(mylocation));
+                if (tvRaceStatus.getText().toString().trim().equals("结束监控")) {
+                    mPolyoptions.add(mylocation);
+                    mTracelocationlist.add(Util.parseTraceLocation(aMapLocation));
+                    redrawline();
+                    if (mTracelocationlist.size() > tracesize - 1) {
+                        trace();
+                    }
+                    mquery = new WeatherSearchQuery(aMapLocation.getCity(), WeatherSearchQuery.WEATHER_TYPE_LIVE);
+                    mweathersearch = new WeatherSearch(getActivity());
+                    mweathersearch.setOnWeatherSearchListener(this);
+                    mweathersearch.setQuery(mquery);
+                    mweathersearch.searchWeatherAsyn(); //异步搜索
                 }
-                tvSpeed.setText(CommonUitls.doubleformat(aMapLocation.getSpeed()*3.6));
-                mquery = new WeatherSearchQuery(aMapLocation.getCity(), WeatherSearchQuery.WEATHER_TYPE_LIVE);
-                mweathersearch=new WeatherSearch(getActivity());
-                mweathersearch.setOnWeatherSearchListener(this);
-                mweathersearch.setQuery(mquery);
-                mweathersearch.searchWeatherAsyn(); //异步搜索
+                tvSpeed.setText(CommonUitls.doubleformat(aMapLocation.getSpeed() *3.6,2)+"Km/H");
             } else {
-                String errText = "定位失败," + aMapLocation.getErrorCode()+ ": " + aMapLocation.getErrorInfo();
-                Log.e("AmapErr",errText);
+                String errText = "定位失败," + aMapLocation.getErrorCode() + ": " + aMapLocation.getErrorInfo();
+                Log.e("AmapErr", errText);
             }
         }
     }
 
+    private String getDuration() {
+        return String.valueOf((mEndTime - mStartTime) / 1000f);
+    }
 
     private String getAverage(float distance) {
         return String.valueOf(distance / (float) (mEndTime - mStartTime));
@@ -589,7 +613,30 @@ public class CarServiceFragment extends BaseFragment implements LocationSource, 
         return distance;
     }
 
-    private String getDuration() {
-        return String.valueOf((mEndTime - mStartTime) / 1000f);
+    private String getPathLineString(List<AMapLocation> list) {
+        if (list == null || list.size() == 0) {
+            return "";
+        }
+        StringBuffer pathline = new StringBuffer();
+        for (int i = 0; i < list.size(); i++) {
+            AMapLocation location = list.get(i);
+            String locString = amapLocationToString(location);
+            pathline.append(locString).append(";");
+        }
+        String pathLineString = pathline.toString();
+        pathLineString = pathLineString.substring(0,
+                pathLineString.length() - 1);
+        return pathLineString;
+    }
+
+    private String amapLocationToString(AMapLocation location) {
+        StringBuffer locString = new StringBuffer();
+        locString.append(location.getLatitude()).append(",");
+        locString.append(location.getLongitude()).append(",");
+        locString.append(location.getProvider()).append(",");
+        locString.append(location.getTime()).append(",");
+        locString.append(location.getSpeed()).append(",");
+        locString.append(location.getBearing());
+        return locString.toString();
     }
 }

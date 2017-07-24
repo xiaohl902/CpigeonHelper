@@ -5,7 +5,7 @@ package com.cpigeon.cpigeonhelper.common.network;
  */
 
 public class ApiConstants {
-    public static final String BASE_URL = "http://118.123.244.89:818/";
+    public static final String BASE_URL = "http://221.236.20.76:818/";
 //    public static final String BASE_URL = "http://192.168.0.5:8888/";
 
 }

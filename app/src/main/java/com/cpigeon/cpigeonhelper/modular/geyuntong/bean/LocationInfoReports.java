@@ -10,30 +10,23 @@ public class LocationInfoReports {
     private int id;
     private String time;
     private double lo;
-    private int speed;
+    private double speed;
     private WeatherBean weather;
     private double la;
+    private double lc;
+
 
     public LocationInfoReports() {
     }
 
-    public LocationInfoReports(int id, String time, double lo, int speed, double la) {
-        this.id = id;
-        this.time = time;
-        this.lo = lo;
-        this.speed = speed;
-        this.la = la;
+    public double getLc() {
+        return lc;
     }
 
-
-    public LocationInfoReports(int id, String time, double lo, int speed, WeatherBean weather, double la) {
-        this.id = id;
-        this.time = time;
-        this.lo = lo;
-        this.speed = speed;
-        this.weather = weather;
-        this.la = la;
+    public void setLc(double lc) {
+        this.lc = lc;
     }
+
 
     public int getId() {
         return id;
@@ -59,11 +52,11 @@ public class LocationInfoReports {
         this.lo = lo;
     }
 
-    public int getSpeed() {
+    public double getSpeed() {
         return speed;
     }
 
-    public void setSpeed(int speed) {
+    public void setSpeed(double speed) {
         this.speed = speed;
     }
 

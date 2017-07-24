@@ -23,7 +23,6 @@
 
         <EditText
             android:id="@+id/et_money_income_number"
-            style="?android:attr/textViewStyle"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:background="@null"

@@ -8,16 +8,21 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.cpigeon.cpigeonhelper.MainActivity;
 import com.cpigeon.cpigeonhelper.R;
 import com.cpigeon.cpigeonhelper.base.ToolbarBaseActivity;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
+import com.cpigeon.cpigeonhelper.common.network.ApiConstants;
+import com.cpigeon.cpigeonhelper.common.network.ApiResponse;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.modular.flyarea.activity.FlyingAreaActivity;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
+import com.cpigeon.cpigeonhelper.modular.order.activity.ReChargeActivity;
 import com.cpigeon.cpigeonhelper.modular.order.activity.VipLevelUpActivity;
 import com.cpigeon.cpigeonhelper.modular.root.activity.RootListActivity;
 import com.cpigeon.cpigeonhelper.modular.root.activity.RootManagerActivity;
+import com.cpigeon.cpigeonhelper.modular.setting.activity.WebViewActivity;
 import com.cpigeon.cpigeonhelper.utils.CommonUitls;
 import com.cpigeon.cpigeonhelper.utils.DateUtils;
 import com.cpigeon.cpigeonhelper.utils.StatusBarUtil;
@@ -33,10 +38,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.annotations.NonNull;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
+import static com.cpigeon.cpigeonhelper.modular.setting.activity.WebViewActivity.EXTRA_URL;
+
 /**
+ *
  * Created by Administrator on 2017/7/6.
+ *
  */
 
 public class MyGYTActivity extends ToolbarBaseActivity {
@@ -88,22 +99,48 @@ public class MyGYTActivity extends ToolbarBaseActivity {
         setTitle("我的鸽运通");
         setTopLeftButton(R.drawable.ic_back, this::finish);
         setTopRightButton("续费", this::xuFei);
-
-        if (RealmUtils.getInstance().existGYTInfo())
-        {
+        loadGYTStatisticalData();
+        if (RealmUtils.getInstance().existGYTInfo()) {
             GYTService gytService = RealmUtils.getInstance().queryGTYInfo().get(0);
-            tvState.setText(TextUtils.isEmpty(gytService.getGrade())?"当前用户等级：普通用户":"当前用户等级："+gytService.getGrade());
+            tvState.setText(TextUtils.isEmpty(gytService.getGrade()) ? "当前用户等级：普通用户" : "当前用户等级：" + gytService.getGrade());
             tvEndTime.setText(gytService.getExpireTime());
             tvStartTime.setText(gytService.getOpenTime());
-            tvUsingTime.setText(DateUtils.compareDate(gytService.getExpireTime(),gytService.getOpenTime()));
-        }else {
+        } else {
             loadGTYServer();
+
         }
 
     }
 
-    private void xuFei(){
+    private void loadGYTStatisticalData() {
+        Map<String, Object> urlParams = new HashMap<>();
+        urlParams.put("uid", AssociationData.getUserId());
+        urlParams.put("type", "xiehui");
 
+        RetrofitHelper.getApi()
+                .getGYTStatisticalData(AssociationData.getUserToken(),
+                        urlParams)
+                .compose(bindToLifecycle())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribeOn(Schedulers.io())
+                .subscribe(apiResponse -> {
+                    if (apiResponse.getErrorCode() == 0 && apiResponse.getData() != null) {
+                        tvTopSpeed.setText(apiResponse.getData().getMaxSpeed() + "Km/H");
+                        tvAvargeSpeed.setText(CommonUitls.doubleformat(apiResponse.getData().getAvgSpeed() * 3.6,2) + "Km/H");
+                        tvTotalrace.setText(apiResponse.getData().getMonitorRaceCount() + "场");
+                        int hour = apiResponse.getData().getTotalSeconds() / 3600;
+                        int days = hour / 24;
+                        hour %= 24;
+                        tvUsingTime.setText((days>0?days+"天":"")+hour+"小时");
+                        tvTotaldistance.setText(CommonUitls.doubleformat(apiResponse.getData().getTotalMileage()*0.001,2)+"KM");
+                    }
+                }, throwable -> {
+
+                });
+    }
+
+    private void xuFei() {
+        startActivity(new Intent(this, ReChargeActivity.class));
     }
 
     private void loadGTYServer() {
@@ -117,24 +154,18 @@ public class MyGYTActivity extends ToolbarBaseActivity {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(gytServiceApiResponse -> {
-                    if (gytServiceApiResponse.getErrorCode() == 0 && gytServiceApiResponse.getData()!=null) {
-                        tvState.setText(TextUtils.isEmpty(gytServiceApiResponse.getData().getGrade())?"当前用户等级：普通用户":"当前用户等级："+gytServiceApiResponse.getData().getGrade());
+                    if (gytServiceApiResponse.getErrorCode() == 0 && gytServiceApiResponse.getData() != null) {
+                        tvState.setText(TextUtils.isEmpty(gytServiceApiResponse.getData().getGrade()) ? "当前用户等级：普通用户" : "当前用户等级：" + gytServiceApiResponse.getData().getGrade());
                         tvEndTime.setText(gytServiceApiResponse.getData().getExpireTime());
                         tvStartTime.setText(gytServiceApiResponse.getData().getOpenTime());
-                        tvUsingTime.setText(DateUtils.compareDate(DateUtils.millis2String(System.currentTimeMillis()),gytServiceApiResponse.getData().getOpenTime()));
-                        if (RealmUtils.getInstance().existGYTInfo())
-                        {
+                        if (RealmUtils.getInstance().existGYTInfo()) {
                             RealmUtils.getInstance().deleteGYTInfo();
                             RealmUtils.getInstance().insertGYTService(gytServiceApiResponse.getData());
-                        }else {
+                        } else {
                             RealmUtils.getInstance().insertGYTService(gytServiceApiResponse.getData());
                         }
 
                     } else {
-                        tvState.setText("无");
-                        tvEndTime.setText("无");
-                        tvStartTime.setText("无");
-                        tvUsingTime.setText("无");
                         CommonUitls.showToast(this, "您暂未开通鸽运通");
                     }
                 }, throwable -> {
@@ -152,18 +183,21 @@ public class MyGYTActivity extends ToolbarBaseActivity {
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll_enter_geyuntong:
-                startActivity(new Intent(this,GeYunTongListActivity.class));
+                startActivity(new Intent(this, GeYunTongListActivity.class));
                 break;
             case R.id.ll_enter_flyarea:
-                startActivity(new Intent(this,FlyingAreaActivity.class));
+                startActivity(new Intent(this, FlyingAreaActivity.class));
                 break;
             case R.id.ll_enter_root:
-                startActivity(new Intent(this,RootListActivity.class));
+                startActivity(new Intent(this, RootListActivity.class));
                 break;
             case R.id.ll_enter_vip:
-                startActivity(new Intent(this,VipLevelUpActivity.class));
+                startActivity(new Intent(this, VipLevelUpActivity.class));
                 break;
             case R.id.ll_enter_help:
+                Intent intent = new Intent(this, WebViewActivity.class);
+                intent.putExtra(EXTRA_URL, ApiConstants.BASE_URL+"APP/Help?type=help&appType=cpigeonhelper");
+                startActivity(intent);
                 break;
         }
     }

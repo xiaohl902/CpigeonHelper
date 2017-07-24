@@ -1,17 +1,12 @@
 package com.cpigeon.cpigeonhelper.common.db;
 
 
-import com.cpigeon.cpigeonhelper.base.MyApp;
-import com.cpigeon.cpigeonhelper.modular.flyarea.fragment.bean.FlyingArea;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.GYTService;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.bean.MyLocation;
 import com.cpigeon.cpigeonhelper.modular.usercenter.bean.UserBean;
 import com.cpigeon.cpigeonhelper.modular.xiehui.bean.OrgInfo;
-import com.cpigeon.cpigeonhelper.utils.CommonUitls;
-import com.orhanobut.logger.Logger;
 
 import io.realm.Realm;
-import io.realm.RealmAsyncTask;
 import io.realm.RealmResults;
 
 /**
@@ -147,18 +142,18 @@ public class RealmUtils {
     public void insertLocation(MyLocation location)
     {
         getRealm().beginTransaction();
-        getRealm().copyToRealmOrUpdate(location);
+        getRealm().copyToRealm(location);
         getRealm().commitTransaction();
     }
 
     /**
      * 查询坐标
-     * @param raceid
+     * @param raceId
      * @return
      */
-    public RealmResults<MyLocation> queryLocation(int raceid)
+    public RealmResults<MyLocation> queryLocation(int raceId)
     {
-        return getRealm().where(MyLocation.class).equalTo("raceid",raceid).findAll();
+        return getRealm().where(MyLocation.class).equalTo("raceId",raceId).findAll();
     }
 
     /**
@@ -212,20 +207,6 @@ public class RealmUtils {
     public RealmResults<OrgInfo> queryOrgInfo(int uid) {
         return getRealm().where(OrgInfo.class).equalTo("uid",uid).findAll();
     }
-
-    ///////////////////////////////////////////////////////////////////////////
-    // 
-    ///////////////////////////////////////////////////////////////////////////
-
-    /**
-     * 插入司放地信息
-     */
-    public void insertFlyingArea(FlyingArea flyingArea) {
-        getRealm().beginTransaction();
-        getRealm().copyToRealmOrUpdate(flyingArea);
-        getRealm().commitTransaction();
-    }
-    
     
 
 }

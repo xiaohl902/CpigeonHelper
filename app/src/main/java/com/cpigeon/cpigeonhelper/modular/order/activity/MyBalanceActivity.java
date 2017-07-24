@@ -30,6 +30,7 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 /**
+ * 我的钱包界面
  * Created by Administrator on 2017/6/30.
  */
 
@@ -86,7 +87,7 @@ public class MyBalanceActivity extends ToolbarBaseActivity {
                 .subscribe(stringApiResponse -> {
                     if (stringApiResponse.getErrorCode() == 0)
                     {
-                        tvMoney.setText("￥"+stringApiResponse.getData());
+                        tvMoney.setText(stringApiResponse.getData());
                     }else {
                         tvMoney.setText("");
                     }
@@ -108,10 +109,12 @@ public class MyBalanceActivity extends ToolbarBaseActivity {
 
     }
 
+
     @OnClick({R.id.ll_open_vip, R.id.ll_open_gxt, R.id.ll_xufei, R.id.ll_open_gyt, R.id.ll_recharge})
     public void onViewClicked(View view) {
         switch (view.getId()) {
             case R.id.ll_open_vip:
+                startActivity(new Intent(this,ReChargeActivity.class));
                 break;
             case R.id.ll_open_gxt:
                 break;

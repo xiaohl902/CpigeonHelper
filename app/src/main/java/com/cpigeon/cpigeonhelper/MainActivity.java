@@ -29,6 +29,7 @@ import com.cpigeon.cpigeonhelper.base.BaseActivity;
 import com.cpigeon.cpigeonhelper.base.MyApp;
 import com.cpigeon.cpigeonhelper.common.db.AssociationData;
 import com.cpigeon.cpigeonhelper.common.db.RealmUtils;
+import com.cpigeon.cpigeonhelper.common.network.ApiConstants;
 import com.cpigeon.cpigeonhelper.common.network.RetrofitHelper;
 import com.cpigeon.cpigeonhelper.common.network.SingleLoginService;
 import com.cpigeon.cpigeonhelper.modular.geyuntong.activity.GeYunTongListActivity;
@@ -43,6 +44,7 @@ import com.cpigeon.cpigeonhelper.modular.order.activity.OrderListActivity;
 import com.cpigeon.cpigeonhelper.modular.order.activity.ReChargeActivity;
 import com.cpigeon.cpigeonhelper.modular.setting.activity.OperatorActivity;
 import com.cpigeon.cpigeonhelper.modular.setting.activity.SettingActivity;
+import com.cpigeon.cpigeonhelper.modular.setting.activity.WebViewActivity;
 import com.cpigeon.cpigeonhelper.modular.xiehui.activity.XieHuiInfoActivity;
 import com.cpigeon.cpigeonhelper.ui.MyDecoration;
 import com.cpigeon.cpigeonhelper.ui.textview.MarqueeTextView;
@@ -72,6 +74,8 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
+
+import static com.cpigeon.cpigeonhelper.modular.setting.activity.WebViewActivity.EXTRA_URL;
 
 public class MainActivity extends BaseActivity implements NavigationView.OnNavigationItemSelectedListener, AMap.OnMyLocationChangeListener {
 
@@ -129,12 +133,39 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         drawerLayout.setDrawerListener(actionBarDrawerToggle);
         actionBarDrawerToggle.syncState();
         navView.setNavigationItemSelectedListener(this);
-        loadAd();
+        loadAd();//加载主页广告
         mMapView.onCreate(savedInstanceState);
-        loadRace();
-        loadGTYServer();
-        loadTopNews();
-//        SingleLoginService.start(mContext);
+        loadRace();//加载主页上比赛数据
+        loadGTYServer();//加载用户鸽运通的服务信息
+        loadTopNews();//加载公告信息
+        loadOrganizationInfo();//加载用户的组织信息
+    }
+
+    private void loadOrganizationInfo() {
+        RetrofitHelper.getApi()
+                .getOrgInfo(AssociationData.getUserToken(), AssociationData.getUserId())
+                .compose(bindToLifecycle())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(orgInfoApiResponse -> {
+                    if (orgInfoApiResponse.getErrorCode() == 0) {
+                        if (RealmUtils.getInstance().queryOrgInfo(AssociationData.getUserId())!=null)
+                        {
+                            RealmUtils.getInstance().deleteXieHuiInfo();
+                            RealmUtils.getInstance().insertXieHuiInfo(orgInfoApiResponse.getData());
+                        }
+                    } else {
+                        CommonUitls.showToast(this, orgInfoApiResponse.getMsg());
+                    }
+                }, throwable -> {
+                    if (throwable instanceof SocketTimeoutException) {
+                        CommonUitls.showToast(this, "获取组织信息超时");
+                    } else if (throwable instanceof ConnectException) {
+                        CommonUitls.showToast(this, "获取组织信息失败");
+                    } else if (throwable instanceof RuntimeException) {
+                        CommonUitls.showToast(this, "获取失败");
+                    }
+                });
     }
 
     private void loadGTYServer() {
@@ -186,7 +217,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                                 startActivity(new Intent(this, GeYunTongListActivity.class))
                         );
                         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-                        mRecyclerView.addItemDecoration(new MyDecoration(this, MyDecoration.VERTICAL_LIST));
                         mRecyclerView.setAdapter(mAdapter);
                     } else {
                         loadMap();
@@ -201,7 +231,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }
                 });
     }
-
 
     private void loadMap() {
         mMapView.setVisibility(View.VISIBLE);
@@ -254,10 +283,10 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(announcementListApiResponse -> {
-                    if (announcementListApiResponse.isStatus()) {
+                    if (announcementListApiResponse.getErrorCode()==0) {
                         listHeaderRaceDetialGg.setText(TextUtils.isEmpty(announcementListApiResponse.getData().getTitle()) ? "暂无任何消息" : announcementListApiResponse.getData().getTitle());
                     } else {
-                        Logger.e("返回数据为空");
+                        CommonUitls.showToast(this,announcementListApiResponse.getMsg());
                     }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException) {
@@ -271,7 +300,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
     }
 
     private void showAd(List<HomeAd> homeAds) {
-
         ViewGroup.LayoutParams lp = mBanner.getLayoutParams();
         lp.height = ScreenTool.getScreenWidth(this) / 2;
         mBanner.setLayoutParams(lp);
@@ -289,7 +317,6 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
         mBanner.setDelayTime(5000);
         //banner设置方法全部调用完毕时最后调用
         mBanner.start();
-
     }
 
     @Override
@@ -309,7 +336,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
 
             } else {
-                AppManager.getAppManager().AppExit();
+                AppManager.getAppManager().AppExit(mContext);
             }
             count = 2;
             Observable.timer(2, TimeUnit.SECONDS)
@@ -324,9 +351,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
      */
     @Override
     protected void setStatusBar() {
-
         StatusBarUtil.setColorForDrawerLayout(this, drawerLayout, mColor, 0);
-
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -341,8 +366,7 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 startActivity(new Intent(MainActivity.this, MyBalanceActivity.class));
                 break;
             case R.id.my_geyuntong://我的鸽运通
-                if (RealmUtils.getInstance().existGYTInfo())
-                {
+                if (RealmUtils.getInstance().existGYTInfo()) {
                     GYTService gytService = RealmUtils.getInstance().queryGTYInfo().get(0);
                     if (!gytService.isIsExpired())
                     {
@@ -350,11 +374,9 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                     }else {
                         startActivity(new Intent(MainActivity.this, ReChargeActivity.class));
                     }
-
                 }else {
                     startActivity(new Intent(MainActivity.this, OpeningGeyuntongActivity.class));
                 }
-
                 break;
             case R.id.my_order://我的订单
                 startActivity(new Intent(MainActivity.this, OrderListActivity.class));
@@ -364,6 +386,11 @@ public class MainActivity extends BaseActivity implements NavigationView.OnNavig
                 break;
             case R.id.operator_log://日志查看
                 startActivity(new Intent(MainActivity.this, OperatorActivity.class));
+                break;
+            case R.id.help:
+                Intent intent = new Intent(MainActivity.this, WebViewActivity.class);
+                intent.putExtra(EXTRA_URL, ApiConstants.BASE_URL+"APP/Help?type=help&appType=cpigeonhelper");
+                startActivity(intent);
                 break;
 
         }

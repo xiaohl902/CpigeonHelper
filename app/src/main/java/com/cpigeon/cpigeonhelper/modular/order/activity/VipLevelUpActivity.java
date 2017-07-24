@@ -75,6 +75,12 @@ public class VipLevelUpActivity extends ToolbarBaseActivity {
     protected void initViews(Bundle savedInstanceState) {
         setTitle("会员升级");
         setTopLeftButton(R.drawable.ic_back, this::finish);
+        if (RealmUtils.getInstance().queryOrgInfo(AssociationData.getUserId())!=null)
+        {
+            tvUserBelongXiehui.setText(RealmUtils.getInstance().queryOrgInfo(AssociationData.getUserId())
+                    .get(0).getName());
+        }
+
         initView();
         initRecyclerView();
         loadGYTServer();
@@ -92,8 +98,9 @@ public class VipLevelUpActivity extends ToolbarBaseActivity {
                     if (listApiResponse.getErrorCode() == 0&&listApiResponse.getData()!=null&&listApiResponse.getData().size()>0) {
                         mAdapter.setNewData(listApiResponse.getData());
                         finishTask();
-                    } else {
-                        CommonUitls.showToast(this,"暂无数据");
+                    }
+                    else {
+                        CommonUitls.showToast(this,"您已是咱们的最高等级咯");
                     }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException)
@@ -112,22 +119,17 @@ public class VipLevelUpActivity extends ToolbarBaseActivity {
         mAdapter = new VipLevelUpAdapter(null);
         mAdapter.setOnItemChildClickListener((adapter, view, position) -> {
             PackageInfo packageInfo = (PackageInfo) adapter.getData().get(position);
-//            new SweetAlertDialog(VipLevelUpActivity.this,SweetAlertDialog.WARNING_TYPE)
-//                    .setTitleText("温馨提示")
-//                    .setContentText("是否从"+packageInfo.getPackageName()+"套餐?")
-//                    .setConfirmText("确认")
-//                    .setConfirmClickListener(sweetAlertDialog -> {
-//                        sweetAlertDialog.dismiss();
-//                        createWxOrder(packageInfo.getId(),"upgrade");
-//                    })
-//                    .setCancelText("取消")
-//                    .setCancelClickListener(Dialog::dismiss)
-//                    .show();
-            Intent i = new Intent(this,PayGeyuntongActivity.class);
-            i.putExtra("sid",packageInfo.getId());
-            i.putExtra("type","upgrade");
-            startActivity(i);
-
+            new SweetAlertDialog(VipLevelUpActivity.this,SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("温馨提示")
+                    .setContentText("是否从"+packageInfo.getPackageName()+"套餐?")
+                    .setConfirmText("确认")
+                    .setConfirmClickListener(sweetAlertDialog -> {
+                        sweetAlertDialog.dismiss();
+                        createWxOrder(packageInfo.getId(),"upgrade");
+                    })
+                    .setCancelText("取消")
+                    .setCancelClickListener(Dialog::dismiss)
+                    .show();
         });
 
 

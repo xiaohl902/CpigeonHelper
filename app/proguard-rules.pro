@@ -46,6 +46,10 @@
 -dontwarn  org.json.alipay.**
 -keep class corg.json.alipay.** {*;}
 
+
+-dontwarn  cn.pedant.**
+-keep class cn.pedant.** {*;}
+
 #############################################
 #
 # 对于一些基本指令的添加

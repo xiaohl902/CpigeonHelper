@@ -1,5 +1,10 @@
 package com.cpigeon.cpigeonhelper.modular.geyuntong.bean;
 
+import com.amap.api.location.AMapLocation;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 
@@ -10,39 +15,27 @@ import io.realm.annotations.PrimaryKey;
  */
 
 public class MyLocation extends RealmObject{
-    @PrimaryKey
-    private int id;
-    private int raceid;//赛事id
-    private double latitude;
-    private double longitude;
-    private String windDirection;//风向
-    private String humidity;//湿度
-    private String getReportTime;//发布时间
+
+    private int raceId;//赛事id
+    private double longitude;//经度
+    private double latitude;//纬度
+    private String speed;//速度
     private String weather;//天气
+    private String windPower;//风力
+    private String windDirection;//风向
     private String temperature;//温度
+    private String areDistance;//空距
+    private long time;//时间
 
-    public int getRaceid() {
-        return raceid;
+    public MyLocation() {
     }
 
-    public void setRaceid(int raceid) {
-        this.raceid = raceid;
+    public int getRaceId() {
+        return raceId;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(double latitude) {
-        this.latitude = latitude;
+    public void setRaceId(int raceId) {
+        this.raceId = raceId;
     }
 
     public double getLongitude() {
@@ -53,28 +46,20 @@ public class MyLocation extends RealmObject{
         this.longitude = longitude;
     }
 
-    public String getWindDirection() {
-        return windDirection;
+    public double getLatitude() {
+        return latitude;
     }
 
-    public void setWindDirection(String windDirection) {
-        this.windDirection = windDirection;
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
     }
 
-    public String getHumidity() {
-        return humidity;
+    public String getSpeed() {
+        return speed;
     }
 
-    public void setHumidity(String humidity) {
-        this.humidity = humidity;
-    }
-
-    public String getGetReportTime() {
-        return getReportTime;
-    }
-
-    public void setGetReportTime(String getReportTime) {
-        this.getReportTime = getReportTime;
+    public void setSpeed(String speed) {
+        this.speed = speed;
     }
 
     public String getWeather() {
@@ -85,11 +70,43 @@ public class MyLocation extends RealmObject{
         this.weather = weather;
     }
 
+    public String getWindPower() {
+        return windPower;
+    }
+
+    public void setWindPower(String windPower) {
+        this.windPower = windPower;
+    }
+
+    public String getWindDirection() {
+        return windDirection;
+    }
+
+    public void setWindDirection(String windDirection) {
+        this.windDirection = windDirection;
+    }
+
     public String getTemperature() {
         return temperature;
     }
 
     public void setTemperature(String temperature) {
         this.temperature = temperature;
+    }
+
+    public String getAreDistance() {
+        return areDistance;
+    }
+
+    public void setAreDistance(String areDistance) {
+        this.areDistance = areDistance;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 }

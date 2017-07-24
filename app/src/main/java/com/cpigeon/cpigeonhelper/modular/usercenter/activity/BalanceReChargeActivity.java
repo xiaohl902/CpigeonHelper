@@ -7,6 +7,7 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
@@ -35,6 +36,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.MultipartBody;
@@ -67,9 +69,20 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
 
     private CommonUitls.OnWxPayListener onWxPayListenerWeakReference = wxPayReturnCode -> {
         if (wxPayReturnCode == ERR_OK) {
-            CommonUitls.showToast(BalanceReChargeActivity.this, "支付成功了");
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("支付成功")
+                    .setConfirmText("好的")
+                    .setConfirmClickListener(sweetAlertDialog -> {
+                        sweetAlertDialog.dismissWithAnimation();
+                        finish();
+                    })
+                    .show();
         } else
-            CommonUitls.showToast(BalanceReChargeActivity.this, "支付失败");
+            new SweetAlertDialog(this, SweetAlertDialog.ERROR_TYPE)
+                    .setTitleText("支付失败")
+                    .setConfirmText("好的")
+            .setConfirmClickListener(SweetAlertDialog::dismissWithAnimation)
+                    .show();
     };
 
     @Override
@@ -96,6 +109,7 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
             mWxApi = WXAPIFactory.createWXAPI(mContext, null);
             mWxApi.registerApp(WXPayEntryActivity.APP_ID);
         }
+        CommonUitls.getInstance().addOnWxPayListener(onWxPayListenerWeakReference);
         chosePayWayMoney(1);
         etMoneyIncomeNumber.setFilters(new InputFilter[]{new CashierInputFilter()});
         etMoneyIncomeNumber.addTextChangedListener(new TextWatcher() {
@@ -162,64 +176,72 @@ public class BalanceReChargeActivity extends ToolbarBaseActivity {
 
                 break;
             case R.id.btn_ok_income:
-                long timestamp = System.currentTimeMillis() / 1000;
-                RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                        .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
-                        .addFormDataPart("m", etMoneyIncomeNumber.getText().toString().trim())
-                        .build();
-                Map<String, Object> postParams = new HashMap<>();
-                postParams.put("uid", String.valueOf(AssociationData.getUserId()));
-                postParams.put("m", etMoneyIncomeNumber.getText().toString().trim());
-                RetrofitHelper.getApi()
-                        .createRechargeOrder(AssociationData.getUserToken(), mRequestBody, timestamp,
-                                CommonUitls.getApiSign(timestamp, postParams))
-                        .compose(bindToLifecycle())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(orderApiResponse -> {
-                            if (orderApiResponse.getErrorCode() == 0) {
+                if (TextUtils.isEmpty(etMoneyIncomeNumber.getText().toString().trim()))
+                {
+                    CommonUitls.showToast(this,"充值金额必须大于0.01");
+                    return;
+                }
+                if (!cbOrderProtocolIncome.isChecked())
+                {
+                    CommonUitls.showToast(this,"请阅读中鸽网支付协议");
+                }else {
+                    long timestamp = System.currentTimeMillis() / 1000;
+                    RequestBody mRequestBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                            .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
+                            .addFormDataPart("m", etMoneyIncomeNumber.getText().toString().trim())
+                            .build();
+                    Map<String, Object> postParams = new HashMap<>();
+                    postParams.put("uid", String.valueOf(AssociationData.getUserId()));
+                    postParams.put("m", etMoneyIncomeNumber.getText().toString().trim());
+                    RetrofitHelper.getApi()
+                            .createRechargeOrder(AssociationData.getUserToken(), mRequestBody, timestamp,
+                                    CommonUitls.getApiSign(timestamp, postParams))
+                            .compose(bindToLifecycle())
+                            .subscribeOn(Schedulers.io())
+                            .observeOn(AndroidSchedulers.mainThread())
+                            .subscribe(orderApiResponse -> {
+                                if (orderApiResponse.getErrorCode() == 0) {
+                                    //创建充值订单完成，请求服务器进行微信预支付订单的获取
+                                    RequestBody mBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
+                                            .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
+                                            .addFormDataPart("did", String.valueOf(orderApiResponse.getData().getId()))
+                                            .addFormDataPart("t", "android")
+                                            .addFormDataPart("app", "cpigeonhelper")
+                                            .build();
 
-                                CommonUitls.getInstance().addOnWxPayListener(onWxPayListenerWeakReference);
-                                //创建充值订单完成，请求服务器进行微信预支付订单的获取
-                                RequestBody mBody = new MultipartBody.Builder().setType(MultipartBody.FORM)
-                                        .addFormDataPart("uid", String.valueOf(AssociationData.getUserId()))
-                                        .addFormDataPart("did", String.valueOf(orderApiResponse.getData().getId()))
-                                        .addFormDataPart("t", "android")
-                                        .addFormDataPart("app", "cpigeonhelper")
-                                        .build();
+                                    Map<String, Object> pstParams = new HashMap<>();
+                                    pstParams.put("uid", String.valueOf(AssociationData.getUserId()));
+                                    pstParams.put("did", String.valueOf(orderApiResponse.getData().getId()));
+                                    pstParams.put("t", "android");
+                                    pstParams.put("app", "cpigeonhelper");
 
-                                Map<String, Object> pstParams = new HashMap<>();
-                                pstParams.put("uid", String.valueOf(AssociationData.getUserId()));
-                                pstParams.put("did", String.valueOf(orderApiResponse.getData().getId()));
-                                pstParams.put("t", "android");
-                                pstParams.put("app", "cpigeonhelper");
-
-                                //请求服务器进行微信预支付订单的获取
-                                RetrofitHelper.getApi()
-                                        .getWXPrePayOrderForRecharge(AssociationData.getUserToken(), mBody,
-                                                timestamp, CommonUitls.getApiSign(timestamp, pstParams))
-                                        .compose(bindToLifecycle())
-                                        .subscribeOn(Schedulers.io())
-                                        .observeOn(AndroidSchedulers.mainThread())
-                                        .subscribe(payRequestApiResponse -> {
-                                            if (payRequestApiResponse.getErrorCode() == 0) {
-                                                if (mWxApi.isWXAppInstalled()) {
-                                                    if (payReq != null) {
-                                                        entryWXPay(payReq);
-                                                        return;
+                                    //请求服务器进行微信预支付订单的获取
+                                    RetrofitHelper.getApi()
+                                            .getWXPrePayOrderForRecharge(AssociationData.getUserToken(), mBody,
+                                                    timestamp, CommonUitls.getApiSign(timestamp, pstParams))
+                                            .compose(bindToLifecycle())
+                                            .subscribeOn(Schedulers.io())
+                                            .observeOn(AndroidSchedulers.mainThread())
+                                            .subscribe(payRequestApiResponse -> {
+                                                if (payRequestApiResponse.getErrorCode() == 0) {
+                                                    if (mWxApi.isWXAppInstalled()) {
+                                                        if (payReq != null) {
+                                                            entryWXPay(payReq);
+                                                            return;
+                                                        }
+                                                        mWxApi.sendReq(payRequestApiResponse.getData().getWxPayReq());
                                                     }
-                                                    mWxApi.sendReq(payRequestApiResponse.getData().getWxPayReq());
                                                 }
-                                            }
-                                        }, throwable -> {
+                                            }, throwable -> {
 
-                                        });
+                                            });
 
 
-                            }
-                        }, throwable -> {
+                                }
+                            }, throwable -> {
 
-                        });
+                            });
+                }
                 break;
         }
     }

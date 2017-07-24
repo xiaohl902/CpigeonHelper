@@ -39,6 +39,9 @@ public class GeYunTongListAdapter extends BaseQuickAdapter<GeYunTong,BaseViewHol
             case "未开始监控":
                 helper.setTextColor(R.id.tv_geyuntong_status,mContext.getResources().getColor(R.color.colorPrimary));
                 break;
+            case "监控结束":
+                helper.setTextColor(R.id.tv_geyuntong_status,mContext.getResources().getColor(R.color.colorGary));
+                break;
         }
     }
 }

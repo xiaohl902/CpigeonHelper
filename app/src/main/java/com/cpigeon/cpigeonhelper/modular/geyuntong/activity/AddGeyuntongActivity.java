@@ -98,6 +98,7 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
             setTopLeftButton(R.drawable.ic_back, this::finish);
             setTopRightButton("完成", this::edit);
             tvGeyuntongName.setText(geYunTong.getRaceName());
+            tvGeyuntongName.setSelection(geYunTong.getRaceName().length());
             tvGeyuntongPlace.setText(geYunTong.getFlyingArea());
             tvLongitude.setText(String.valueOf(geYunTong.getLongitude()));
             tvLatitude.setText (String.valueOf(geYunTong.getLatitude()));
@@ -192,8 +193,8 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
                     .addFormDataPart("type", AssociationData.getUserType())
                     .addFormDataPart("rname", tvGeyuntongName.getText().toString())
                     .addFormDataPart("farea", tvGeyuntongPlace.getText().toString())
-                    .addFormDataPart("lo", tvLatitude.getText().toString())
-                    .addFormDataPart("la", tvLongitude.getText().toString())
+                    .addFormDataPart("lo", tvLongitude.getText().toString())
+                    .addFormDataPart("la", tvLatitude.getText().toString())
                     .addFormDataPart("faid", String.valueOf(faid))
                     .build();
 
@@ -202,8 +203,8 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
             postParams.put("type", AssociationData.getUserType());
             postParams.put("rname", tvGeyuntongName.getText().toString());
             postParams.put("farea", tvGeyuntongPlace.getText().toString());
-            postParams.put("lo", tvLatitude.getText().toString());
-            postParams.put("la", tvLongitude.getText().toString());
+            postParams.put("lo", tvLongitude.getText().toString());
+            postParams.put("la", tvLatitude.getText().toString());
             postParams.put("faid", String.valueOf(faid));
 
             RetrofitHelper.getApi().createGeYunTongRace(AssociationData.getUserToken()
@@ -276,8 +277,8 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
                     .addFormDataPart("type", AssociationData.getUserType())
                     .addFormDataPart("rname", tvGeyuntongName.getText().toString())
                     .addFormDataPart("farea", tvGeyuntongPlace.getText().toString())
-                    .addFormDataPart("lo", tvLatitude.getText().toString())
-                    .addFormDataPart("la", tvLongitude.getText().toString())
+                    .addFormDataPart("lo", tvLongitude.getText().toString())
+                    .addFormDataPart("la", tvLatitude.getText().toString())
                     .addFormDataPart("faid", String.valueOf(faid))
                     .build();
 
@@ -287,8 +288,8 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
             postParams.put("type", AssociationData.getUserType());
             postParams.put("rname", tvGeyuntongName.getText().toString());
             postParams.put("farea", tvGeyuntongPlace.getText().toString());
-            postParams.put("lo", tvLatitude.getText().toString());
-            postParams.put("la", tvLongitude.getText().toString());
+            postParams.put("lo", tvLongitude.getText().toString());
+            postParams.put("la", tvLatitude.getText().toString());
             postParams.put("faid", String.valueOf(faid));
 
             RetrofitHelper.getApi().updateGeYunTongRace(AssociationData.getUserToken()
@@ -306,7 +307,7 @@ public class AddGeyuntongActivity extends ToolbarBaseActivity {
                                     .setConfirmClickListener(sweetAlertDialog -> {
                                         sweetAlertDialog.dismissWithAnimation();
                                         AppManager.getAppManager().killActivity(ACarServiceActivity.class);
-                                        finish();
+                                        this.finish();
                                     })
                                     .show();
                         } else {

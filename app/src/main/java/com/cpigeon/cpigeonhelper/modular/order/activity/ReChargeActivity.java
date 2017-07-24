@@ -71,6 +71,11 @@ public class ReChargeActivity extends ToolbarBaseActivity {
     protected void initViews(Bundle savedInstanceState) {
         setTitle("续费会员");
         setTopLeftButton(R.drawable.ic_back,this::finish);
+        if (RealmUtils.getInstance().queryOrgInfo(AssociationData.getUserId())!=null)
+        {
+            tvUserBelongXiehui.setText(RealmUtils.getInstance().queryOrgInfo(AssociationData.getUserId())
+                    .get(0).getName());
+        }
         initView();
         initRecyclerView();
         loadGYTServer();
@@ -110,7 +115,7 @@ public class ReChargeActivity extends ToolbarBaseActivity {
             PackageInfo packageInfo = (PackageInfo) adapter.getData().get(position);
             new SweetAlertDialog(ReChargeActivity.this,SweetAlertDialog.WARNING_TYPE)
                     .setTitleText("温馨提示")
-                    .setContentText("是否从"+packageInfo.getPackageName()+"套餐?")
+                    .setContentText("是否续费"+packageInfo.getPackageName()+"套餐?")
                     .setConfirmText("确认")
                     .setConfirmClickListener(sweetAlertDialog -> {
                         sweetAlertDialog.dismiss();
@@ -142,7 +147,15 @@ public class ReChargeActivity extends ToolbarBaseActivity {
         }else {
             tvUserState.setText(gytServices.get(0).getGrade().toUpperCase());
         }
-        tvUserTime.setText(DateUtils.compareDate(DateUtils.millis2String(System.currentTimeMillis()),gytServices.get(0).getExpireTime()));
+        if (CommonUitls.compare_date(DateUtils.millis2String(System.currentTimeMillis()),gytServices.get(0).getExpireTime())==1)
+        {
+            tvStatus.setText("已过期");
+            tvUserTime.setText(DateUtils.compareDate(DateUtils.millis2String(System.currentTimeMillis()),gytServices.get(0).getExpireTime()));
+        }else {
+            tvStatus.setText("还剩");
+            tvUserTime.setText(DateUtils.compareDate(gytServices.get(0).getExpireTime(),DateUtils.millis2String(System.currentTimeMillis())));
+        }
+
     }
 
 

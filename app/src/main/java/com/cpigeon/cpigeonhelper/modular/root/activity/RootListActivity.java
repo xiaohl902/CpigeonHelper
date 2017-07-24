@@ -97,7 +97,7 @@ public class RootListActivity extends ToolbarBaseActivity {
                         mAdapter.setNewData(listApiResponse.getData());
                         finishTask();
                     } else {
-                        initEmptyView(listApiResponse.getMsg());
+                        initEmptyView("暂无授权用户");
                     }
                 }, throwable -> {
                     if (throwable instanceof SocketTimeoutException)
